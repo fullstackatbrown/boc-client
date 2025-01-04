@@ -7,46 +7,26 @@ const PawPrints = () => {
   const pawPrintImages = [
     {
       src: singlepaw,
-      styles: {
-        position: "absolute",
-        top: "70%",
-        left: "62%",
-        transform: "rotate(-40deg) scale(0.55)",
-        filter: "contrast(1.1) brightness(1.05)",
-      },
+      styles:
+        "top-[80%] left-[62%] transform-[-40deg] w-[50px] h-[50px] filter-[contrast(110%) brightness(105%)]",
       objectPosition: "20% 20%",
     },
     {
       src: singlepaw,
-      styles: {
-        position: "absolute",
-        top: "59%",
-        left: "59%",
-        transform: "rotate(-40deg) scale(0.47)",
-        filter: "contrast(1.1) brightness(1.05)",
-      },
+      styles:
+        "top-[69%] left-[59%] transform-[-40deg] w-[50px] h-[50px] filter-[contrast(110%) brightness(105%)]",
       objectPosition: "20% 20%",
     },
     {
       src: image1,
-      styles: {
-        position: "absolute",
-        top: "49%",
-        left: "55%",
-        transform: "rotate(-30deg) scaleX(-1) scale(0.8)",
-        filter: "contrast(1.1) brightness(1.05)",
-      },
+      styles:
+        "top-[51%] left-[55%] transform-[-30deg] scale-x-[-1] w-[100px] h-[100px] filter-[contrast(110%) brightness(105%)]",
       objectPosition: "center bottom",
     },
     {
       src: image1,
-      styles: {
-        position: "absolute",
-        bottom: "47%",
-        left: "53%",
-        transform: "rotate(-9deg) scale(0.8)",
-        filter: "contrast(1.1) brightness(1.05)",
-      },
+      styles:
+        "bottom-[47%] left-[53%] transform-[-9deg] w-[100px] h-[100px] filter-[contrast(110%) brightness(105%)]",
       objectPosition: "25% 25%",
     },
   ];
@@ -55,12 +35,7 @@ const PawPrints = () => {
       {pawPrintImages.map((imageData, index) => (
         <div
           key={index}
-          style={{
-            width: "100px",
-            height: "100px",
-            position: "absolute", // Removed from imageData.styles, as it's now set here
-            overflow: "hidden",
-          }}
+          className={"absolute overflow-hidden w-[100px] h-[100px] " + imageData.styles}
         >
           <Image
             src={imageData.src}
@@ -69,7 +44,7 @@ const PawPrints = () => {
             sizes="100vw, 50vw, 33vw"
             style={{
               objectFit: "cover",
-              objectPosition: imageData.objectPosition || 'center center'
+              objectPosition: imageData.objectPosition || "center center",
             }}
           />
         </div>
