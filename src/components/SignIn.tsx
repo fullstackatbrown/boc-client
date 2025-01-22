@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 
-const Dropdown = (props: { text : string }) => {
+const Dropdown = (props: { text: string }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -33,7 +33,9 @@ const Dropdown = (props: { text : string }) => {
       {isOpen && (
         <ul className="dropdown-menu absolute top-[100%] right-0">
           <li className="text-right">View Profile</li>
-          <li className="text-right"><button onClick={logout}>Logout</button></li>
+          <li className="text-right">
+            <button onClick={logout}>Logout</button>
+          </li>
         </ul>
       )}
     </div>
@@ -41,16 +43,7 @@ const Dropdown = (props: { text : string }) => {
 };
 
 async function logout() {
-  try {
-    const { data: userData } = await axios.get(
-      "http://localhost:8080/logout",
-      {
-        withCredentials: true,
-      },
-    );
-  } catch (error) {
-    console.log(error);
-  }
+  localStorage.removeItem("access_token");
   window.location.reload();
 }
 
@@ -60,12 +53,14 @@ export default function GoogleSignIn() {
   const updateLogin = async () => {
     try {
       const { data: userData } = await axios.get(
-        "http://localhost:8080/me",
+        `${process.env.NEXT_PUBLIC_API_BASE}/user/profile`,
         {
-          withCredentials: true,
+          headers: {
+            token: localStorage.getItem("access_token"),
+          },
         },
       );
-      setUser(userData.name);
+      setUser(`${userData.firstName} ${userData.lastName}`);
     } catch (error) {
       setUser("");
       console.log("ERROR");
@@ -76,17 +71,15 @@ export default function GoogleSignIn() {
     updateLogin();
   }, []);
 
-  const handleLoginSuccess = async (response : { code:string }) => {
+  const handleLoginSuccess = async (response: { code: string }) => {
     try {
       const { data } = await axios.post(
-        "http://localhost:8080/auth",
+        `${process.env.NEXT_PUBLIC_API_BASE}/auth`,
         {
           code: response.code,
         },
-        {
-          withCredentials: true,
-        },
       );
+      localStorage.setItem("access_token", data.access_token);
 
       updateLogin();
     } catch (error) {
