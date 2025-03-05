@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import Link from 'next/link'
-import profile from "@/app/profile/page";
 
 const Dropdown = (props: { text: string }) => {
   const [isOpen, setIsOpen] = useState(false);
