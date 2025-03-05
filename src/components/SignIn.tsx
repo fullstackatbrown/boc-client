@@ -2,6 +2,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
+import Link from 'next/link'
+import profile from "@/app/profile/page";
 
 const Dropdown = (props: { text: string }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,7 +34,7 @@ const Dropdown = (props: { text: string }) => {
       <button onClick={toggleDropdown}>{props.text} ≡</button>
       {isOpen && (
         <ul className="dropdown-menu absolute top-[100%] right-0">
-          <li className="text-right">View Profile</li>
+          <Link className="text-right" href="/profile">View Profile</Link>
           <li className="text-right">
             <button onClick={logout}>Logout</button>
           </li>
