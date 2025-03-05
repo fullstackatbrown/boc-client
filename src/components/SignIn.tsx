@@ -32,7 +32,9 @@ const Dropdown = (props: { text: string }) => {
       <button onClick={toggleDropdown}>{props.text} ≡</button>
       {isOpen && (
         <ul className="dropdown-menu absolute top-[100%] right-0">
-          <li className="text-right">View Profile</li>
+          <li className="text-right">
+            <button onClick={handleViewProfile}>View Profile</button>
+          </li>
           <li className="text-right">
             <button onClick={logout}>Logout</button>
           </li>
@@ -58,7 +60,7 @@ export default function GoogleSignIn() {
           headers: {
             token: localStorage.getItem("access_token"),
           },
-        },
+        }
       );
       setUser(`${userData.firstName} ${userData.lastName}`);
     } catch (error) {
@@ -77,7 +79,7 @@ export default function GoogleSignIn() {
         `${process.env.NEXT_PUBLIC_API_BASE}/auth`,
         {
           code: response.code,
-        },
+        }
       );
       localStorage.setItem("access_token", data.access_token);
 
@@ -113,3 +115,7 @@ export default function GoogleSignIn() {
     </div>
   );
 }
+
+const handleViewProfile = () => {
+  window.location.href = "/user";
+};
