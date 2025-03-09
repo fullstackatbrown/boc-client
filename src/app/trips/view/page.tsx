@@ -29,7 +29,7 @@ function formatDate(isoDateString: string): string {
 
 function getDaySuffix(day: number): string {
     if (day >= 11 && day <= 13) {
-        return 'th';
+        return 'th'
     }
     
     switch (day % 10) {
