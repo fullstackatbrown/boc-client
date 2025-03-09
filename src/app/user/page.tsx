@@ -16,6 +16,93 @@ function Paragraph(props: { children: React.ReactNode }) {
   );
 }
 
+interface Trip {
+  trip: string;
+  date: string;
+  leaders: string[];
+}
+
+const mock_data = {
+  upcomingTrips: [
+    {
+      trip: "Trip 1",
+      date: "2023-10-01",
+      leaders: ["Moses Y", "Sofia G"],
+    },
+    {
+      trip: "Trip 2",
+      date: "2023-11-01",
+      leaders: ["Sofia G", "Kieran L"],
+    },
+  ],
+  pastTrips: [
+    {
+      trip: "Trip A",
+      date: "2023-09-01",
+      leaders: ["Alan Wang", "William Stone"],
+    },
+    {
+      trip: "Trip B",
+      date: "2023-08-01",
+      leaders: ["William Stone", "Alan Wang"],
+    },
+  ],
+};
+
+function Td(props: { children: React.ReactNode }) {
+  return (
+    <td className="p-[0.7em] text-left text-[1.200rem]">{props.children}</td>
+  );
+}
+
+function TripRow(data: Trip) {
+  return (
+    <tr className="divide-x divide-black px-4 py-2">
+      <Td>{data.trip}</Td>
+      <Td>{data.date}</Td>
+      <Td>
+        {data.leaders.map((leader, index) => (
+          <div key={leader}>{leader}</div>
+        ))}
+      </Td>
+    </tr>
+  );
+}
+
+// create a table for all upcoming trips
+function tripTable(isPast: boolean, trips: Trip[]) {
+  const timing = isPast ? "Past" : "Upcoming";
+
+  return (
+    <div className="flex flex-col mb-10 mx-10">
+      <div className="border-b border-gray-700 border-radius w-[95%] mb-10 mx-auto">
+        <div className="ml-4">
+          <Subheading>{timing} Trips</Subheading>
+        </div>
+      </div>
+      <div className="flex justify-center">
+        <table className="table-fixed w-full border border-black">
+          <colgroup>
+            <col style={{ width: "60%" }} />
+            <col style={{ width: "20%" }} />
+            <col style={{ width: "20%" }} />
+          </colgroup>
+          <tbody className="divide-y divide-black">
+            <tr className="divide-x divide-black px-4 py-2 text-center font-bold">
+              <Td>Trip:</Td>
+              <Td>Date</Td>
+              <Td>Leaders</Td>
+            </tr>
+            {trips.map((data, index) => (
+              <TripRow key={index} {...data} />
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 export default function User() {
   const [userProfile, setUserProfile] = useState({
     name: "",
@@ -125,6 +212,8 @@ export default function User() {
           </div>
         </div>
       </div>
+      {tripTable(false, mock_data.upcomingTrips)}
+      {tripTable(true, mock_data.pastTrips)}
     </div>
   );
 }
