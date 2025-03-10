@@ -16,38 +16,51 @@ function Paragraph(props: { children: React.ReactNode }) {
   );
 }
 
-interface Trip {
-  trip: string;
-  date: string;
-  leaders: string[];
+// represents trip info from user/profile route
+interface TripSignUp {
+  tripId: number;
+  tripRole: string;
+  status: string | null;
+  needPaperwork: boolean | null;
+  confirmed: boolean | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
-const mock_data = {
-  upcomingTrips: [
-    {
-      trip: "Trip 1",
-      date: "2023-10-01",
-      leaders: ["Moses Y", "Sofia G"],
-    },
-    {
-      trip: "Trip 2",
-      date: "2023-11-01",
-      leaders: ["Sofia G", "Kieran L"],
-    },
-  ],
-  pastTrips: [
-    {
-      trip: "Trip A",
-      date: "2023-09-01",
-      leaders: ["Alan Wang", "William Stone"],
-    },
-    {
-      trip: "Trip B",
-      date: "2023-08-01",
-      leaders: ["William Stone", "Alan Wang"],
-    },
-  ],
-};
+interface Trip {
+  tripName: string;
+  date: string;
+  blurb: string;
+  leaders: string[];
+  lotteryInfo: string;
+}
+
+// const mock_data = {
+//   upcomingTrips: [
+//     {
+//       trip: "Trip 1",
+//       date: "2023-10-01",
+//       leaders: ["Moses Y", "Sofia G"],
+//     },
+//     {
+//       trip: "Trip 2",
+//       date: "2023-11-01",
+//       leaders: ["Sofia G", "Kieran L"],
+//     },
+//   ],
+//   pastTrips: [
+//     {
+//       trip: "Trip A",
+//       date: "2023-09-01",
+//       leaders: ["Alan Wang", "William Stone"],
+//     },
+//     {
+//       trip: "Trip B",
+//       date: "2023-08-01",
+//       leaders: ["William Stone", "Alan Wang"],
+//     },
+//   ],
+// };
 
 function Td(props: { children: React.ReactNode }) {
   return (
@@ -58,13 +71,13 @@ function Td(props: { children: React.ReactNode }) {
 function TripRow(data: Trip) {
   return (
     <tr className="divide-x divide-black px-4 py-2">
-      <Td>{data.trip}</Td>
-      <Td>{data.date}</Td>
       <Td>
-        {data.leaders.map((leader, index) => (
-          <div key={leader}>{leader}</div>
-        ))}
+        <b>{data.tripName} </b>
+        <br /> {data.blurb}
       </Td>
+      <Td>{data.date}</Td>
+      <Td>{data.leaders.join(", ")}</Td>
+      <Td>{data.lotteryInfo}</Td>
     </tr>
   );
 }
@@ -83,7 +96,8 @@ function tripTable(isPast: boolean, trips: Trip[]) {
       <div className="flex justify-center">
         <table className="table-fixed w-full border border-black">
           <colgroup>
-            <col style={{ width: "60%" }} />
+            <col style={{ width: "40%" }} />
+            <col style={{ width: "20%" }} />
             <col style={{ width: "20%" }} />
             <col style={{ width: "20%" }} />
           </colgroup>
@@ -92,6 +106,7 @@ function tripTable(isPast: boolean, trips: Trip[]) {
               <Td>Trip:</Td>
               <Td>Date</Td>
               <Td>Leaders</Td>
+              <Td>Lottery Info</Td>
             </tr>
             {trips.map((data, index) => (
               <TripRow key={index} {...data} />
@@ -111,8 +126,11 @@ export default function User() {
     phoneNum: "",
     tripsParticipated: "",
   });
+  const [tripDetails, setTripDetails] = useState<Trip[]>([]);
+
   const updateLogin = async () => {
     try {
+      // User Profile information set
       const { data: userData } = await axios.get(
         `${process.env.NEXT_PUBLIC_API_BASE}/user/profile`,
         {
@@ -129,7 +147,42 @@ export default function User() {
         phoneNum: `${userData.phone} `,
         tripsParticipated: `${userData.tripsParticipated} `,
       });
+
+      // User Trips information set
+      const tripPromises = userData.TripSignUps.map(
+        async (signup: TripSignUp) => {
+          const { data: tripInfo } = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_BASE}/trip/${signup.tripId}`
+          );
+
+          const leaders =
+            tripInfo.otherLeaders &&
+            Array.isArray(tripInfo.otherLeaders) &&
+            tripInfo.otherLeaders.length > 0
+              ? tripInfo.otherLeaders
+              : [];
+
+          if (
+            signup.tripRole === "Leader" &&
+            !leaders.includes(`${userData.firstName} ${userData.lastName}`)
+          ) {
+            leaders.push(`${userData.firstName} ${userData.lastName}`);
+          }
+
+          return {
+            tripId: signup.tripId,
+            tripName: tripInfo.tripName || "Unknown",
+            date: new Date(tripInfo.plannedDate).toLocaleDateString(),
+            blurb: tripInfo.blurb || "No description",
+            leaders: leaders.length > 0 ? leaders : ["No leaders assigned"],
+            lotteryInfo: signup.status || "Hosted Trip",
+          };
+        }
+      );
+      const tripsWithDetails = await Promise.all(tripPromises);
+      setTripDetails(tripsWithDetails);
     } catch (error) {
+      console.error(error);
       setUserProfile({
         name: "",
         role: "",
@@ -137,6 +190,7 @@ export default function User() {
         phoneNum: "",
         tripsParticipated: "",
       });
+      setTripDetails([]);
       console.log("ERROR");
     }
   };
@@ -212,8 +266,21 @@ export default function User() {
           </div>
         </div>
       </div>
-      {tripTable(false, mock_data.upcomingTrips)}
-      {tripTable(true, mock_data.pastTrips)}
+      {/* Upcoming trips table */}
+      {tripTable(
+        false,
+        tripDetails.filter(
+          (trip) => new Date(trip.date).getTime() >= new Date().getTime()
+        )
+      )}
+
+      {/* Past trips table */}
+      {tripTable(
+        true,
+        tripDetails.filter(
+          (trip) => new Date(trip.date).getTime() < new Date().getTime()
+        )
+      )}
     </div>
   );
 }
