@@ -50,6 +50,7 @@ export default function ProfilePage() {
         axios.get(`${process.env.NEXT_PUBLIC_API_BASE}/trip/${id}`).then((res) => {
             setTrip(res.data);
         });
+        console.log(trip);
     }, [id]);
 
 

@@ -1,24 +1,21 @@
 "use client";
 import NavBar from "@/components/NavBar";
 import WhiteWaterBanner from "@/components/WhiteWaterBanner";
-
-function Subheading(props: { children: React.ReactNode }) {
-  return (
-    <h1 className="text-2xl font-bold mb-5 mt-10">{props.children}</h1>
-  )
-}
-
-function Paragraph(props: { children: React.ReactNode }) {
-  return (
-    <div className="text-xl font-[100] text-left leading-10 mb-3">
-      <p>{props.children}</p>
-    </div>
-  );
-}
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 export default function Trips() {
+
+  const [trips, setTrips] = useState<any[]>([]);
+
+  useEffect(() => {
+    axios.get(`${process.env.NEXT_PUBLIC_API_BASE}/trips`).then((res) => {
+      setTrips(res.data);
+    });
+  }, []);
+
   return (
-    <div className="h-full min-h-screen w-full">
+    <div className="h-full min-h-screen w-full overflow-x-hidden">
       <NavBar></NavBar>
 
       {/* Site content */}
@@ -47,17 +44,37 @@ export default function Trips() {
               </tr>
             </thead>
 
-            {/* Table Body (5 Rows) */}
+            {/* Table Body */}
             <tbody>
-              {[...Array(5)].map((_, index) => (
+              {trips.map((trip, index) => (
                 <tr key={index} className="text-center">
-                  <td className="border border-black px-4 py-2">Trip {index + 1}</td>
-                  <td className="border border-black px-4 py-2">MM/DD/YYYY</td>
-                  <td className="border border-black px-4 py-2">Trip description here</td>
-                  <td className="border border-black px-4 py-2">MM/DD/YYYY</td>
-                  <td className="border border-black px-4 py-2">Leader Name</td>
+                  <td className="border border-black px-4 py-2">
+                    <a 
+                      href={`/trips/view?id=${index + 1}`} 
+                      className="text-blue-600 underline"
+                    >
+                      {trip.tripName}
+                    </a>
+                  </td>
+                  <td className="border border-black px-4 py-2">
+                    {new Date(trip.plannedDate).toLocaleDateString()}
+                  </td>
+                  <td className="border border-black px-4 py-2">{trip.sentenceDesc}</td>
+                  <td className="border border-black px-4 py-2">
+                    {new Date(trip.plannedDate).toLocaleDateString()}
+                  </td>
+                  <td className="border border-black px-4 py-2">
+                    {trip.class || "Not specified"}
+                  </td>
                 </tr>
               ))}
+              {trips.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="border border-black px-4 py-2 text-center">
+                    No upcoming trips available
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
