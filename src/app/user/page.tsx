@@ -3,6 +3,7 @@ import NavBar from "@/components/NavBar";
 import WhiteWaterBanner from "@/components/WhiteWaterBanner";
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
+import tripsBadge from "@/assets/images/trips_badge.png";
 
 function Subheading(props: { children: React.ReactNode }) {
   return <h1 className="text-2xl font-bold mb-5 mt-10">{props.children}</h1>;
@@ -86,6 +87,17 @@ function TripRow(data: Trip) {
 function tripTable(isPast: boolean, trips: Trip[]) {
   const timing = isPast ? "Past" : "Upcoming";
 
+  if (trips.length === 0) {
+    return (
+      <div className="flex flex-col mb-10 mx-10">
+        <div className="border-b border-gray-700 border-radius w-[95%] mb-10 mx-auto">
+          <div className="ml-4">
+            <Subheading>{timing} Trips</Subheading>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col mb-10 mx-10">
       <div className="border-b border-gray-700 border-radius w-[95%] mb-10 mx-auto">
@@ -204,49 +216,52 @@ export default function User() {
       <NavBar></NavBar>
 
       {/* Site content */}
-      <WhiteWaterBanner text="User Profile"></WhiteWaterBanner>
 
-      <div id="content" className="flex justify-center items-start gap-10 p-5">
+      <div id="content" className="flex justify-center items-start gap-20 p-5">
         <div className="w-60 aspect-square flex justify-center rounded-lg object cover bg-gray-200">
           <img alt="User Profile" className="w-1/2 rounded-lg object cover" />
         </div>
-        <div className="text-[1.200rem] leading-loose">
-          <div>
-            <b>Name: </b>
-            {userProfile.name}
+        <div className="text-[1.200rem] text-boc_darkbrown leading-loose ">
+          <div className="text-[3.3rem] leading-tight">
+            <b>{userProfile.name}</b>
           </div>
-          <div>
-            {" "}
-            <b>BOC Position:</b> {userProfile.role}
+          <div className="text-[2rem] mt-1">
+            <b>{userProfile.role}</b>
           </div>
-          <div>
-            <b>E-mail:</b> {userProfile.email}
-          </div>
-          <div>
-            <b>Phone Number: </b>
-            {userProfile.phoneNum}
+          <div className="flex gap-12 text-[1.2rem]">
+            <div>
+              <b>EMAIL</b>
+              <p>{userProfile.email}</p>
+            </div>
+            <div>
+              <b>PHONE NUMBER </b>
+              <p>{userProfile.phoneNum}</p>
+            </div>
           </div>
         </div>
-        <div
-          style={{ backgroundColor: "#5CB85B" }}
-          className="w-1/4 text-center rounded-lg shadow-md"
-        >
-          <p className="text-2xl font-bold text-white pt-7">Summit Seeker</p>
-          <hr className="border-t-2 border-white w-full my-4" />
+        <div className="w-1/4 text-center rounded-lg float-right">
+          <p className="text-2xl font-bold text-boc_darkbrown pt-7">
+            SUMMIT SEEKER
+          </p>
 
-          <div className="pb-7">
-            <p
-              style={{ color: "#FFFFFFBF" }}
-              className="text-2xl font-bold text-white"
-            >
-              Total Trips:
-            </p>
-            <p className="text-3xl font-bold text-white">
+          <div className="relative w-full">
+            <img
+              src={tripsBadge.src}
+              alt="trips badge"
+              className="w-full h-auto"
+            ></img>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white font-bold text-5xl px-4 py-2 rounded-lg">
               {userProfile.tripsParticipated}
-            </p>
+            </div>
+          </div>
+          <div className="pb-7">
+            <p className="text-2xl font-bold text-boc_darkbrown">TOTAL TRIPS</p>
+            {/* <p className="text-3xl font-bold text-white">
+              {userProfile.tripsParticipated}
+            </p> */}
           </div>
         </div>
-        <div
+        {/* <div
           style={{ backgroundColor: "#5CB85B" }}
           className="w-1/4 text-center rounded-lg shadow-md"
         >
@@ -264,7 +279,7 @@ export default function User() {
               {userProfile.tripsParticipated} / 24
             </p>
           </div>
-        </div>
+        </div> */}
       </div>
       {/* Upcoming trips table */}
       {tripTable(
