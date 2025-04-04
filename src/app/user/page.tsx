@@ -4,6 +4,8 @@ import WhiteWaterBanner from "@/components/WhiteWaterBanner";
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import tripsBadge from "@/assets/images/trips_badge.png";
+import profilepic from "@/assets/images/bear.png";
+import wood from "@/assets/images/wood.png";
 
 function Subheading(props: { children: React.ReactNode }) {
   return <h1 className="text-2xl font-bold mb-5 mt-10">{props.children}</h1>;
@@ -70,6 +72,24 @@ function Td(props: { children: React.ReactNode }) {
 }
 
 function TripRow(data: Trip) {
+  const getLotteryColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "signed up":
+        return "bg-green-500 text-white";
+      case "selected":
+        return "bg-green-500 text-black";
+      case "not selected":
+        return "bg-orange-500 text-black";
+      case "attended":
+        return "bg-gray-500 text-white";
+      case "no show":
+        return "bg-gray-500 text-darkgray";
+      case "hosted trip":
+        return "bg-gray-300 text-black";
+      default:
+        return "bg-gray-300 text-darkgray";
+    }
+  };
   return (
     <tr className="divide-x divide-black px-4 py-2">
       <Td>
@@ -78,21 +98,27 @@ function TripRow(data: Trip) {
       </Td>
       <Td>{data.date}</Td>
       <Td>{data.leaders.join(", ")}</Td>
-      <Td>{data.lotteryInfo}</Td>
+      <Td>
+        <span
+          className={`flex justify-center px-5 py-4 rounded ${getLotteryColor(
+            data.lotteryInfo
+          )}`}
+        >
+          {data.lotteryInfo}
+        </span>
+      </Td>
     </tr>
   );
 }
 
 // create a table for all upcoming trips
-function tripTable(isPast: boolean, trips: Trip[]) {
-  const timing = isPast ? "Past" : "Upcoming";
-
+function tripTable(tripsType: String, trips: Trip[]) {
   if (trips.length === 0) {
     return (
       <div className="flex flex-col mb-10 mx-10">
         <div className="border-b border-gray-700 border-radius w-[95%] mb-10 mx-auto">
           <div className="ml-4">
-            <Subheading>{timing} Trips</Subheading>
+            <Subheading>{tripsType} Trips</Subheading>
           </div>
         </div>
       </div>
@@ -102,7 +128,7 @@ function tripTable(isPast: boolean, trips: Trip[]) {
     <div className="flex flex-col mb-10 mx-10">
       <div className="border-b border-gray-700 border-radius w-[95%] mb-10 mx-auto">
         <div className="ml-4">
-          <Subheading>{timing} Trips</Subheading>
+          <Subheading>{tripsType} Trips</Subheading>
         </div>
       </div>
       <div className="flex justify-center">
@@ -115,7 +141,7 @@ function tripTable(isPast: boolean, trips: Trip[]) {
           </colgroup>
           <tbody className="divide-y divide-black">
             <tr className="divide-x divide-black px-4 py-2 text-center font-bold">
-              <Td>Trip:</Td>
+              <Td>Trip</Td>
               <Td>Date</Td>
               <Td>Leaders</Td>
               <Td>Lottery Info</Td>
@@ -139,6 +165,8 @@ export default function User() {
     tripsParticipated: "",
   });
   const [tripDetails, setTripDetails] = useState<Trip[]>([]);
+  const [showPastTrips, setShowPastTrips] = useState(false);
+  const [hostedTrips, setHostedTrips] = useState(false);
 
   const updateLogin = async () => {
     try {
@@ -159,6 +187,9 @@ export default function User() {
         phoneNum: `${userData.phone} `,
         tripsParticipated: `${userData.tripsParticipated} `,
       });
+      if (userData.role === "Leader" || userData.role === "Admin") {
+        setHostedTrips(true);
+      }
 
       // User Trips information set
       const tripPromises = userData.TripSignUps.map(
@@ -217,9 +248,19 @@ export default function User() {
 
       {/* Site content */}
 
+      <br></br>
       <div id="content" className="flex justify-center items-start gap-20 p-5">
-        <div className="w-60 aspect-square flex justify-center rounded-lg object cover bg-gray-200">
-          <img alt="User Profile" className="w-1/2 rounded-lg object cover" />
+        <div className="relative w-60 aspect-square rounded-lg">
+          <img
+            alt="User Profile"
+            className="absolute inset-0 rounded-lg "
+            src={wood.src}
+          />
+          <img
+            alt="User Profile"
+            className="absolute inset-0 rounded-lg"
+            src={profilepic.src}
+          />
         </div>
         <div className="text-[1.200rem] text-boc_darkbrown leading-loose ">
           <div className="text-[3.3rem] leading-tight">
@@ -240,15 +281,13 @@ export default function User() {
           </div>
         </div>
         <div className="w-1/4 text-center rounded-lg float-right">
-          <p className="text-2xl font-bold text-boc_darkbrown pt-7">
-            SUMMIT SEEKER
-          </p>
+          <p className="text-2xl font-bold text-boc_darkbrown">SUMMIT SEEKER</p>
 
           <div className="relative w-full">
             <img
               src={tripsBadge.src}
               alt="trips badge"
-              className="w-full h-auto"
+              className="w-full h-auto p-7"
             ></img>
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white font-bold text-5xl px-4 py-2 rounded-lg">
               {userProfile.tripsParticipated}
@@ -281,21 +320,54 @@ export default function User() {
           </div>
         </div> */}
       </div>
+      <br></br>
+      {/* Your trips table */}
+      {hostedTrips && (
+        <div id="hostedTrips" className="flex flex-col mb-10">
+          <button className="ml-auto mr-10 bg-boc_darkbrown text-white font-bold py-2 px-4 rounded-full hover:bg-boc_darkgreen transition duration-300 ease-in-out">
+            + Create a New Trip
+          </button>
+          {tripTable(
+            "Your",
+            tripDetails.filter(
+              (trip) =>
+                trip.lotteryInfo === "Hosted Trip" &&
+                new Date(trip.date).getTime() >= new Date().getTime()
+            )
+          )}
+        </div>
+      )}
+
       {/* Upcoming trips table */}
       {tripTable(
-        false,
+        "Upcoming",
         tripDetails.filter(
-          (trip) => new Date(trip.date).getTime() >= new Date().getTime()
+          (trip) =>
+            trip.lotteryInfo !== "Hosted Trip" &&
+            new Date(trip.date).getTime() >= new Date().getTime()
         )
       )}
 
       {/* Past trips table */}
-      {tripTable(
-        true,
-        tripDetails.filter(
-          (trip) => new Date(trip.date).getTime() < new Date().getTime()
-        )
+      {showPastTrips && (
+        <div id="pastTrips">
+          {tripTable(
+            "Past",
+            tripDetails.filter(
+              (trip) => new Date(trip.date).getTime() < new Date().getTime()
+            )
+          )}
+        </div>
       )}
+      <div className="flex justify-center">
+        <button
+          id="toggleButton"
+          className="bg-boc_darkbrown text-white font-bold py-2 px-4 rounded-full hover:bg-boc_darkgreen transition duration-300 ease-in-out ml-auto mr-10 mb-10"
+          onClick={() => setShowPastTrips(!showPastTrips)}
+        >
+          {showPastTrips ? "Hide Past Trips" : "Show Past Trips"}
+        </button>
+      </div>
     </div>
   );
 }
