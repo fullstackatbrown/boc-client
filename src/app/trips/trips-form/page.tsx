@@ -1,5 +1,5 @@
 'use client';
-
+import NavBar from "@/components/NavBar";
 
 import React, { useState, useEffect, useRef } from 'react';
 
@@ -27,6 +27,7 @@ function Form() {
     const submitBtn = <input id="submit" type="submit" value="Submit" className="w-28 border-black bg-primary-red rounded-xl text-white h-10 mt-5 text-lg"/>
 
     return (
+        
         <form id="data-form" action={scriptUrl} target="_blank" method="POST" className="w-1/2 min-w-[340px] text-left">
             <div className="flex text-center">   
                 <FormElt label="First name: " name="first-name" type="text" />
@@ -71,6 +72,7 @@ export default function Download() {
 
     return (
     <div className="h-full min-h-screen w-full">
+        <NavBar></NavBar>
         {/* Dynamic spacer based on header height */}
         <div style={{ minHeight: `${headerHeight}px` }}></div>
 
