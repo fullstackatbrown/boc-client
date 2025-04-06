@@ -128,51 +128,38 @@ export default function Trips() {
         </div>
 
         <div className="overflow-x-auto mt-6">
-          <table className="w-full border-collapse border border-black">
-            {/* Table Head */}
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="border border-black px-4 py-2">Name</th>
-                <th className="border border-black px-4 py-2">Date</th>
-                <th className="border border-black px-4 py-2">Description</th>
-                <th className="border border-black px-4 py-2">Size</th>
-                <th className="border border-black px-4 py-2">Leaders</th>
-              </tr>
-            </thead>
 
-            {/* Table Body */}
-            <tbody>
-              {filteredTrips.map((trip, index) => (
-                <tr key={index} className="text-center">
-                  <td className="border border-black px-4 py-2">
-                    <a 
-                      href={`/trips/view?id=${index + 1}`} 
-                      className="text-blue-600 underline"
-                    >
+          {/* Trip Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredTrips.length > 0 ? (
+              filteredTrips.map((trip, index) => (
+                <div key={index} className="w-full border border-black p-4 rounded-md shadow">
+                  <h2 className="text-lg font-bold text-blue-600 underline mb-0">
+                    <a href={`/trips/view?id=${index + 1}`}>
                       {trip.tripName}
                     </a>
-                  </td>
-                  <td className="border border-black px-4 py-2">
+                  </h2>
+                  <p className="mb-1">
                     {new Date(trip.plannedDate).toLocaleDateString()}
-                  </td>
-                  <td className="border border-black px-4 py-2">{trip.sentenceDesc}</td>
-                  <td className="border border-black px-4 py-2">
-                    {trip.maxSize}
-                  </td>
-                  <td className="border border-black px-4 py-2">
-                    {trip.class || "Not specified"}
-                  </td>
-                </tr>
-              ))}
-              {filteredTrips.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="border border-black px-4 py-2 text-center">
-                    No trips match your filters
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                  </p>
+                  <p className="mb-1">
+                    <strong>Description:</strong> {trip.sentenceDesc}
+                  </p>
+                  <p className="mb-1">
+                    <strong>Max Size:</strong> {trip.maxSize}
+                  </p>
+                  <p>
+                    <strong>Class:</strong> {trip.class || "Not specified"}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p className="col-span-full text-center text-gray-600">
+                No trips match your filters
+              </p>
+            )}
+          </div>
+         
         </div>
       </section>
     </div>
