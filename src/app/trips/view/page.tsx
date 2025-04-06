@@ -53,6 +53,35 @@ export default function ProfilePage() {
         });
     }, [id]);
 
+    const [role, setRole] = useState(""); // <-- create state for role
+
+    useEffect(() => {
+        axios.get(`${process.env.NEXT_PUBLIC_API_BASE}/user/profile`).then((res) => {
+            setRole(res.data.role); // <-- extract role from response
+        });
+    }, [id]);
+
+    switch (role) {
+        case 'admin':
+          // Code to execute if role is 'admin'
+          console.log('User is an admin');
+          break;
+        case 'user':
+          // Code to execute if role is 'user'
+          console.log('User is a regular user');
+          break;
+        case 'guest':
+          // Code to execute if role is 'guest'
+          console.log('User is a guest');
+          break;
+        default:
+          // Code to execute if role doesn't match any case
+          console.log('Unknown role');
+          break;
+      }
+
+
+
 
     return (
         <div className="min-h-screen flex flex-col">
