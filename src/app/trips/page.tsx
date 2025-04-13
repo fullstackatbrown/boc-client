@@ -130,10 +130,10 @@ export default function Trips() {
         <div className="overflow-x-auto mt-6">
 
           {/* Trip Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             {filteredTrips.length > 0 ? (
               filteredTrips.map((trip, index) => (
-                <div key={index} className="w-full border border-black p-4 rounded-md shadow">
+                <div key={index} className="w-full p-4 rounded-[20px] shadow" style={{ backgroundColor: '#FFE8B6' }}>
                   <h2 className="text-lg font-bold text-blue-600 underline mb-0">
                     <a href={`/trips/view?id=${index + 1}`}>
                       {trip.tripName}
