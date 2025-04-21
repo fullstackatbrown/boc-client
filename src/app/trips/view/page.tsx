@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import axios from "axios";
 import { useState, useEffect } from "react";
 import GreenButton from "@/components/GreenButton";
+import NavBar from "@/components/NavBar";
 
 function formatDate(isoDateString: string): string {
     const date = new Date(isoDateString);
@@ -29,7 +30,7 @@ function formatDate(isoDateString: string): string {
 
 function getDaySuffix(day: number): string {
     if (day >= 11 && day <= 13) {
-        return 'th';
+        return 'th'
     }
     
     switch (day % 10) {
@@ -53,10 +54,43 @@ export default function ProfilePage() {
         console.log(trip);
     }, [id]);
 
+    const [role, setRole] = useState(""); // <-- create state for role
+
+    useEffect(() => {
+        axios.get(`${process.env.NEXT_PUBLIC_API_BASE}/user/profile`).then((res) => {
+            setRole(res.data.role); // <-- extract role from response
+        });
+    }, [id]);
+
+    switch (role) {
+        case 'admin':
+          // Code to execute if role is 'admin'
+          console.log('User is an admin');
+          break;
+        case 'user':
+          // Code to execute if role is 'user'
+          console.log('User is a regular user');
+          break;
+        case 'guest':
+          // Code to execute if role is 'guest'
+          console.log('User is a guest');
+          break;
+        default:
+          // Code to execute if role doesn't match any case
+          console.log('Unknown role');
+          break;
+      }
+
+
+
 
     return (
-        <div className="min-h-screen pt-10 pb-10 flex justify-center items-center">
-            <div className="w-min-[500px] w-[80%] flex flex-col gap-y-4">
+        <div className="min-h-screen flex flex-col">
+            {/* Ensure NavBar is at the top */}
+            <NavBar />
+
+            {/* Main content section */}
+            <div className="w-full max-w-4xl mx-auto px-4 py-6 flex flex-col gap-y-4">
                 <div className="w-full">
                     <h1 className="text-[4vmin] font-bold">{trip?.tripName}</h1>
                     <div className="w-full h-[1px] bg-black "></div>
@@ -65,10 +99,18 @@ export default function ProfilePage() {
                     <div className="flex flex-row gap-x-4">
                         <div className="w-[400px] h-[200px] bg-gray-200 rounded-lg"></div>
                         <div className="flex justify-around flex-col">
-                            <div className="flex flex-row gap-x-2"><label className="font-bold">Leaders:</label><p>{trip?.leaders?.join(", ") || "No leaders assigned"}</p></div>
-                            <div className="flex flex-row gap-x-2"><label className="font-bold">Trip Category:</label><p>{trip?.category || "Not specified"}</p></div>
-                            <div className="flex flex-row gap-x-2"><label className="font-bold">Date:</label><p>{trip?.plannedDate ? formatDate(trip?.plannedDate) : "Date not set"}</p></div>
-                            <div className="flex flex-row gap-x-2"><label className="font-bold">Qualifications:</label><p>{trip?.qualifications?.join(", ") || "None required"}</p></div>
+                            <div className="flex flex-row gap-x-2">
+                                <label className="font-bold">Leaders:</label><p>{trip?.leaders?.join(", ") || "No leaders assigned"}</p>
+                            </div>
+                            <div className="flex flex-row gap-x-2">
+                                <label className="font-bold">Trip Category:</label><p>{trip?.category || "Not specified"}</p>
+                            </div>
+                            <div className="flex flex-row gap-x-2">
+                                <label className="font-bold">Date:</label><p>{trip?.plannedDate ? formatDate(trip?.plannedDate) : "Date not set"}</p>
+                            </div>
+                            <div className="flex flex-row gap-x-2">
+                                <label className="font-bold">Qualifications:</label><p>{trip?.qualifications?.join(", ") || "None required"}</p>
+                            </div>
                         </div>
                     </div>
                     <p className="text-[2vmin] pt-4 pb-4">{trip?.sentenceDesc}</p>
@@ -76,20 +118,32 @@ export default function ProfilePage() {
                 <div>
                     <h2 className="text-[2.5vmin] font-bold">Signup Information</h2>
                     <div className="mt-4">
-                        <div className="flex flex-row gap-x-2 items-center"><label className="text-md">Signups Opened At:</label><p className="text-sm">{trip?.createdAt ? formatDate(trip?.createdAt) : "Not set"}</p></div>
-                        <div className="flex flex-row gap-x-2 items-center"><label className="text-md">Signups Close At:</label><p className="text-sm">{trip?.signupClose ? formatDate(trip?.signupClose) : "Not set"}</p></div>
-                        <div className="flex flex-row gap-x-2 items-center"><label className="text-md">Maximum Participants:</label><p className="text-sm">{trip?.maxSize ? trip?.maxSize : "Not set"}</p></div>
-                        <div className="flex flex-row gap-x-2 items-center"><label className="text-md">Notes:</label><p className="text-sm">{trip?.notes ? trip?.notes : "No notes"}</p></div>
+                        <div className="flex flex-row gap-x-2 items-center">
+                            <label className="text-md">Signups Opened At:</label><p className="text-sm">{trip?.createdAt ? formatDate(trip?.createdAt) : "Not set"}</p>
+                        </div>
+                        <div className="flex flex-row gap-x-2 items-center">
+                            <label className="text-md">Signups Close At:</label><p className="text-sm">{trip?.signupClose ? formatDate(trip?.signupClose) : "Not set"}</p>
+                        </div>
+                        <div className="flex flex-row gap-x-2 items-center">
+                            <label className="text-md">Maximum Participants:</label><p className="text-sm">{trip?.maxSize ? trip?.maxSize : "Not set"}</p>
+                        </div>
+                        <div className="flex flex-row gap-x-2 items-center">
+                            <label className="text-md">Notes:</label><p className="text-sm">{trip?.notes ? trip?.notes : "No notes"}</p>
+                        </div>
                     </div>
                 </div>
-                <div className="w-fit"> 
-                    <GreenButton text="Signup for this trip!" onClick={() => {}}></GreenButton>
+                <div className="w-fit">
+                    <GreenButton text="Signup for this trip!" onClick={() => { }}></GreenButton>
                 </div>
-                {trip?.status.toLowerCase() === "open" ? 
-                    <div className="mt-2 p-4 bg-[#D9EDF7] border border-blue-200 rounded-lg"><p className="text-blue-600">Signups are currently open for this trip!</p></div> : 
-                    <div className="mt-2 p-4 bg-[#F2DEDE] border border-red-200 rounded-lg"><p className="text-red-600">In order to signup for this trip, you must be <Link href="/" className="text-blue-600">log in</Link>.</p></div>
+                {trip?.status.toLowerCase() === "open" ?
+                    <div className="mt-2 p-4 bg-[#D9EDF7] border border-blue-200 rounded-lg">
+                        <p className="text-blue-600">Signups are currently open for this trip!</p>
+                    </div> :
+                    <div className="mt-2 p-4 bg-[#F2DEDE] border border-red-200 rounded-lg">
+                        <p className="text-red-600">In order to signup for this trip, you must be <Link href="/" className="text-blue-600">log in</Link>.</p>
+                    </div>
                 }
-                {trip?.userData ==null ? <></> :
+                {trip?.userData == null ? <></> :
                     <div className="flex flex-col gap-y-4">
                         <div className="flex flex-col gap-y-1">
                             <div className="flex flex-row gap-x-4 items-center">
@@ -108,5 +162,5 @@ export default function ProfilePage() {
                 }
             </div>
         </div>
-    )
+    );
 }
