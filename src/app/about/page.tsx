@@ -1,6 +1,6 @@
 "use client";
 import NavBar from "@/components/NavBar";
-import WhiteButton from "@/components/NatureButton";
+import WhiteButton from "@/components/GreenButton";
 import Title from "@/components/Title";
 import AboutRiver from "@/assets/images/AboutRiver.png";
 

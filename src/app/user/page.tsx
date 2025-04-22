@@ -37,33 +37,6 @@ interface Trip {
   lotteryInfo: string;
 }
 
-// const mock_data = {
-//   upcomingTrips: [
-//     {
-//       trip: "Trip 1",
-//       date: "2023-10-01",
-//       leaders: ["Moses Y", "Sofia G"],
-//     },
-//     {
-//       trip: "Trip 2",
-//       date: "2023-11-01",
-//       leaders: ["Sofia G", "Kieran L"],
-//     },
-//   ],
-//   pastTrips: [
-//     {
-//       trip: "Trip A",
-//       date: "2023-09-01",
-//       leaders: ["Alan Wang", "William Stone"],
-//     },
-//     {
-//       trip: "Trip B",
-//       date: "2023-08-01",
-//       leaders: ["William Stone", "Alan Wang"],
-//     },
-//   ],
-// };
-
 function Td(props: { children: React.ReactNode }) {
   return (
     <td className="p-[0.7em] text-left text-[1.200rem]">{props.children}</td>
@@ -100,7 +73,7 @@ function TripRow(data: Trip) {
       <Td>
         <span
           className={`flex justify-center px-5 py-4 rounded ${getLotteryColor(
-            data.lotteryInfo
+            data.lotteryInfo,
           )}`}
         >
           {data.lotteryInfo}
@@ -176,7 +149,7 @@ export default function User() {
           headers: {
             token: localStorage.getItem("access_token"),
           },
-        }
+        },
       );
 
       setUserProfile({
@@ -194,7 +167,12 @@ export default function User() {
       const tripPromises = userData.TripSignUps.map(
         async (signup: TripSignUp) => {
           const { data: tripInfo } = await axios.get(
-            `${process.env.NEXT_PUBLIC_API_BASE}/trip/${signup.tripId}`
+            `${process.env.NEXT_PUBLIC_API_BASE}/trip/${signup.tripId}`,
+            {
+              headers: {
+                token: localStorage.getItem("access_token"),
+              },
+            },
           );
 
           const leaders =
@@ -219,7 +197,7 @@ export default function User() {
             leaders: leaders.length > 0 ? leaders : ["No leaders assigned"],
             lotteryInfo: signup.status || "Hosted Trip",
           };
-        }
+        },
       );
       const tripsWithDetails = await Promise.all(tripPromises);
       setTripDetails(tripsWithDetails);
@@ -248,7 +226,7 @@ export default function User() {
       {/* Site content */}
 
       <br></br>
-      <div id="content" className="flex justify-center items-start gap-20 p-5">
+      <div id="content" className="flex justify-center items-start gap-20 p-14">
         <div className="relative w-60 aspect-square rounded-lg">
           <img
             alt="User Profile"
@@ -294,30 +272,8 @@ export default function User() {
           </div>
           <div className="pb-7">
             <p className="text-2xl font-bold text-boc_darkbrown">TOTAL TRIPS</p>
-            {/* <p className="text-3xl font-bold text-white">
-              {userProfile.tripsParticipated}
-            </p> */}
           </div>
         </div>
-        {/* <div
-          style={{ backgroundColor: "#5CB85B" }}
-          className="w-1/4 text-center rounded-lg shadow-md"
-        >
-          <p className="text-2xl font-bold text-white pt-7">Novice</p>
-          <hr className="border-t-2 border-white w-full my-4" />
-
-          <div className="pb-7">
-            <p
-              style={{ color: "#FFFFFFBF" }}
-              className="text-2xl font-bold text-white"
-            >
-              Total Trip Types:
-            </p>
-            <p className="text-3xl font-bold text-white">
-              {userProfile.tripsParticipated} / 24
-            </p>
-          </div>
-        </div> */}
       </div>
       <br></br>
       {/* Your trips table */}
@@ -331,8 +287,8 @@ export default function User() {
             tripDetails.filter(
               (trip) =>
                 trip.lotteryInfo === "Hosted Trip" &&
-                new Date(trip.date).getTime() >= new Date().getTime()
-            )
+                new Date(trip.date).getTime() >= new Date().getTime(),
+            ),
           )}
         </div>
       )}
@@ -343,8 +299,8 @@ export default function User() {
         tripDetails.filter(
           (trip) =>
             trip.lotteryInfo !== "Hosted Trip" &&
-            new Date(trip.date).getTime() >= new Date().getTime()
-        )
+            new Date(trip.date).getTime() >= new Date().getTime(),
+        ),
       )}
 
       {/* Past trips table */}
@@ -353,8 +309,8 @@ export default function User() {
           {tripTable(
             "Past",
             tripDetails.filter(
-              (trip) => new Date(trip.date).getTime() < new Date().getTime()
-            )
+              (trip) => new Date(trip.date).getTime() < new Date().getTime(),
+            ),
           )}
         </div>
       )}

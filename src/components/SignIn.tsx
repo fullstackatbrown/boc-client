@@ -47,7 +47,7 @@ const Dropdown = (props: { text: string }) => {
 
 async function logout() {
   localStorage.removeItem("access_token");
-  window.location.reload();
+  window.location.href = "/";
 }
 
 export default function GoogleSignIn() {
