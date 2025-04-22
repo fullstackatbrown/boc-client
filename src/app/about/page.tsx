@@ -1,13 +1,12 @@
 "use client";
 import NavBar from "@/components/NavBar";
 import WhiteButton from "@/components/NatureButton";
-import WhiteWaterBanner from "@/components/WhiteWaterBanner";
-
+import Title from "@/components/Title";
 import AboutRiver from "@/assets/images/AboutRiver.png";
 
 function Paragraph(props: { children: React.ReactNode }) {
   return (
-    <div className="text-xl font-[100] text-left leading-10 mb-3">
+    <div className="text-xl text-justify leading-10 mb-3">
       <p>{props.children}</p>
     </div>
   );
@@ -19,29 +18,11 @@ export default function About() {
       <NavBar></NavBar>
 
       {/* Site content */}
-      <WhiteWaterBanner text="ABOUT"></WhiteWaterBanner>
-      <div className="text-center mt-8 mb-8 flex justify-center gap-4">
-        <WhiteButton
-          onClick={handleMissionClick}
-          text="Our Mission"
-        ></WhiteButton>
-        <WhiteButton
-          onClick={handleLandClick}
-          text="Land Acknowledgement"
-        ></WhiteButton>
-        <WhiteButton
-          onClick={handleTeamClick}
-          text="Meet Our Team!"
-        ></WhiteButton>
-        <WhiteButton
-          onClick={handleMailClick}
-          text="Join Our Mailing List!"
-        ></WhiteButton>
-      </div>
+      <Title text="About" />
       <div className="flex justify-center"></div>
 
       <div className="flex mx-20">
-        <div className="text-center p-5 w-3/4">
+        <div className="text-center pr-8 w-3/4">
           <Paragraph>
             The BOC runs everything from
             <span className="font-bold"> local walks</span> to
@@ -78,6 +59,20 @@ export default function About() {
           </Paragraph>
         </div>
         <img src={AboutRiver.src} className="w-3/5 mx-auto mb-8" />
+      </div>
+      <div className="text-center mt-8 mb-8 flex justify-center gap-4">
+        <WhiteButton
+          onClick={handleLandClick}
+          text="Land Acknowledgement"
+        ></WhiteButton>
+        <WhiteButton
+          onClick={handleTeamClick}
+          text="Meet Our Team!"
+        ></WhiteButton>
+        <WhiteButton
+          onClick={handleMailClick}
+          text="Join Our Mailing List!"
+        ></WhiteButton>
       </div>
     </div>
   );

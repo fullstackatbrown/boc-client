@@ -1,6 +1,6 @@
 "use client";
 import NavBar from "@/components/NavBar";
-import WhiteWaterBanner from "@/components/WhiteWaterBanner";
+import Title from "@/components/Title";
 import Schedule from "./schedule"
 
 function Subheading(props: { children: React.ReactNode }) {
@@ -11,7 +11,7 @@ function Subheading(props: { children: React.ReactNode }) {
 
 function Paragraph(props: { children: React.ReactNode }) {
   return (
-    <div className="text-xl font-[100] text-left leading-10 mb-3">
+    <div className="text-xl font-[100] text-justify leading-10 mb-3">
       <p>{props.children}</p>
     </div>
   );
@@ -21,11 +21,11 @@ export default function GearRoom() {
   return (
     <div className="h-full min-h-screen w-full">
       <NavBar></NavBar>
+      <Title text="Gear Room" />
 
       {/* Site content */}
-      <WhiteWaterBanner text="GEAR ROOM"></WhiteWaterBanner>
 
-      <div className="mx-20">
+      <div className="p-14 pt-0">
         <Paragraph>
           The BOC has a gear room in the ground floor of the Campus Center
           (directions below), where we have a large selection of outdoor gear.
@@ -49,7 +49,7 @@ export default function GearRoom() {
           for exact updates!
         </Paragraph>
         </div>
-        <div className="w-2/3 mx-5">
+        <div className="w-2/3 pl-10">
           <Schedule />
         </div>
         </div>

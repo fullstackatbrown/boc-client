@@ -7,7 +7,7 @@ function WhiteButton(props: { text: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className={`bg-white hover:bg-white-700 text-black font-montserrat font-bold py-4 px-8 rounded-lg text-lg`}
+      className={`bg-white hover:bg-white-700 text-black font-bold py-4 px-8 rounded-lg text-lg`}
     >
       {text}
     </button>

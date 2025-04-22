@@ -1,6 +1,5 @@
 "use client";
 import NavBar from "@/components/NavBar";
-import WhiteWaterBanner from "@/components/WhiteWaterBanner";
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import tripsBadge from "@/assets/images/trips_badge.png";

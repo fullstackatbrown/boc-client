@@ -1,6 +1,5 @@
 "use client";
 import NavBar from "@/components/NavBar";
-import WhiteWaterBanner from "@/components/WhiteWaterBanner";
 
 function Subheading(props: { children: React.ReactNode }) {
   return (
@@ -21,8 +20,6 @@ export default function ContactUs() {
     <div className="h-full min-h-screen w-full">
       <NavBar></NavBar>
 
-      {/* Site content */}
-      <WhiteWaterBanner text="CONTACT US"></WhiteWaterBanner>
     </div>
   );
 }

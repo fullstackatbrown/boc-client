@@ -8,7 +8,7 @@ import splash_graphic from "@/assets/images/splash_graphic.png";
 
 export default function Home() {
   return (
-    <div className="bg-boc_lightbrown w-screen h-screen absolute z-0">
+    <div className="w-screen h-screen absolute z-0">
       {/* Top Bar of nav options and bear logo*/}
       <NavBar></NavBar>
 
@@ -21,7 +21,8 @@ export default function Home() {
       {/* Main Body */}
       <div className="absolute w-[95%] top-[5em]">
         <div className="ml-20 pl-9 mt-20">
-          <h1 className="text-boc_logo_size text-boc_darkgreen font-montserrat font-bold mb-4 leading-tight">
+          <h1 className="text-boc_logo_size text-boc_darkgreen 
+          font-funky font-bold mb-4 leading-tight">
             BROWN OUTING <br /> CLUB
           </h1>
         </div>

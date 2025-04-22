@@ -1,6 +1,5 @@
 "use client";
 import NavBar from "@/components/NavBar";
-import WhiteWaterBanner from "@/components/WhiteWaterBanner";
 import { useState } from "react";
 
 export default function MailingList() {
@@ -17,9 +16,6 @@ export default function MailingList() {
       <NavBar />
       {/* Dynamic spacer based on header height */}
       <div style={{ minHeight: `5px` }}></div>
-
-      {/* Site banner */}
-      <WhiteWaterBanner text="JOIN OUR MAILING LIST!" />
 
       {/* Centered content with margin */}
       <div className="flex flex-col items-center mt-12 px-4">
