@@ -59,16 +59,19 @@ export default function ProfilePage() {
   const id = searchParams.get("id");
 
   const [trip, setTrip] = useState<any>(null);
+  const [signedUp, setSignedUp] = useState<any>(false);
 
   function signup() {
-    const { data: tripInfo } = axios.post(
-      `${process.env.NEXT_PUBLIC_API_BASE}/trip/${id}/signup`, {},
+    axios.post(
+      `${process.env.NEXT_PUBLIC_API_BASE}/trip/${id}/signup`,
+      {},
       {
         headers: {
           token: localStorage.getItem("access_token"),
         },
       },
     );
+    setSignedUp(true);
   }
 
   useEffect(() => {
@@ -95,6 +98,18 @@ export default function ProfilePage() {
       })
       .then((res) => {
         setRole(res.data.role); // <-- extract role from response
+      });
+  }, [id]);
+
+  useEffect(() => {
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_BASE}/trip/${id}/is-signed-up`, {
+        headers: {
+          token: localStorage.getItem("access_token"),
+        },
+      })
+      .then((res) => {
+        setSignedUp(res.data);
       });
   }, [id]);
 
@@ -187,10 +202,14 @@ export default function ProfilePage() {
           </div>
         </div>
         <div className="w-fit">
-          <GreenButton
-            text="Signup for this trip!"
-            onClick={() => signup()}
-          ></GreenButton>
+          {signedUp ? (
+            <div>You are signed up!</div>
+          ) : (
+            <GreenButton
+              text="Signup for this trip!"
+              onClick={() => signup()}
+            ></GreenButton>
+          )}
         </div>
         {trip?.status.toLowerCase() === "open" ? (
           <div className="mt-2 p-4 bg-[#D9EDF7] border border-blue-200 rounded-lg">

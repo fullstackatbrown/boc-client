@@ -55,18 +55,18 @@ export default function GoogleSignIn() {
 
   const updateLogin = async () => {
     try {
+      let token = localStorage.getItem("access_token");
       const { data: userData } = await axios.get(
         `${process.env.NEXT_PUBLIC_API_BASE}/user/profile`,
         {
           headers: {
-            token: localStorage.getItem("access_token"),
+            token: token,
           },
         }
       );
       setUser(`${userData.firstName} ${userData.lastName}`);
     } catch (error) {
       setUser("");
-      console.log("ERROR");
     }
   };
 
