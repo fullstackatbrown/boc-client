@@ -11,7 +11,7 @@ export default function MailingList() {
   };
 
   return (
-    <div className="h-full min-h-screen w-full">
+    <div className="h-full w-full">
       {/* Dynamic spacer based on header height */}
       <div style={{ minHeight: `5px` }}></div>
 

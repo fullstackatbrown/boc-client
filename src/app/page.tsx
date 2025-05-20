@@ -33,7 +33,7 @@ export default function Home() {
               BOC will help you get there!
             </p>
             <BOCButton
-              onClick={handleExploreClick}
+              onClick={handleMailClick}
               text="Join our Mailing List!"
             ></BOCButton>
           </section>
@@ -44,6 +44,6 @@ export default function Home() {
   );
 }
 
-const handleExploreClick = () => {
-  window.location.href = "/trips";
+const handleMailClick = () => {
+  window.location.href = "/mailing-list";
 };

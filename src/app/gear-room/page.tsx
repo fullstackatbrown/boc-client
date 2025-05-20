@@ -18,12 +18,12 @@ function Paragraph(props: { children: React.ReactNode }) {
 
 export default function GearRoom() {
   return (
-    <div className="h-full min-h-screen w-full">
+    <div className="h-full w-full px-20 py-10">
       <Title text="Gear Room" />
 
       {/* Site content */}
 
-      <div className="p-14 pt-0">
+      <div>
         <Paragraph>
           The BOC has a gear room in the ground floor of the Campus Center
           (directions below), where we have a large selection of outdoor gear.
