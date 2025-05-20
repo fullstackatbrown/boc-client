@@ -1,9 +1,9 @@
 "use client";
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
-import tripsBadge from "@/assets/images/trips_badge.png";
-import profilepic from "@/assets/images/bear.png";
-import wood from "@/assets/images/wood.png";
+import tripsBadge from "@/assets/images/profile/badge.png";
+import profilepic from "@/assets/images/profile/wood.png";
+import wood from "@/assets/images/profile/wood.png";
 
 function Subheading(props: { children: React.ReactNode }) {
   return <h1 className="text-2xl font-bold mb-5 mt-10">{props.children}</h1>;

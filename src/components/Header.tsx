@@ -33,7 +33,7 @@ function NavBar() {
         <NavButton url="/about">ABOUT</NavButton>
         <NavButton url="/trips">TRIPS</NavButton>
         <NavButton url="/gear-room">GEARS</NavButton>
-        <NavButton url="/contact">CONTACT</NavButton>
+        <NavButton url="/get-involved">GET INVOLVED</NavButton>
         <SignIn />
       </div>
     </div>

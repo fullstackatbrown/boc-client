@@ -45,5 +45,5 @@ export default function Home() {
 }
 
 const handleMailClick = () => {
-  window.location.href = "/mailing-list";
+  window.location.href = "/get-involved";
 };
