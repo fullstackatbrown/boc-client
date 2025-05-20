@@ -1,5 +1,4 @@
 "use client";
-import NavBar from "@/components/NavBar";
 import Title from "@/components/Title"
 
 import React, { useEffect, useState } from "react";
@@ -83,8 +82,7 @@ function Leadership() {
 
 export default function MeetOurTeam() {
   return (
-    <div className="h-full min-h-screen w-full">
-      <NavBar></NavBar>
+    <div className="h-full w-full py-10 px-20">
       <Title text="Past Leadership" />
       {/* Dynamic spacer based on header height */}
       <div id="content" className="text-center p-14 pt-0">

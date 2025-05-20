@@ -1,5 +1,4 @@
 "use client";
-import NavBar from "@/components/NavBar";
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import tripsBadge from "@/assets/images/trips_badge.png";
@@ -221,7 +220,6 @@ export default function User() {
 
   return (
     <div className="h-full min-h-screen w-full">
-      <NavBar></NavBar>
 
       {/* Site content */}
 

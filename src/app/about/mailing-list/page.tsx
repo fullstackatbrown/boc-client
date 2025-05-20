@@ -1,5 +1,4 @@
 "use client";
-import NavBar from "@/components/NavBar";
 import { useState } from "react";
 
 export default function MailingList() {
@@ -13,7 +12,6 @@ export default function MailingList() {
 
   return (
     <div className="h-full min-h-screen w-full">
-      <NavBar />
       {/* Dynamic spacer based on header height */}
       <div style={{ minHeight: `5px` }}></div>
 

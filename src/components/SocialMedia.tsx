@@ -1,6 +1,5 @@
-import Instagram from "@/assets/images/instagram.png";
-import Twitter from "@/assets/images/twitter.png";
-import Facebook from "@/assets/images/facebook.png";
+import Instagram from "@/assets/images/home/instagram.png";
+import Facebook from "@/assets/images/home/facebook.png";
 import React from 'react';
 import Image from 'next/image';
 
@@ -19,29 +18,10 @@ const SocialMedia: React.FC = () => {
             alt: "Instagram",
             label: "Visit our Instagram profile",
         },
-        {
-            href: "https://www.twitter.com",
-            src: Twitter.src,
-            alt: "Twitter",
-            label: "Visit our Twitter page",
-        },
     ];
 
-    const containerStyles = {
-        display: 'flex',
-        justifyContent: 'flex-start',
-        marginTop: '10px',
-        width: '100%',
-        marginLeft: '-5%',
-    };
-
-    const linkStyles = {
-        margin: '0 3%',
-        display: 'inline-block',
-    };
-
     return (
-        <div style={containerStyles}>
+        <div className="flex space-x-10">
             {socialLinks.map(({ href, src, alt, label }, index) => (
                 <a
                     key={index}
@@ -49,7 +29,6 @@ const SocialMedia: React.FC = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={label}
-                    style={linkStyles}
                 >
                     <Image 
                         src={src} 

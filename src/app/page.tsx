@@ -1,17 +1,12 @@
 "use client";
-import NavBar from "@/components/NavBar";
-import GreenButton from "@/components/GreenButton";
+import BOCButton from "@/components/BOCButton";
 import SocialMedia from "@/components/SocialMedia";
-import PawPrints from "@/components/PawPrints";
 
-import splash_graphic from "@/assets/images/splash_graphic.png";
+import splash_graphic from "@/assets/images/home/splash_graphic.png";
 
 export default function Home() {
   return (
-    <div className="w-screen h-screen absolute z-0">
-      {/* Top Bar of nav options and bear logo*/}
-      <NavBar></NavBar>
-
+    <div className="h-full w-full">
       {/* Splash Graphic */}
       <img
         src={splash_graphic.src}
@@ -28,7 +23,7 @@ export default function Home() {
         </div>
         <div className="pl-9 w-[45%] ml-20">
           <section className="flex-auto justify-end mb-8">
-            <p className="mb-2 text-black font-montserrat pb-8">
+            <p className="mb-2 pb-8">
               The Brown Outing Club facilitates getting students together and
               into the outdoors. The club runs trips throughout the school year
               in New England and along the east coast. The BOC is entirely
@@ -37,14 +32,13 @@ export default function Home() {
               mountains, woods, rivers, and bays of the east during college, the
               BOC will help you get there!
             </p>
-            <GreenButton
+            <BOCButton
               onClick={handleExploreClick}
-              text="EXPLORE!"
-            ></GreenButton>
+              text="Join our Mailing List!"
+            ></BOCButton>
           </section>
-          <SocialMedia></SocialMedia>
+          <SocialMedia />
         </div>
-        <PawPrints></PawPrints>
       </div>
     </div>
   );

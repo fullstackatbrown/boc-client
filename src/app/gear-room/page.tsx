@@ -1,5 +1,4 @@
 "use client";
-import NavBar from "@/components/NavBar";
 import Title from "@/components/Title";
 import Schedule from "./schedule"
 
@@ -20,7 +19,6 @@ function Paragraph(props: { children: React.ReactNode }) {
 export default function GearRoom() {
   return (
     <div className="h-full min-h-screen w-full">
-      <NavBar></NavBar>
       <Title text="Gear Room" />
 
       {/* Site content */}

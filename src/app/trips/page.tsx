@@ -1,5 +1,4 @@
 "use client";
-import NavBar from "@/components/NavBar";
 import Title from "@/components/Title";
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
@@ -71,12 +70,12 @@ export default function Trips() {
   };
 
   return (
-    <div className="h-full min-h-screen w-full overflow-x-hidden">
-      <NavBar></NavBar>
-
+    <div className="h-full w-full py-10 px-20">
       {/* Title and Description */}
       <Title text="BOC Trips Calendar" />
-      <section className="p-14 pt-4">
+      Find all of our upcoming trips on this page and click on them to learn
+      more!
+      <section className="pt-10">
         {/* Filters */}
         <div className="rounded-lg">
           <h3 className="text-2xl font-semibold mb-3">Filter Trips</h3>
@@ -134,27 +133,18 @@ export default function Trips() {
           <div className="grid grid-cols-1 gap-4">
             {filteredTrips.length > 0 ? (
               filteredTrips.map((trip, index) => (
-                <div
-                  key={index}
-                  className={`w-full p-4 rounded-[20px] 
+                <a key={index} href={`/trips/view?id=${index + 1}`}>
+                  <div
+                    className={`w-full p-4 rounded-[20px] 
                     shadow-[4px] ${index % 2 == 0 ? "bg-boc_yellow text-black" : "bg-boc_darkgreen text-white"}`}
-                >
-                  <h2 className="text-lg font-bold mb-0">
-                    <a href={`/trips/view?id=${index + 1}`}>{trip.tripName}</a>
-                  </h2>
-                  <p className="mb-1">
-                    {new Date(trip.plannedDate).toLocaleDateString()}
-                  </p>
-                  <p className="mb-1">
-                    <strong>Description:</strong> {trip.sentenceDesc}
-                  </p>
-                  <p className="mb-1">
-                    <strong>Max Size:</strong> {trip.maxSize}
-                  </p>
-                  <p>
-                    <strong>Class:</strong> {trip.class || "Not specified"}
-                  </p>
-                </div>
+                  >
+                    <h2 className="text-lg font-bold mb-0">{trip.tripName}</h2>
+                    <p className="mb-1">
+                      {new Date(trip.plannedDate).toLocaleDateString()}
+                    </p>
+                    <p className="mb-1">{trip.sentenceDesc}</p>
+                  </div>
+                </a>
               ))
             ) : (
               <p className="col-span-full text-center text-gray-600">

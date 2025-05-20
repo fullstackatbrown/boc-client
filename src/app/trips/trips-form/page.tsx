@@ -1,5 +1,4 @@
 'use client';
-import NavBar from "@/components/NavBar";
 
 import React, { useState, useEffect, useRef } from 'react';
 
@@ -72,7 +71,6 @@ export default function Download() {
 
     return (
     <div className="h-full min-h-screen w-full">
-        <NavBar></NavBar>
         {/* Dynamic spacer based on header height */}
         <div style={{ minHeight: `${headerHeight}px` }}></div>
 

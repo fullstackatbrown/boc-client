@@ -4,8 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import { useState, useEffect } from "react";
-import GreenButton from "@/components/GreenButton";
-import NavBar from "@/components/NavBar";
+import BOCButton from "@/components/BOCButton";
 
 function formatDate(isoDateString: string): string {
   const date = new Date(isoDateString);
@@ -60,6 +59,7 @@ export default function ProfilePage() {
 
   const [trip, setTrip] = useState<any>(null);
   const [signedUp, setSignedUp] = useState<any>(false);
+  const [role, setRole] = useState(null);
 
   function signup() {
     axios.post(
@@ -67,76 +67,51 @@ export default function ProfilePage() {
       {},
       {
         headers: {
-          token: localStorage.getItem("access_token"),
+          token: token,
         },
       },
     );
     setSignedUp(true);
   }
 
+  let token;
   useEffect(() => {
+    token = localStorage.getItem("access_token");
     axios
       .get(`${process.env.NEXT_PUBLIC_API_BASE}/trip/${id}`, {
         headers: {
-          token: localStorage.getItem("access_token"),
+          token: token,
         },
       })
       .then((res) => {
         setTrip(res.data);
-      });
-    console.log(trip);
-  }, [id]);
-
-  const [role, setRole] = useState(""); // <-- create state for role
-
-  useEffect(() => {
-    axios
-      .get(`${process.env.NEXT_PUBLIC_API_BASE}/user/profile`, {
-        headers: {
-          token: localStorage.getItem("access_token"),
-        },
-      })
-      .then((res) => {
-        setRole(res.data.role); // <-- extract role from response
+        if (res.data.userData == null) {
+          setRole(null);
+        } else if (res.data.userData == -1) {
+          setRole("None");
+        } else {
+          setRole(res.data.userData.tripRole);
+        }
       });
   }, [id]);
 
   useEffect(() => {
-    axios
-      .get(`${process.env.NEXT_PUBLIC_API_BASE}/trip/${id}/is-signed-up`, {
-        headers: {
-          token: localStorage.getItem("access_token"),
-        },
-      })
-      .then((res) => {
-        setSignedUp(res.data);
-      });
+    token = localStorage.getItem("access_token");
+    if (token) {
+      axios
+        .get(`${process.env.NEXT_PUBLIC_API_BASE}/trip/${id}/is-signed-up`, {
+          headers: {
+            token: token,
+          },
+        })
+        .then((res) => {
+          setSignedUp(res.data);
+        });
+    }
   }, [id]);
-
-  switch (role) {
-    case "admin":
-      // Code to execute if role is 'admin'
-      console.log("User is an admin");
-      break;
-    case "user":
-      // Code to execute if role is 'user'
-      console.log("User is a regular user");
-      break;
-    case "guest":
-      // Code to execute if role is 'guest'
-      console.log("User is a guest");
-      break;
-    default:
-      // Code to execute if role doesn't match any case
-      console.log("Unknown role");
-      break;
-  }
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Ensure NavBar is at the top */}
-      <NavBar />
-
       {/* Main content section */}
       <div className="w-full px-14 py-6 flex flex-col gap-y-4">
         <div className="w-full">
@@ -201,31 +176,42 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
-        <div className="w-fit">
-          {signedUp ? (
-            <div>You are signed up!</div>
-          ) : (
-            <GreenButton
-              text="Signup for this trip!"
-              onClick={() => signup()}
-            ></GreenButton>
-          )}
-        </div>
-        {trip?.status.toLowerCase() === "open" ? (
-          <div className="mt-2 p-4 bg-[#D9EDF7] border border-blue-200 rounded-lg">
-            <p className="text-blue-600">
-              Signups are currently open for this trip!
-            </p>
+
+        {trip?.status.toLowerCase() != "open" ? (
+          <div className="mt-2 p-4 bg-gray-200 border border-grey-400 rounded-lg">
+            <p className="text-grey-600">Signups have closed.</p>
           </div>
         ) : (
-          <div className="mt-2 p-4 bg-[#F2DEDE] border border-red-200 rounded-lg">
-            <p className="text-red-600">
-              In order to signup for this trip, you must be{" "}
-              <Link href="/" className="text-blue-600">
-                logged in
-              </Link>
-              .
-            </p>
+          <div>
+            {role == null ? (
+              <div className="mt-2 p-4 bg-[#F2DEDE] border border-red-200 rounded-lg">
+                <p className="text-red-600">
+                  In order to signup for this trip, you must be{" "}
+                  <Link href="/" className="text-blue-600">
+                    logged in
+                  </Link>
+                  .
+                </p>
+              </div>
+            ) : (
+              <div>
+                <div className="w-fit">
+                  {signedUp ? (
+                    <div>You are signed up!</div>
+                  ) : (
+                    <BOCButton
+                      text="Signup for this trip!"
+                      onClick={() => signup()}
+                    ></BOCButton>
+                  )}
+                </div>
+                <div className="mt-2 p-4 bg-[#D9EDF7] border border-blue-200 rounded-lg">
+                  <p className="text-blue-600">
+                    Signups are currently open for this trip!
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -1,6 +1,4 @@
 "use client";
-import NavBar from "@/components/NavBar";
-
 function Subheading(props: { children: React.ReactNode }) {
   return (
     <h1 className="text-2xl font-bold mb-5 mt-10">{props.children}</h1>
@@ -17,8 +15,7 @@ function Paragraph(props: { children: React.ReactNode }) {
 
 export default function ContactUs() {
   return (
-    <div className="h-full min-h-screen w-full">
-      <NavBar></NavBar>
+    <div className="h-full w-full py-10 px-20">
 
     </div>
   );
