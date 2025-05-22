@@ -18,7 +18,7 @@ export default function RootLayout({
   return (
     <GoogleOAuthProvider clientId={CLIENT_ID}>
       <html lang="en" className={`${chelseaMarket.variable} ${gabarito.variable}`}>
-        <body className="font-standard text-[18px]"><Header />{children}</body>
+        <body className="bg-background font-standard text-[18px]"><Header />{children}</body>
       </html>
     </GoogleOAuthProvider>
   );

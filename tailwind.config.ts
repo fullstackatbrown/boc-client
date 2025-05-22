@@ -14,8 +14,8 @@ const config: Config = {
         montserrat: ['Montserrat', 'sans-serif'],
       },
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        background: "#FFF2DA",
+        foreground: "#000000",
         boc_green: '#5B913A',
         boc_darkgreen: "#678F44",
         boc_darkbrown: "#461300",

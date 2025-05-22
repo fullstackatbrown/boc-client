@@ -6,9 +6,9 @@ import Image1 from "@/assets/images/about/riverlandacknowledgement.png";
 export default function LandAcknowledgement() {
   return (
     <div className="h-full w-full px-20 py-10">
-      <Title text="Land Acknowledgement" />
+      <Title text="Land Tribute" />
 
-      <div id="content" className="text-center p-14 flex">
+      <div id="content" className="text-center flex py-5">
         <div>
           <div>
             <h2
@@ -32,7 +32,7 @@ export default function LandAcknowledgement() {
           <hr className="border-t-1.5 border-gray-300 w-24 mx-auto my-4" />
           <div
             id="paragraph"
-            className="mt-8 mb-8 text-xl font-[100] text-left leading-10"
+            className="mb-8 text-xl font-[100] text-left leading-10"
           >
             <p>
               {" "}
@@ -44,7 +44,7 @@ export default function LandAcknowledgement() {
 
           <div
             id="paragraph2"
-            className="mt-8 mb-8 text-xl font-[100] text-left leading-10"
+            className="mb-8 text-xl font-[100] text-left leading-10"
           >
             <p>
               {" "}
@@ -57,7 +57,7 @@ export default function LandAcknowledgement() {
 
           <div
             id="paragraph3"
-            className="mt-8 mb-8 text-xl font-[100] text-left leading-10"
+            className="mb-8 text-xl font-[100] text-left leading-10"
           >
             <p>
               {" "}
@@ -68,7 +68,7 @@ export default function LandAcknowledgement() {
         </div>
 
         <div className="pl-24">
-          <img src={Image1.src} className=""></img>
+          <img src={Image1.src} className="rounded-xl"></img>
         </div>
       </div>
     </div>
