@@ -14,16 +14,16 @@ export default function Home() {
       />
 
       {/* Main Body */}
-      <div className="absolute w-[95%] top-[5em]">
-        <div className="ml-20 pl-9 mt-20">
+      <div className="px-20 py-20">
+        <div className="">
           <h1 className="text-boc_logo_size text-boc_darkgreen 
           font-funky font-bold mb-4 leading-tight">
             BROWN OUTING <br /> CLUB
           </h1>
         </div>
-        <div className="pl-9 w-[45%] ml-20">
+        <div className="w-[45%]">
           <section className="flex-auto justify-end mb-8">
-            <p className="mb-2 pb-8">
+            <p className="pb-8">
               The Brown Outing Club facilitates getting students together and
               into the outdoors. The club runs trips throughout the school year
               in New England and along the east coast. The BOC is entirely

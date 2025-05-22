@@ -1,11 +1,9 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
-import axios from "axios";
-
-import login from "@/scripts/login";
-import bear_vector from "@/assets/images/logo.svg";
 import { usePathname } from "next/navigation";
+import axios from "axios";
+import bear_vector from "@/assets/images/header/logo.svg";
 
 function NavButton(props: { item: any }) {
   const pathname = usePathname();
