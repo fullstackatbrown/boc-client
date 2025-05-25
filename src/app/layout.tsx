@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { LoginProvider } from "@/contexts/LoginContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Chelsea_Market, Gabarito } from "next/font/google";
 import "@/styles/globals.css";
@@ -29,19 +30,21 @@ export default function RootLayout({
   const CLIENT_ID =
     process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "default_client_id";
   return (
-    <GoogleOAuthProvider clientId={CLIENT_ID}>
-      <html
-        lang="en"
-        className={`${chelseaMarket.className} ${gabarito.className}`}
-      >
-        <body className="bg-background font-standard text-[18px] min-h-screen flex flex-col">
-          <div className="min-h-screen">
-            <Header />
-            {children}
-          </div>
-          <Footer />
-        </body>
-      </html>
-    </GoogleOAuthProvider>
+    <LoginProvider>
+      <GoogleOAuthProvider clientId={CLIENT_ID}>
+        <html
+          lang="en"
+          className={`${chelseaMarket.className} ${gabarito.className}`}
+        >
+          <body className="bg-background font-standard text-[18px] min-h-screen flex flex-col">
+            <div className="min-h-screen">
+              <Header />
+              {children}
+            </div>
+            <Footer />
+          </body>
+        </html>
+      </GoogleOAuthProvider>
+    </LoginProvider>
   );
 }

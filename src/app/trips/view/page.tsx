@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Login from "@/components/Login";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import { useState, useEffect } from "react";
@@ -53,7 +53,7 @@ function getDaySuffix(day: number): string {
   }
 }
 
-export default function ProfilePage() {
+export default function TripPage() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
@@ -62,6 +62,7 @@ export default function ProfilePage() {
   const [role, setRole] = useState(null);
 
   function signup() {
+    let token = localStorage.getItem("access_token");
     axios.post(
       `${process.env.NEXT_PUBLIC_API_BASE}/trip/${id}/signup`,
       {},
@@ -74,9 +75,8 @@ export default function ProfilePage() {
     setSignedUp(true);
   }
 
-  let token;
   useEffect(() => {
-    token = localStorage.getItem("access_token");
+    let token = localStorage.getItem("access_token");
     axios
       .get(`${process.env.NEXT_PUBLIC_API_BASE}/trip/${id}`, {
         headers: {
@@ -86,28 +86,17 @@ export default function ProfilePage() {
       .then((res) => {
         setTrip(res.data);
         if (res.data.userData == null) {
+          // Not signed in
           setRole(null);
         } else if (res.data.userData == -1) {
+          // Signed in but not signed up
           setRole("None");
         } else {
+          // Signed in and signed up
           setRole(res.data.userData.tripRole);
+          setSignedUp(true);
         }
       });
-  }, [id]);
-
-  useEffect(() => {
-    token = localStorage.getItem("access_token");
-    if (token) {
-      axios
-        .get(`${process.env.NEXT_PUBLIC_API_BASE}/trip/${id}/is-signed-up`, {
-          headers: {
-            token: token,
-          },
-        })
-        .then((res) => {
-          setSignedUp(res.data);
-        });
-    }
   }, [id]);
 
   return (
@@ -115,10 +104,10 @@ export default function ProfilePage() {
       {/* Main content section */}
       <div className="w-full px-14 py-6 flex flex-col gap-y-4">
         <div className="w-full">
-          <h1 className="text-[4vmin] font-bold font-funky text-green">
+          <h1 className="text-[4vmin] font-bold font-funky text-boc_green">
             {trip?.tripName}
           </h1>
-          <div className="w-full h-[1px] bg-black "></div>
+          <div className="w-full h-[1px] bg-gray-400"></div>
         </div>
         <div className="w-full pt-4">
           <div className="flex flex-row gap-x-4">
@@ -143,38 +132,17 @@ export default function ProfilePage() {
                 <label className="font-bold">Qualifications:</label>
                 <p>{trip?.qualifications?.join(", ") || "None required"}</p>
               </div>
+              <div className="flex flex-row gap-x-2">
+                <label className="font-bold">Signup Deadline:</label>
+                <p>
+                  {trip?.signupClose
+                    ? formatDate(trip?.signupClose)
+                    : "Not set"}
+                </p>
+              </div>
             </div>
           </div>
           <p className="text-[2vmin] pt-4 pb-4">{trip?.sentenceDesc}</p>
-        </div>
-        <div>
-          <h2 className="text-[2.5vmin] font-bold">Signup Information</h2>
-          <div className="mt-4">
-            <div className="flex flex-row gap-x-2 items-center">
-              <label className="text-md">Signups Opened At:</label>
-              <p className="text-sm">
-                {trip?.createdAt ? formatDate(trip?.createdAt) : "Not set"}
-              </p>
-            </div>
-            <div className="flex flex-row gap-x-2 items-center">
-              <label className="text-md">Signups Close At:</label>
-              <p className="text-sm">
-                {trip?.signupClose ? formatDate(trip?.signupClose) : "Not set"}
-              </p>
-            </div>
-            <div className="flex flex-row gap-x-2 items-center">
-              <label className="text-md">Maximum Participants:</label>
-              <p className="text-sm">
-                {trip?.maxSize ? trip?.maxSize : "Not set"}
-              </p>
-            </div>
-            <div className="flex flex-row gap-x-2 items-center">
-              <label className="text-md">Notes:</label>
-              <p className="text-sm">
-                {trip?.notes ? trip?.notes : "No notes"}
-              </p>
-            </div>
-          </div>
         </div>
 
         {trip?.status.toLowerCase() != "open" ? (
@@ -187,9 +155,9 @@ export default function ProfilePage() {
               <div className="mt-2 p-4 bg-[#F2DEDE] border border-red-200 rounded-lg">
                 <p className="text-red-600">
                   In order to signup for this trip, you must be{" "}
-                  <Link href="/" className="text-blue-600">
-                    logged in
-                  </Link>
+                  <Login>
+                    <u>logged in</u>
+                  </Login>
                   .
                 </p>
               </div>
@@ -206,9 +174,7 @@ export default function ProfilePage() {
                   )}
                 </div>
                 <div className="mt-2 p-4 bg-[#D9EDF7] border border-blue-200 rounded-lg">
-                  <p className="text-blue-600">
-                    Signups are currently open for this trip!
-                  </p>
+                  <p className="text-blue-600">Signups are now open!</p>
                 </div>
               </div>
             )}

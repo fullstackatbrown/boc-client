@@ -1,8 +1,11 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
-import { usePathname } from "next/navigation";
 import axios from "axios";
+import { usePathname } from "next/navigation";
+
+import Login from "@/components/Login";
+import { useLogin } from "@/contexts/LoginContext";
+
 import bear_vector from "@/assets/images/header/logo.svg";
 
 function NavButton(props: { item: any }) {
@@ -16,7 +19,7 @@ function NavButton(props: { item: any }) {
         ${isDropdown ? "group-hover:rounded-b-none" : ""}
           cursor-pointer font-montserrat font-bold text-[13pt]
           group-hover:bg-boc_green group-hover:text-white
-      ${pathname.includes(props.item.url) ? "bg-boc_green text-white" : "bg-background text-boc_darkbrown"}`}
+      ${pathname.includes(props.item.url) ? "bg-boc_green text-white" : "bg-transparent text-boc_darkbrown"}`}
         onClick={() => {
           window.location.href = props.item.url;
         }}
@@ -50,6 +53,7 @@ function NavButton(props: { item: any }) {
 }
 
 function NavBar() {
+  const { isLoggedIn, setIsLoggedIn } = useLogin();
   const [user, setUser] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -93,30 +97,10 @@ function NavBar() {
     ],
   };
 
-  const handleLoginSuccess = async (response: { code: string }) => {
-    try {
-      const { data } = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE}/auth`,
-        {
-          code: response.code,
-        },
-      );
-      localStorage.setItem("access_token", data.access_token);
-      window.location.reload();
-    } catch (error) {
-      console.error("Error during authentication", error);
-    }
-  };
-
-  const handleLoginFailure = (error: unknown) => {
-    console.error("Login failed", error);
-  };
-
   const updateLogin = async () => {
     try {
       let token = localStorage.getItem("access_token");
       if (!token) {
-        setUser("");
         setLoading(false);
         return;
       }
@@ -132,20 +116,15 @@ function NavBar() {
       setUser(`${userData.firstName} ${userData.lastName}`);
       setLoading(false);
     } catch (error) {
-      setUser("");
+      localStorage.removeItem("access_token");
+      setUser(null);
       setLoading(false);
     }
   };
 
   useEffect(() => {
     updateLogin();
-  }, []);
-
-  const login = useGoogleLogin({
-    onSuccess: handleLoginSuccess,
-    onError: handleLoginFailure,
-    flow: "auth-code",
-  });
+  }, [isLoggedIn]);
 
   return (
     <nav className="px-8 py-8 flex justify-between">
@@ -164,18 +143,13 @@ function NavBar() {
         {loading ? (
           <div className="w-[200px]"></div>
         ) : (
-          <div className="flex justify-end w-[200px]">
+          <div className="flex font-bold font-montserrat text-boc_darkbrown justify-end w-[200px]">
             {user ? (
               <NavButton item={userItem} />
             ) : (
-              <button
-                onClick={() => {
-                  login();
-                }}
-                className="font-bold font-montserrat text-boc_darkbrown"
-              >
-                LOGIN
-              </button>
+              <Login>
+                <div className="h-full flex items-center">LOGIN</div>
+              </Login>
             )}
           </div>
         )}

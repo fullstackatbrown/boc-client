@@ -111,19 +111,3 @@ export default function About() {
     </div>
   );
 }
-
-const handleMailClick = () => {
-  window.location.href = "/about/mailing-list";
-};
-
-const handleLandClick = () => {
-  window.location.href = "/about/land-acknowledgement";
-};
-
-const handleTeamClick = () => {
-  window.location.href = "/about/meet-our-team";
-};
-
-const handleMissionClick = () => {
-  window.location.href = "/about/our-mission";
-};

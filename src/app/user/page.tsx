@@ -86,8 +86,8 @@ function TripRow(data: Trip) {
 function tripTable(tripsType: String, trips: Trip[]) {
   if (trips.length === 0) {
     return (
-      <div className="flex flex-col mb-10 mx-10">
-        <div className="border-b border-gray-700 border-radius w-[95%] mb-10 mx-auto">
+      <div className="flex flex-col">
+        <div className="border-b border-gray-700 border-radius mb-10">
           <div className="ml-4">
             <Subheading>{tripsType} Trips</Subheading>
           </div>
@@ -96,8 +96,8 @@ function tripTable(tripsType: String, trips: Trip[]) {
     );
   }
   return (
-    <div className="flex flex-col mb-10 mx-10">
-      <div className="border-b border-gray-700 border-radius w-[95%] mb-10 mx-auto">
+    <div className="flex flex-col mb-10">
+      <div className="border-b border-gray-700 border-radius mb-10">
         <div className="ml-4">
           <Subheading>{tripsType} Trips</Subheading>
         </div>
@@ -219,12 +219,12 @@ export default function User() {
   }, []);
 
   return (
-    <div className="h-full min-h-screen w-full">
+    <div className="h-full min-h-screen w-full px-20 py-10">
 
       {/* Site content */}
 
       <br></br>
-      <div id="content" className="flex justify-center items-start gap-20 p-14">
+      <div id="content" className="flex justify-center items-start gap-20 p-5">
         <div className="relative w-60 aspect-square rounded-lg">
           <img
             alt="User Profile"
@@ -303,7 +303,7 @@ export default function User() {
 
       {/* Past trips table */}
       {showPastTrips && (
-        <div id="pastTrips">
+        <div>
           {tripTable(
             "Past",
             tripDetails.filter(
@@ -315,7 +315,7 @@ export default function User() {
       <div className="flex justify-center">
         <button
           id="toggleButton"
-          className="bg-boc_darkbrown text-white font-bold py-2 px-4 rounded-full hover:bg-boc_darkgreen transition duration-300 ease-in-out ml-auto mr-10 mb-10"
+          className="bg-boc_darkbrown text-white font-bold py-2 px-4 rounded-full hover:bg-boc_darkgreen transition duration-300 ease-in-out"
           onClick={() => setShowPastTrips(!showPastTrips)}
         >
           {showPastTrips ? "Hide Past Trips" : "Show Past Trips"}
