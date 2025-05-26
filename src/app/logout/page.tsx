@@ -1,15 +1,13 @@
 "use client";
-import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
-
-async function logout() {
-  localStorage.removeItem("access_token");
-  window.location.href = "/";
-}
+import { signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
 export default function Logout() {
-  logout();
-  // window.location.href = "/";
+  const { data: session, status } = useSession();
+
+  signOut({ callbackUrl: "/" });
+
   return (
     <div className="px-20 py-10">
       Go to{" "}
