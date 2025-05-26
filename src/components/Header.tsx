@@ -1,10 +1,10 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import axios from "axios";
+import api from "@/scripts/api";
 import { usePathname } from "next/navigation";
 
 import Login from "@/components/Login";
-import { useLogin } from "@/contexts/LoginContext";
+import { useSession } from "next-auth/react";
 
 import bear_vector from "@/assets/images/header/logo.svg";
 
@@ -53,13 +53,13 @@ function NavButton(props: { item: any }) {
 }
 
 function NavBar() {
-  const { isLoggedIn, setIsLoggedIn } = useLogin();
   const [user, setUser] = useState("");
   const [loading, setLoading] = useState(true);
+  const { data: session, status } = useSession();
 
   const menuItems = [
     {
-      label: "ABOUT",
+      label: "ABOUT US",
       url: "/about",
       dropdown: [
         { label: "About Us", url: "/about" },
@@ -79,7 +79,7 @@ function NavBar() {
       dropdown: [],
     },
     {
-      label: "GEARS",
+      label: "GEAR ROOM",
       url: "/gear-room",
       dropdown: [
         { label: "Gear Room", url: "/gear-room" },
@@ -99,32 +99,30 @@ function NavBar() {
 
   const updateLogin = async () => {
     try {
-      let token = localStorage.getItem("access_token");
-      if (!token) {
+      if (!session) {
         setLoading(false);
         return;
       }
 
-      const { data: userData } = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_BASE}/user/profile`,
-        {
-          headers: {
-            token: token,
-          },
+      const { data: userData } = await api.get("/user/profile", {
+        headers: {
+          token: session.accessToken,
         },
-      );
+      });
       setUser(`${userData.firstName} ${userData.lastName}`);
       setLoading(false);
     } catch (error) {
-      localStorage.removeItem("access_token");
       setUser(null);
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    updateLogin();
-  }, [isLoggedIn]);
+    if (status !== "loading") {
+      updateLogin();
+    }
+  }, [status]);
+
 
   return (
     <nav className="px-8 py-8 flex justify-between">

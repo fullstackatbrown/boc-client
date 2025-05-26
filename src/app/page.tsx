@@ -14,7 +14,7 @@ export default function Home() {
       />
 
       {/* Main Body */}
-      <div className="px-20 py-20">
+      <div className="px-20 pt-20">
         <div className="">
           <h1 className="text-boc_logo_size text-boc_darkgreen 
           font-funky font-bold mb-4 leading-tight">

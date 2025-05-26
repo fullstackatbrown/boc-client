@@ -1,57 +1,13 @@
 "use client";
 
 import Login from "@/components/Login";
-import { useSearchParams } from "next/navigation";
-import axios from "axios";
-import { useState, useEffect } from "react";
 import BOCButton from "@/components/BOCButton";
 
-function formatDate(isoDateString: string): string {
-  const date = new Date(isoDateString);
+import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 
-  // Get month name
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-  const month = monthNames[date.getMonth()];
-
-  // Get day with ordinal suffix
-  const day = date.getDate();
-  const suffix = getDaySuffix(day);
-
-  // Get year
-  const year = date.getFullYear();
-
-  return `${month} ${day}${suffix}, ${year}`;
-}
-
-function getDaySuffix(day: number): string {
-  if (day >= 11 && day <= 13) {
-    return "th";
-  }
-
-  switch (day % 10) {
-    case 1:
-      return "st";
-    case 2:
-      return "nd";
-    case 3:
-      return "rd";
-    default:
-      return "th";
-  }
-}
+import api from "@/scripts/api";
+import { useSession } from "next-auth/react";
 
 export default function TripPage() {
   const searchParams = useSearchParams();
@@ -60,15 +16,18 @@ export default function TripPage() {
   const [trip, setTrip] = useState<any>(null);
   const [signedUp, setSignedUp] = useState<any>(false);
   const [role, setRole] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const { data: session, status } = useSession();
 
   function signup() {
     let token = localStorage.getItem("access_token");
-    axios.post(
-      `${process.env.NEXT_PUBLIC_API_BASE}/trip/${id}/signup`,
+    api.post(
+      `/trip/${id}/signup`,
       {},
       {
         headers: {
-          token: token,
+          token: session.accessToken,
         },
       },
     );
@@ -76,28 +35,35 @@ export default function TripPage() {
   }
 
   useEffect(() => {
-    let token = localStorage.getItem("access_token");
-    axios
-      .get(`${process.env.NEXT_PUBLIC_API_BASE}/trip/${id}`, {
-        headers: {
-          token: token,
-        },
-      })
-      .then((res) => {
-        setTrip(res.data);
-        if (res.data.userData == null) {
-          // Not signed in
-          setRole(null);
-        } else if (res.data.userData == -1) {
-          // Signed in but not signed up
-          setRole("None");
-        } else {
-          // Signed in and signed up
-          setRole(res.data.userData.tripRole);
-          setSignedUp(true);
-        }
-      });
-  }, [id]);
+    if (status !== "loading") {
+      api
+        .get(`/trip/${id}`, {
+          headers: {
+            token: session.accessToken,
+          },
+        })
+        .then((res) => {
+          setTrip(res.data);
+          if (res.data.userData == null) {
+            // Not signed in
+            setRole(null);
+          } else if (res.data.userData == -1) {
+            // Signed in but not signed up
+            setRole("None");
+          } else {
+            // Signed in and signed up
+            setRole(res.data.userData.tripRole);
+            setSignedUp(true);
+          }
+
+          setLoading(false);
+        });
+    }
+  }, [id, status]);
+
+  if (loading) {
+    return <div className="px-20 flex justify-center">Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -124,7 +90,7 @@ export default function TripPage() {
                 <label className="font-bold">Date:</label>
                 <p>
                   {trip?.plannedDate
-                    ? formatDate(trip?.plannedDate)
+                    ? new Date(trip.plannedDate).toLocaleDateString()
                     : "Date not set"}
                 </p>
               </div>
@@ -167,14 +133,16 @@ export default function TripPage() {
                   {signedUp ? (
                     <div>You are signed up!</div>
                   ) : (
-                    <BOCButton
-                      text="Signup for this trip!"
-                      onClick={() => signup()}
-                    ></BOCButton>
+                    <div>
+                      <BOCButton
+                        text="Signup for this trip!"
+                        onClick={() => signup()}
+                      ></BOCButton>
+                      <div className="mt-2 p-4 bg-[#D9EDF7] border border-blue-200 rounded-lg">
+                        <p className="text-blue-600">Signups are now open!</p>
+                      </div>
+                    </div>
                   )}
-                </div>
-                <div className="mt-2 p-4 bg-[#D9EDF7] border border-blue-200 rounded-lg">
-                  <p className="text-blue-600">Signups are now open!</p>
                 </div>
               </div>
             )}
