@@ -10,11 +10,11 @@ export default function Home() {
       {/* Splash Graphic */}
       <img
         src={splash_graphic.src}
-        className="w-[45em] h-auto absolute bottom-0 right-0 -z-10"
+        className="w-[45em] h-auto fixed bottom-0 right-0 -z-10"
       />
 
       {/* Main Body */}
-      <div className="px-20 py-20">
+      <div className="px-20">
         <div className="">
           <h1 className="text-boc_logo_size text-boc_darkgreen 
           font-funky font-bold mb-4 leading-tight">
