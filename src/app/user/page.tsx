@@ -287,7 +287,7 @@ export default function User() {
           </div>
         </div>
       </div>
-      <br></br>
+      <br/>
       {/* Your trips table */}
       {hostedTrips && (
         <div id="hostedTrips" className="flex flex-col mb-10">
