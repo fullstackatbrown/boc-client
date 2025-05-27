@@ -2,6 +2,9 @@
 import Title from "@/components/Title";
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
+import Logo from "@/assets/images/header/logo.svg"
+import yArrow from "@/assets/images/trips/arrow-yellow.svg"
+import gArrow from "@/assets/images/trips/arrow-green.svg"
 
 export default function Trips() {
   const [trips, setTrips] = useState<any[]>([]);
@@ -70,7 +73,7 @@ export default function Trips() {
   };
 
   return (
-    <div className="h-full w-full py-10 px-20">
+    <div className="h-full w-full pb-10 px-20">
       {/* Title and Description */}
       <Title text="BOC Trips Calendar" />
       Find all of our upcoming trips on this page and click on them to learn
@@ -128,21 +131,29 @@ export default function Trips() {
           </button>
         </div>
 
-        <div className="overflow-x-auto mt-6">
-          {/* Trip Cards */}
-          <div className="grid grid-cols-1 gap-4">
+        <div className="overflow-x-auto mt-6 max-h-[36rem] overflow-y-scroll"> {/* 36rem is just enough to see 4 cards, which seems good to me... I'm amenable to changing though */}
+          {/* Trip Cards */} 
+          <div className="grid grid-cols-1 gap-2">
             {filteredTrips.length > 0 ? (
               filteredTrips.map((trip, index) => (
                 <a key={index} href={`/trips/view?id=${index + 1}`}>
                   <div
-                    className={`w-full p-4 rounded-[20px] 
+                    className={`w-[calc(100% - 1.5rem)] pl-4 pt-4 pr-2 pb-2 rounded-[20px] drop-shadow-lg font-standard mx-3 mb-2 flex flex-col h-36
                     shadow-[4px] ${index % 2 == 0 ? "bg-boc_yellow text-black" : "bg-boc_darkgreen text-white"}`}
                   >
-                    <h2 className="text-lg font-bold mb-0">{trip.tripName}</h2>
-                    <p className="mb-1">
-                      {new Date(trip.plannedDate).toLocaleDateString()}
-                    </p>
-                    <p className="mb-1">{trip.sentenceDesc}</p>
+                    <div className="w-full px-2 flex flex-grow-0" >
+                      <img src={Logo.src} className="aspect-square h-12 flex-grow-0"/> {/* Using logo as placeholder icon for now*/}
+                      <div className="ml-4 h-12">
+                        <h2 className="text-lg mb-0">{trip.tripName}</h2>
+                        <p className={`mt-0 text-sm overflow-y-scroll ${index % 2 == 0 ? "text-boc_medbrown" : "text-boc_slate"}`}>
+                          Date: {new Date(trip.plannedDate).toLocaleString('default', { month: 'long', day: 'numeric' })}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="mb-1 flex-grow">{trip.sentenceDesc}</p>
+                    <div className="w-full flex justify-end flex-grow-0">
+                      <img src={index % 2 == 0 ? gArrow.src : yArrow.src} className="aspect-square h-8"/>
+                    </div>
                   </div>
                 </a>
               ))
