@@ -2,7 +2,8 @@
 import Title from "@/components/Title";
 import Dropdown from "@/components/Dropdown";
 import { useEffect, useState, useRef } from "react";
-import axios from "axios";
+//import axios from "axios";
+import makeRequesters from "@/scripts/requests";
 import Logo from "@/assets/images/header/logo.svg"
 import yArrow from "@/assets/images/trips/arrow-yellow.svg"
 import gArrow from "@/assets/images/trips/arrow-green.svg"
@@ -76,6 +77,7 @@ export default function Trips() {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [filteredTrips, setFilteredTrips] = useState<Trip[]>([]);
   const [splitIdx, setSplitIdx] = useState<number>(0);
+  const { backendGet } = makeRequesters();
 
   // Filter states
   const [nameFilter, setNameFilter] = useState("");
@@ -89,12 +91,7 @@ export default function Trips() {
     }
     fetched.current = true;
 
-    axios
-      .get(`${process.env.NEXT_PUBLIC_API_BASE}/trips`, {
-        headers: {
-          token: localStorage.getItem("access_token"),
-        },
-      })
+    backendGet("/trips")
       .then((res): void => {
         //Tie date objects to each trip, sort them by date, and initially set both trips and filtered Trips
         let trips = res.data;
@@ -104,6 +101,8 @@ export default function Trips() {
         setFilteredTrips(trips);
         //Determine the idx in the trips list splitting current and past trips
         setSplitIdx(findSplit(trips))
+      }).catch((e): void => {
+        console.log("Get failed: "+e)
       });
   }, []);
 

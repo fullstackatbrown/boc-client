@@ -291,7 +291,12 @@ export default function User() {
       {/* Your trips table */}
       {hostedTrips && (
         <div id="hostedTrips" className="flex flex-col mb-10">
-          <button className="ml-auto mr-10 bg-boc_darkbrown text-white font-bold py-2 px-4 rounded-full hover:bg-boc_darkgreen transition duration-300 ease-in-out">
+          <button 
+            className="ml-auto mr-10 bg-boc_darkbrown text-white font-bold py-2 px-4 rounded-full hover:bg-boc_darkgreen transition duration-300 ease-in-out"
+            onClick={() => {
+              window.location.href = "/trips/creation-form";
+            }}
+          >
             + Create a New Trip
           </button>
           {tripTable(
