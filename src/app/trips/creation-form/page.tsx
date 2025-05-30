@@ -78,16 +78,31 @@ export default function CreateTripForm() {
       sentenceDesc: form.sentenceDesc || null,
       blurb: form.blurb || null,
     };
-    console.log(payload)
 
-    try {
-      await backendPost("/leader/create-trip", payload)
+    backendPost("/leader/create-trip", payload)
+    .then(()=>{
       setSuccess('Trip created successfully!');
       setForm({ ...emptyForm });
-    } catch (err) {
-      console.error(err);
-      setError('Failed to create trip. Check your input and try again.');
-    }
+    }).catch((err)=>{
+      let msg;
+      if (err.code == "ERR_BAD_REQUEST") {
+        switch (err.response.status) {
+          case 401:
+            msg = 'Action unauthorized. Make sure you are logged into a leader account.'
+            break;
+          case 422:
+            msg = 'Server-side validation failed. Check input fields for proper format.'
+            break;
+          default:
+            msg = `Trip creation failed with error code ${err.response.status}. Alert an admin if issue persists.`
+        }
+      } else {
+        msg = 'Request failed. Check connectivity and try again. Alert an admin if issue persists.'
+      }
+      console.log(err);
+      setError(msg);
+    })
+      
   };
 
   const labelStyle = "block font-semibold mb-2";
@@ -150,6 +165,7 @@ export default function CreateTripForm() {
             name="tripName"
             type="text"
             value={form.tripName}
+            maxLength={50}
             required
             onChange={handleChange}
             className={iptStyle}
@@ -175,6 +191,7 @@ export default function CreateTripForm() {
             type="number"
             value={form.maxSize}
             min={1}
+            max={1000}
             required
             onChange={handleChange}
             className={iptStyle}
@@ -183,7 +200,7 @@ export default function CreateTripForm() {
         {/* Class or Price Override */}
         <div className="flex w-full">
           <div className="flex-grow mr-4">
-            <label className={labelStyle}>Trip Class (A–J or Z)</label>
+            <label className={labelStyle}>Trip Class (A–J or Z for free)</label>
             <input
               name="class"
               type="text"
@@ -191,6 +208,7 @@ export default function CreateTripForm() {
               onChange={handleChange}
               className={`w-full border p-2 rounded ${form.priceOverride ? 'bg-gray-100 border-gray-300 cursor-not-allowed' : 'border-boc_green'}`}
               maxLength={1}
+              pattern="[A-J, Z]{1}"
               disabled={!!form.priceOverride}
             />
           </div>
@@ -199,7 +217,9 @@ export default function CreateTripForm() {
             <input
               name="priceOverride"
               type="number"
-              step="0.01"
+              step="0.1"
+              min={0}
+              max={1000}
               value={form.priceOverride}
               onChange={handleChange}
               className={`w-full border p-2 rounded ${form.class ? 'bg-gray-100 border-gray-300 cursor-not-allowed' : 'border-boc_green'}`}
@@ -214,6 +234,7 @@ export default function CreateTripForm() {
             name="sentenceDesc"
             type="text"
             value={form.sentenceDesc}
+            maxLength={150}
             onChange={handleChange}
             className={iptStyle}
           />
