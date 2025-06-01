@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, ChangeEvent, FormEvent, useMemo } from 'react';
+import { useState, ChangeEvent, FormEvent, useMemo, useEffect } from 'react';
 import makeRequesters from "@/scripts/requests"
 
 interface TripForm {
@@ -12,6 +12,12 @@ interface TripForm {
   priceOverride: string;
   sentenceDesc: string;
   blurb: string;
+}
+
+interface Leader {
+  firstName: string,
+  lastName: string, 
+  email: string
 }
 
 const emptyForm = {
@@ -28,11 +34,11 @@ const emptyForm = {
 
 export default function CreateTripForm() {
   const [form, setForm] = useState<TripForm>({ ...emptyForm });
-
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
+  const [availableLeaders, setAvailableLeaders] = useState<string[]>([])
 
-  const { backendPost } = makeRequesters();
+  const { backendGet, backendPost } = makeRequesters();
   
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -102,32 +108,21 @@ export default function CreateTripForm() {
       console.log(err);
       setError(msg);
     })
-      
   };
+
+  useEffect(() => {
+    backendGet("/leaders")
+      .then((res): void => {
+        console.log(res.data)
+        setAvailableLeaders(res.data.map((obj: Leader) => obj.email))
+      })
+      .catch((err): void => {
+        console.error(err)
+      })
+  }, [])
 
   const labelStyle = "block font-semibold mb-2";
   const iptStyle = "w-full p-2 border border-boc_green rounded";
-  //iptFields must at least contain type, name, and value
-  function FormField({ label, iptFields }: { label: string, iptFields: React.InputHTMLAttributes<HTMLInputElement> }) {
-    return (
-      <div>
-        <label className={labelStyle}>{label}</label>
-        <input
-          { ...iptFields }
-          className={iptStyle}
-        />
-      </div>
-    )
-  }
-
-
-  const tripNameFields = useMemo(() => ({
-    name: "tripName", 
-    type: "text", 
-    value: form.tripName,
-    required: true,
-    onChange: handleChange,
-  }), [form.tripName])
 
   return (
     <div className="max-w-3xl mx-auto py-12 px-6 bg-boc_yellow text-[#2c3e1d] rounded-t-[5rem] font-body border-4 border-b-0 border-boc_medbrown">
@@ -137,17 +132,29 @@ export default function CreateTripForm() {
         {/* Leader Emails */}
         <div>
           <label className={labelStyle}>Trip Leaders' Emails (Besides your Own!)</label>
-          {form.leaders.map((email, idx) => (
-            <input
-              key={idx}
-              type="email"
-              placeholder={`leader ${idx + 1}`}
-              value={email}
-              onChange={(e) => handleLeaderChange(idx, e.target.value)}
-              className={iptStyle + " mb-2" }
-              required
-            />
-          ))}
+          {form.leaders.map((email, idx) => {
+            const usedEmails = form.leaders.filter((_, i) => i !== idx);
+            const options = availableLeaders.filter(
+              (e) => !usedEmails.includes(e) || e === email //Disclude your own email
+            );
+
+            return (
+              <select
+                key={idx}
+                value={email}
+                onChange={(e) => handleLeaderChange(idx, e.target.value)}
+                className={`${iptStyle} mb-2`}
+                required
+              >
+                <option value="" disabled>Select leader {idx + 1}</option>
+                {options.map((leaderEmail) => (
+                  <option key={leaderEmail} value={leaderEmail}>
+                    {leaderEmail}
+                  </option>
+                ))}
+              </select>
+            );
+          })}
           <div>
             <button type="button" onClick={addLeader} className="text-boc_darkgreen underline inline text-sm mr-4">
               + Add another leader
@@ -198,8 +205,8 @@ export default function CreateTripForm() {
           />
         </div>
         {/* Class or Price Override */}
-        <div className="flex w-full">
-          <div className="flex-grow mr-4">
+        <div className="grid grid-cols-2 gap-4 w-full">
+          <div>
             <label className={labelStyle}>Trip Class (A–J or Z for free)</label>
             <input
               name="class"
@@ -212,7 +219,7 @@ export default function CreateTripForm() {
               disabled={!!form.priceOverride}
             />
           </div>
-          <div className="flex-grow">
+          <div>
             <label className={labelStyle}>Price Override ($)</label>
             <input
               name="priceOverride"

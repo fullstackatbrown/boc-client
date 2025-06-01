@@ -1,32 +1,39 @@
 import api from "@/scripts/api";
 import { useSession } from "next-auth/react";
-import { useState, useEffect } from "react"
+import { useState, useRef, useEffect } from "react"
 
 export default function makeRequesters() {
     const { data: session, status } = useSession();
-    const [token, setToken] = useState<any>(null)
-
-    useEffect(() => { //Wait for session to be defined, then set access token
-        if (status !== "loading") {
-          setToken(session!.jwt.accessToken)
+    const [token, setToken] = useState<string | null>(null);
+    const waiters = useRef<(() => void)[]>([]);
+  
+    // Resolve pending promises once the token is ready
+    useEffect(() => {
+      if (status === "authenticated" && session?.jwt?.accessToken) {
+        setToken(session.jwt.accessToken);
+        waiters.current.forEach((resolve) => resolve());
+        waiters.current = [];
+      }
+    }, [status, session]);
+  
+    const waitUntilReady = () =>
+      new Promise<void>((resolve) => {
+        if (token) {
+          resolve();
+        } else {
+          waiters.current.push(resolve);
         }
-      }, [status]);
-
-      const backendGet = async (path: string) => {
-        return api.get(path, {
-            headers: { token: token },
-        })
-      }
-      const backendPost = async (path: string, body: Object) => {
-        return api.post(
-            "/leader/create-trip",
-            body,
-            {
-              headers: {
-                token: token,
-              },
-            },
-        );
-      }
-      return { backendGet, backendPost }
-}
+      });
+  
+    const backendGet = async (path: string) => {
+      await waitUntilReady();
+      return api.get(path, { headers: { token } });
+    };
+  
+    const backendPost = async (path: string, body: Object) => {
+      await waitUntilReady();
+      return api.post(path, body, { headers: { token } });
+    };
+  
+    return { backendGet, backendPost };
+  }
