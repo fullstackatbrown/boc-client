@@ -1,71 +1,17 @@
 "use client";
+
 import Title from "@/components/Title";
 import Dropdown from "@/components/Dropdown";
+import CreationButton from "./CreationButton";
+import TripDisp from "./TripDisp";
+import { Trip, Role } from "@/models/models"
 import { useEffect, useState, useRef } from "react";
 //import axios from "axios";
 import makeRequesters from "@/scripts/requests";
-import Logo from "@/assets/images/header/logo.svg"
-import yArrow from "@/assets/images/trips/arrow-yellow.svg"
-import gArrow from "@/assets/images/trips/arrow-green.svg"
-
-interface Trip { //interfaces should prob be made for all backend models and put in some file
-  //Backend fields
-  id: number,
-  tripName: string, 
-  plannedDate: string,
-  maxSize: number,
-  class: string | null,
-  priceOverride: number | null, 
-  sentenceDesc: string | null, 
-  blurb: string | null, 
-  status: string,
-  planningChecklist: string
-  //Fields for Frontend convenience
-  date: Date | null
-}
-
-function TripDisp({ trips }:{ trips: Trip[] }) {
-  return (
-    <div className="overflow-x-auto mt-2 mb-3 max-h-[36rem] overflow-y-scroll"> {/* 36rem is just enough to see 4 cards, which seems good to me... I'm amenable to changing though */}
-      {/* Trip Cards */} 
-      <div className="grid grid-cols-1 gap-2">
-        {trips.length > 0 ? (
-          trips.map((trip, index) => (
-            <a key={index} href={`/trips/view?id=${index + 1}`}>
-              <div
-                className={`w-[calc(100% - 1.5rem)] pl-4 pt-4 pr-2 pb-2 rounded-[20px] drop-shadow-lg font-standard mx-3 mb-2 flex flex-col h-36
-                shadow-[4px] ${index % 2 == 0 ? "bg-boc_yellow text-black" : "bg-boc_darkgreen text-white"}`}
-              >
-                <div className="w-full px-2 flex flex-grow-0" >
-                  <img src={Logo.src} className="aspect-square h-12 flex-grow-0"/> {/* Using logo as placeholder icon for now*/}
-                  <div className="ml-4 h-12">
-                    <h2 className="text-lg mb-0">{trip.tripName}</h2>
-                    <p className={`mt-0 text-sm ${index % 2 == 0 ? "text-boc_medbrown" : "text-boc_slate"}`}>
-                      Date: {new Date(trip.plannedDate).toLocaleString('default', { month: 'long', day: 'numeric' })}
-                    </p>
-                  </div>
-                </div>
-                <p className="mb-1 max-h-[2.5rem] overflow-y-scroll flex-grow">{trip.sentenceDesc}</p>
-                <div className="w-full flex justify-end flex-grow-0">
-                  <img src={index % 2 == 0 ? gArrow.src : yArrow.src} className="aspect-square h-8"/>
-                </div>
-              </div>
-            </a>
-          ))
-        ) : (
-          <p className="col-span-full text-center text-gray-600">
-            No available trips match your filters!
-          </p>
-        )}
-      </div>
-    </div>
-  )
-}
 
 function findSplit(trips: Trip[]): number {
   const now = new Date();
   for (let [idx, trip] of trips.entries()) { 
-    console.log(trip)
     if (trip.date!.getTime() > now.getTime()) { 
       return idx;
     }
@@ -74,16 +20,30 @@ function findSplit(trips: Trip[]): number {
 }
 
 export default function Trips() {
+  //Filter utilities
   const [trips, setTrips] = useState<Trip[]>([]);
   const [filteredTrips, setFilteredTrips] = useState<Trip[]>([]);
   const [splitIdx, setSplitIdx] = useState<number>(0);
-  const { backendGet } = makeRequesters();
-
   // Filter states
   const [nameFilter, setNameFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [sizeFilter, setSizeFilter] = useState("");
   const fetched = useRef(false);
+
+  // Non-filter resources
+  const { backendGet } = makeRequesters();
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const [userRole, setUserRole] = useState<Role | null>(null)
+
+  useEffect(() => { //Grab user's role
+    backendGet("/user")
+      .then((res): void => setUserRole(res.data.role))
+      .catch((e): void => {
+        console.log(e.status, e.status !== 401)
+        if (e.status !== 401) console.error(`Fetching user data failed: ${e}`)
+        else setUserRole(Role.None) //If status is 401, user is just not logged in
+      })
+  }, [])
 
   useEffect(() => {
     if (fetched.current) {
@@ -91,7 +51,7 @@ export default function Trips() {
     }
     fetched.current = true;
 
-    backendGet("/trips")
+    backendGet("/trips", true)
       .then((res): void => {
         //Tie date objects to each trip, sort them by date, and initially set both trips and filtered Trips
         let trips = res.data;
@@ -101,9 +61,8 @@ export default function Trips() {
         setFilteredTrips(trips);
         //Determine the idx in the trips list splitting current and past trips
         setSplitIdx(findSplit(trips))
-      }).catch((e): void => {
-        console.log("Get failed: "+e)
-      });
+      }).catch((e): void => console.error("Fetching trips failed: "+e))
+      .finally(() => console.log(trips));
   }, []);
 
   // Apply filters whenever filter values change
@@ -198,7 +157,7 @@ export default function Trips() {
   )
 
   return (
-    <div className="h-full w-full pb-10 px-20">
+    <div className="relative w-full pb-10 px-20">
       {/* Title and Description */}
       <Title text="BOC Trips Calendar" />
       Find all of our upcoming trips on this page and click on them to learn
@@ -212,8 +171,15 @@ export default function Trips() {
         </div>
         <TripDisp trips={filteredTrips.slice(splitIdx)}/>
         <Dropdown header="Past Trips" content={<TripDisp trips={filteredTrips.slice(0, splitIdx)} />}/>
-        
       </section>
+      { userRole && [Role.Leader, Role.Admin].includes(userRole) //Display trip creation button if user is a leader/admin
+        ? ( 
+          <div>
+            <CreationButton footerRef={sentinelRef} />
+            <div ref={sentinelRef} className="w-full absolute bottom-0"></div> {/* Sentinel for positioning the creation button */}
+          </div>
+        ) : (<div>{userRole}</div>)
+      }
     </div>
   );
 }

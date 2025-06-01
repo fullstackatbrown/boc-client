@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { LoginProvider } from "@/contexts/LoginContext";
 import { SessionProvider } from "next-auth/react";
 import { Chelsea_Market, Gabarito } from "next/font/google";
 import "@/styles/globals.css";

@@ -15,7 +15,7 @@ export default function TripPage() {
 
   const [trip, setTrip] = useState<any>(null);
   const [signedUp, setSignedUp] = useState<any>(false);
-  const [role, setRole] = useState(null);
+  const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const { data: session, status } = useSession();
