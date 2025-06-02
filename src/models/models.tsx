@@ -13,6 +13,7 @@ export interface Trip {
   //Fields for Frontend convenience
   date: Date | null
 }
+
 export enum Role { Leader = 'Leader', Participant = 'Participant', Admin = 'Admin', None = 'None' }
 export interface User {
   firstName: string,
@@ -23,4 +24,15 @@ export interface User {
   hasWaiver: boolean,
   tripsLead: number, 
   tripsParticipated: number 
+}
+
+export enum TripRole { Leader = 'Leader', Participant = 'Participant'}
+export interface TripSignUp {
+  tripId: number;
+  tripRole: TripRole;
+  status: string | null;
+  needPaperwork: boolean | null;
+  confirmed: boolean | null;
+  createdAt: string;
+  updatedAt: string;
 }

@@ -1,25 +1,13 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
-
-import tripsBadge from "@/assets/images/profile/badge.png";
-import profilepic from "@/assets/images/profile/bear.png";
-import wood from "@/assets/images/profile/wood.png";
+import React, { useEffect, useState } from "react";
 
 import { useSession } from "next-auth/react";
-import api from "@/scripts/api";
+import makeRequesters from "@/scripts/requests"
+import { User, TripSignUp } from "@/models/models"
+import ProfileBar from "./ProfileBar";
 
-// represents trip info from user/profile route
-interface TripSignUp {
+interface Trip { //Different from the Trip interface in models.tsx 
   tripId: number;
-  tripRole: string;
-  status: string | null;
-  needPaperwork: boolean | null;
-  confirmed: boolean | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Trip {
   tripName: string;
   date: string;
   blurb: string;
@@ -66,7 +54,12 @@ function TripRow(data: Trip) {
     }
   };
   return (
-    <tr className="px-4 py-2">
+    <tr 
+    className="px-4 py-2"
+    onClick={()=>{
+      window.location.href = `/trips/view?id=${data.tripId}`
+    }}
+    >
       <Td>
         <b className="text-blue-400">{data.tripName} </b>
         <br /> {data.blurb}
@@ -90,57 +83,53 @@ function TripRow(data: Trip) {
 // create a table for all upcoming trips
 function tripTable(tripsType: String, trips: Trip[]) {
   return (
-    <div className="flex flex-col pb-10">
+    <div className="flex flex-col mb-10">
       <h1 className="text-2xl font-bold font-funky text-boc_darkgreen">
         {tripsType} Trips
       </h1>
 
-      <div className="flex justify-center py-5">
-        <table className="table-fixed w-full border-separate border-spacing-2">
-          <colgroup>
-            <col style={{ width: "60%" }} />
-            <col style={{ width: "20%" }} />
-            <col style={{ width: "20%" }} />
-          </colgroup>
-          <tbody>
-            <tr className="px-4 py-2 text-center font-bold">
-              <Th>Trip Title</Th>
-              <Th>Date</Th>
-              <Th>Lottery Info</Th>
-            </tr>
-            {trips.map((data, index) => (
-              <TripRow key={index} {...data} />
-            ))}
-          </tbody>
-        </table>
+      <div className="flex justify-center pt-5">
+        { trips.length > 0 ? 
+          <table className="table-fixed w-full border-separate border-spacing-2">
+            <colgroup>
+              <col style={{ width: "60%" }} />
+              <col style={{ width: "20%" }} />
+              <col style={{ width: "20%" }} />
+            </colgroup>
+            <tbody>
+              <tr className="px-4 py-2 text-center font-bold">
+                <Th>Trip Title</Th>
+                <Th>Date</Th>
+                <Th>Lottery Info</Th>
+              </tr>
+              { trips.map((data, index) => (
+                <TripRow key={index} {...data} />
+              ))}
+            </tbody>
+          </table>
+          : <p className="w-full text-center border-2 border-dashed border-boc_green rounded-lg p-8 text-2xl text-gray-500">None Yet!</p>
+        }
       </div>
     </div>
   );
 }
 
 export default function User() {
-  const [userProfile, setUserProfile] = useState({
-    name: "",
-    role: "",
-    email: "",
-    phoneNum: "",
-    tripsParticipated: "",
-  });
+  const [userProfile, setUserProfile] = useState<User | null>(null);
   const [tripDetails, setTripDetails] = useState<Trip[]>([]);
   const [showPastTrips, setShowPastTrips] = useState(false);
   const [hostedTrips, setHostedTrips] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [showPhone, setShowPhone] = useState(false);
-  const [phone, setPhone] = useState("");
+  // const [showPhone, setShowPhone] = useState(false);
+  // const [phone, setPhone] = useState("");
 
+  const { backendGet, backendPost } = makeRequesters()
   const { data: session, status } = useSession();
 
   const updateLogin = async () => {
     try {
       // User Profile information set
-      const { data: userData } = await api.get("/user/profile", {
-        headers: { token: session.jwt.accessToken },
-      });
+      const { data: userData } = await backendGet("/user/profile")
       setUserProfile(userData);
       if (userData.role === "Leader" || userData.role === "Admin") {
         setHostedTrips(true);
@@ -148,12 +137,8 @@ export default function User() {
 
       // User Trips information set
       const tripPromises = userData.TripSignUps.map(
-        async (signup: TripSignUp) => {
-          const { data: tripInfo } = await api.get(`/trip/${signup.tripId}`, {
-            headers: {
-              token: session.jwt.accessToken,
-            },
-          });
+        async (signup: TripSignUp): Promise<Trip> => {
+          const { data: tripInfo } = await backendGet(`/trip/${signup.tripId}`);
 
           const leaders =
             tripInfo.otherLeaders &&
@@ -184,24 +169,20 @@ export default function User() {
       setLoading(false);
     } catch (error) {
       console.error(error);
-      setUserProfile({});
+      setUserProfile(null);
       setTripDetails([]);
       console.log("ERROR");
       setLoading(false);
     }
   };
 
-  const submitPhone = async () => {
-    const response = await api.post(
-      "/user/add-phone",
-      { phoneNum: phone },
-      {
-        headers: {
-          token: session.jwt.accessToken,
-        },
-      },
-    );
+  const submitPhone = (newPhone: string) => {
+    return backendPost("/user/add-phone", { phoneNum: newPhone })
   };
+
+  // const submitPhone = async () => {
+  //   await backendPost("/user/add-phone", { phoneNum: phone })
+  // };
 
   useEffect(() => {
     if (status !== "loading") {
@@ -215,7 +196,8 @@ export default function User() {
 
   return (
     <div className="h-full min-h-screen w-full px-40 py-10">
-      {showPhone ? (
+      {/* Phone Number Edit Screen */}
+      {/* {showPhone ? (
         <div className="fixed inset-0 bg-gray-400 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-gray-200 p-5">
             Set Phone Number:{" "}
@@ -226,71 +208,13 @@ export default function User() {
             </div>
           </div>
         </div>
-      ) : null}
+      ) : null} */}
       {/* Site content */}
-
-      <div id="content" className="flex justify-between items-start">
-        <div className="relative w-60 aspect-square rounded-lg">
-          <img
-            alt="User Profile"
-            className="inset-0 rounded-lg"
-            src={wood.src}
-          />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <img
-              alt="User Profile"
-              className="inset-0 rounded-lg h-[50%]"
-              src={profilepic.src}
-            />
-          </div>
-        </div>
-        <div className="text-[1.200rem] text-boc_darkbrown leading-loose ">
-          <div className="text-[3.3rem] leading-tight">
-            <b>
-              {userProfile.firstName} {userProfile.lastName}
-            </b>
-          </div>
-          <div className="text-[2rem] mt-1">
-            <b>{userProfile.role}</b>
-          </div>
-          <div className="flex gap-12 text-[1.2rem]">
-            <div>
-              <b>EMAIL</b>
-              <p>{userProfile.email}</p>
-            </div>
-            <div>
-              <b>PHONE NUMBER</b>
-              <div
-                onClick={() => setShowPhone(true)}
-                className="cursor-pointer"
-              >
-                <u>{userProfile.phone ? userProfile.phone : "Set phone"}</u>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="w-1/4 text-center rounded-lg float-right">
-          <p className="text-2xl font-bold text-boc_darkbrown">SUMMIT SEEKER</p>
-
-          <div className="relative w-full">
-            <img
-              src={tripsBadge.src}
-              alt="trips badge"
-              className="w-full h-auto p-7"
-            ></img>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white font-bold text-5xl px-4 py-2 rounded-lg">
-              {userProfile.tripsParticipated}
-            </div>
-          </div>
-          <div className="pb-7">
-            <p className="text-2xl font-bold text-boc_darkbrown">TOTAL TRIPS</p>
-          </div>
-        </div>
-      </div>
+      <ProfileBar userProfile={userProfile!} submitPhone={submitPhone}/>
       <br/>
       {/* Your trips table */}
       {hostedTrips && (
-        <div id="hostedTrips" className="flex flex-col mb-10">
+        <div id="hostedTrips" className="flex flex-col">
           <button 
             className="ml-auto mr-10 bg-boc_darkbrown text-white font-bold py-2 px-4 rounded-full hover:bg-boc_darkgreen transition duration-300 ease-in-out"
             onClick={() => {
