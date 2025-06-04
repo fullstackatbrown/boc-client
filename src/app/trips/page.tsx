@@ -7,7 +7,7 @@ import TripDisp from "./TripDisp";
 import { Trip, Role } from "@/models/models"
 import { useEffect, useState, useRef } from "react";
 //import axios from "axios";
-import makeRequesters from "@/scripts/requests";
+import { makeRequesters }from "@/scripts/requests";
 
 function findSplit(trips: Trip[]): number {
   const now = new Date();

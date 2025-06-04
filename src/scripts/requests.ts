@@ -1,8 +1,19 @@
 import api from "@/scripts/api";
 import { useSession } from "next-auth/react";
 import { useRef, useEffect } from "react";
+import { AxiosResponse } from "axios";
 
-export default function useRequesters() {
+// export type Requesters = [
+//   (path: string, noAuth?: boolean) => Promise<AxiosResponse<any, any>>, 
+//   (path: string, body: Object) => Promise<AxiosResponse<any, any>>,
+// ];
+
+export interface Requesters {
+  backendGet: (path: string, noAuth?: boolean) => Promise<AxiosResponse<any, any>>,
+  backendPost: (path: string, body: Object) => Promise<AxiosResponse<any, any>>,
+}
+
+export function makeRequesters() {
   const { data: session, status } = useSession();
   const waiters = useRef<((token: string) => void)[]>([]);
 

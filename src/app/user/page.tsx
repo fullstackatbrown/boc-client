@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 import { useSession } from "next-auth/react";
-import makeRequesters from "@/scripts/requests"
+import { makeRequesters }from "@/scripts/requests"
 import { User, TripSignUp } from "@/models/models"
 import ProfileBar from "./ProfileBar";
 
@@ -123,7 +123,7 @@ export default function User() {
   // const [showPhone, setShowPhone] = useState(false);
   // const [phone, setPhone] = useState("");
 
-  const { backendGet, backendPost } = makeRequesters()
+  const { backendGet, backendPost } = makeRequesters();
   const { data: session, status } = useSession();
 
   const updateLogin = async () => {

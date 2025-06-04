@@ -2,7 +2,9 @@ export interface Trip {
   //Backend fields
   id: number,
   tripName: string, 
+  category: string,
   plannedDate: string,
+  plannedEndDate: string | null,
   maxSize: number,
   class: string | null,
   priceOverride: number | null, 
@@ -15,10 +17,7 @@ export interface Trip {
 }
 
 export enum Role { Leader = 'Leader', Participant = 'Participant', Admin = 'Admin', None = 'None' }
-export interface User {
-  firstName: string,
-  lastName: string,
-  email: string, 
+export interface User extends SimpleUser {
   phone: string, 
   role: Role,
   hasWaiver: boolean,
@@ -26,7 +25,7 @@ export interface User {
   tripsParticipated: number 
 }
 
-export enum TripRole { Leader = 'Leader', Participant = 'Participant'}
+export enum TripRole { Leader = 'Leader', Participant = 'Participant', None = 'None' }
 export interface TripSignUp {
   tripId: number;
   tripRole: TripRole;
@@ -35,4 +34,16 @@ export interface TripSignUp {
   confirmed: boolean | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface TripWithSignup extends Trip {
+  userData: TripSignUp | null,
+  participants: TripSignUp[] | null,
+  leaders: SimpleUser[],
+}
+
+export interface SimpleUser {
+  firstName: string,
+  lastName: string,
+  email: string,
 }

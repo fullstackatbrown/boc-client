@@ -1,12 +1,14 @@
 'use client'
 
 import { useState, ChangeEvent, FormEvent, useMemo, useEffect } from 'react';
-import makeRequesters from "@/scripts/requests"
+import { makeRequesters }from "@/scripts/requests"
 
 interface TripForm {
   leaders: string[];
   tripName: string;
+  //category: string;
   plannedDate: string;
+  //plannedEndDate: string;
   maxSize: string;
   class: string;
   priceOverride: string;
@@ -77,7 +79,9 @@ export default function CreateTripForm() {
     const payload = {
       leaders: form.leaders.filter(email => email.trim() !== ''),
       tripName: form.tripName,
+      category: 'Special', //NEEDS TO BE CHANGED LATER
       plannedDate: new Date(form.plannedDate),
+      plannedEndDate: null, //NEEDS TO BE CHANGED LATER
       maxSize: parseInt(form.maxSize, 10),
       class: form.class || null,
       priceOverride: form.priceOverride ? parseFloat(form.priceOverride) : null,
