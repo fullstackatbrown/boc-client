@@ -18,6 +18,7 @@ const config: Config = {
         foreground: "#000000",
         boc_green: '#5B913A',
         boc_darkgreen: "#678F44",
+        boc_lightgreen: "#DEDEAE",
         boc_darkbrown: "#461300",
         boc_medbrown: "#A2826D",
         boc_lightbrown: "#FDE6BB",
