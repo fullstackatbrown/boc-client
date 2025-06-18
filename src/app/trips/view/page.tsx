@@ -25,19 +25,22 @@ export default function TripPage() {
       backendGet(`/trip/${id}`)
         .then((res): void => {
           setTrip(res.data);
-          // if (res.data.userData == null) {
-          //   // Not signed in
-          //   setRole(null);
-          // } else if (res.data.userData == -1) {
-          //   // Signed in but not signed up
-          //   setRole("None");
-          // } else {
-          //   // Signed in and signed up
-          //   setRole(res.data.userData.tripRole);
-          //   setSignedUp(true);
-          // }
           setLoading(false);
-        });
+        })
+        .catch((err): void => {
+          switch (err.status) {
+            case (401):
+              alert("The requested trip is still in staging. Log in with a trip leader's account or wait for the trip to be made public!")
+              break;
+            case (404):
+              alert("The requested trip page does not exist.")
+              break;
+            default:
+              alert(`ERROR. You shouldn't be seeing this! Contact the website's admin and send them a picture of this message! ${err}`)
+              break;
+          }
+          window.location.href = '/trips'
+        })
     }
   }, [status]);
 

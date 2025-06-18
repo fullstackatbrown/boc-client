@@ -13,7 +13,7 @@ export default function TripPageContents({ trip, reqs }:{ trip: TripWithSignup, 
         <Title text={trip.tripName}/>
         <main className="px-[min(13rem,20%)]">
           <TripInfoBar trip={trip} reqs={reqs}/>
-          <p>{trip.blurb}</p>
+          <p className="my-4">{trip.blurb}</p>
         </main>
       </div>
     </div>

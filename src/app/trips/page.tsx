@@ -178,7 +178,7 @@ export default function Trips() {
             <CreationButton footerRef={sentinelRef} />
             <div ref={sentinelRef} className="w-full absolute bottom-0"></div> {/* Sentinel for positioning the creation button */}
           </div>
-        ) : (<div>{userRole}</div>)
+        ) : (<></>)
       }
     </div>
   );

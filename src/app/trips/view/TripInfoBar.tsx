@@ -34,7 +34,7 @@ export default function TripInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs:
     <div className="w-full pt-4">
       <div className="flex flex-row gap-x-4">
         <img src={pizzaAlan.src} className="w-96 h-80 object-cover rounded-2xl"/>
-        <div className="flex-grow">
+        <div className="flex-grow flex flex-col gap-4">
           <div className="w-full bg-boc_lightgreen rounded-2xl pt-4 pb-8 px-10">
             <h2 className="w-full text-center text-boc_green font-funky text-3xl mb-3">Trip Info</h2>
             <div className="flex justify-around flex-col">
@@ -42,24 +42,12 @@ export default function TripInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs:
               <TripInfo lead="Trip Category" text={trip.category || "Not specified"}/>
               <TripInfo lead="Date" text={trip.plannedDate ? new Date(trip.plannedDate).toLocaleDateString() : "Date not set"}/>
               <TripInfo lead="Cost" text={cost == 0 ? "Free!" : "$"+String(cost)} />
-              {/* <div className="flex flex-row gap-x-2">
-              <label className="font-bold">Qualifications:</label>
-              <p>{trip?.qualifications?.join(", ") || "None required"}</p>
-              </div> */}
-              {/* <div className="flex flex-row gap-x-2">
-              <label className="font-bold">Signup Deadline:</label>
-              <p>
-                  {trip?.signupClose
-                  ? formatDate(trip?.signupClose)
-                  : "Not set"}
-              </p>
-              </div> */}
             </div>
           </div>
           <SignupButton trip={trip} reqs={reqs}/>
         </div>
       </div>
-      <p className="text-[2vmin] pt-4 pb-4">{trip.sentenceDesc}</p>
+      {/* <p className="text-[2vmin] pt-4 pb-4">{trip.sentenceDesc}</p> */}
     </div>
   )
 }
