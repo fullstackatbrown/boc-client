@@ -64,6 +64,7 @@ function NavBar() {
       dropdown: [
         { label: "About Us", url: "/about" },
         { label: "Land Tribute", url: "/about/land-tribute" },
+        { label: "Financial Aid", url: "/about/financial-aid"},
         { label: "Our Team", url: "/about/our-team" },
         { label: "Photo Album", url: "/about/photo-album" },
       ],

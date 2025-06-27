@@ -27,14 +27,14 @@ export default function SignupButton({ trip, reqs }:{ trip: TripWithSignup, reqs
   }
   const [showPopup, setShowPopup] = useState(false);
   //Helper Components
-  const payBar = ( //Note: need to change link address once financial aid page is made!
+  const payBar = ( 
     <div className="flex flex-col gap-1 flex-shrink-0">
       <BOCButton text="Pay" onClick={() => { 
         backendPost(`/trip/${trip.id}/participate/pay`, {});
         window.open("https://payment.brown.edu/C20460_ustores/web/store_cat.jsp?STOREID=2&CATID=396", "_blank");
         window.location.reload();
       }} grow/>
-      <a href="/" className="text-sm underline nowrap">Financial Aid Policy</a> 
+      <a href="/about/financial-aid" className="text-sm underline nowrap">Financial Aid Policy</a> 
     </div>
   )
   //Possible components
