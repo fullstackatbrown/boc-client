@@ -1,6 +1,10 @@
-import { TripWithSignup, TripRole, TripStatus, SignupStatus } from "@/models/models";
+'use client'
+
+import { useState } from "react";
+import { TripWithSignup, TripRole, TripStatus, SignupStatus, TripClass } from "@/models/models";
 import BOCButton from "@/components/BOCButton";
 import { Requesters } from "@/scripts/requests";
+import Popup from "@/components/Popup";
 
 function Message({ text, bgColor, textColor}: { text: string, bgColor: string, textColor: string }) {
   return (
@@ -10,13 +14,6 @@ function Message({ text, bgColor, textColor}: { text: string, bgColor: string, t
   )
 }
 
-// function Informational({ text }:{ text: string }) {
-//   return (
-//     <div className="p-4 bg-gray-200 border border-grey-400 rounded-lg overflow-scroll">
-//       <p className="text-grey-600">{text}</p>
-//     </div>
-//   )
-// }
 function Informational({ text }:{ text: string }) { return <Message text={text} bgColor="bg-gray-200" textColor="text-gray-600"/> }
 function BadNews({ text }: { text: string }) { return <Message text={text} bgColor="bg-red-200" textColor="text-red-600"/> }
 function GoodNews({ text }: { text: string }) { return <Message text={text} bgColor="bg-boc_lightgreen" textColor="text-boc_darkgreen"/> }
@@ -24,45 +21,61 @@ function GoodNews({ text }: { text: string }) { return <Message text={text} bgCo
 export default function SignupButton({ trip, reqs }:{ trip: TripWithSignup, reqs: Requesters }) {
   //Signup/confirm/cancel functionality
   const { backendPost } = reqs;
-  function signup() {
-    backendPost(`/trip/${trip.id}/signup`, {});
+  function simpleUpdate(path: string) {
+    backendPost(path, {});
     window.location.reload(); 
   }
-  function confirm() {
-    backendPost(`/trip/${trip.id}/participate/confirm`, {});
-    //window.location.reload();
-  }
-  function cancel() {
-
-  }
-  //Possible components
-  const SignupsClosed = <Informational text="Signups have closed"/>
-  const Staging = <Informational text="This trip is not yet public" />
-  const SignUpButton = (
-    <div className="w-full flex justify-center gap-4 items-end">
-      <div className="flex-shrink-0">
-        <BOCButton
-          text="Signup for this trip!"
-          onClick={() => signup()}
-        ></BOCButton>
-      </div>
-      <Informational text="Signups usually close 3-4 days before the trip date." />
+  const [showPopup, setShowPopup] = useState(false);
+  //Helper Components
+  const payBar = ( //Note: need to change link address once financial aid page is made!
+    <div className="flex flex-col gap-1 flex-shrink-0">
+      <BOCButton text="Pay" onClick={() => { 
+        backendPost(`/trip/${trip.id}/participate/pay`, {});
+        window.open("https://payment.brown.edu/C20460_ustores/web/store_cat.jsp?STOREID=2&CATID=396", "_blank");
+        window.location.reload();
+      }} grow/>
+      <a href="/" className="text-sm underline nowrap">Financial Aid Policy</a> 
     </div>
   )
-  const SignedUp = <Informational text="You are signed up! We'll let you know once the lottery has run if you were selected. You are signed up! We'll let you know once the lottery has run if you were selected." />
-  const NotSelected = <BadNews text="Unfortunately, you were not selected for this trip."/>
+  //Possible components
+  const Staging = <Informational text="This trip is not yet public" />
+  const SignUpButton = (
+    <div className="w-full flex flex-col gap-2 justify-stretch items-stretch">
+      <Informational text="Signups usually close 3-4 days before the trip date." />
+      <BOCButton
+        text="Sign up for this trip!"
+        onClick={() => simpleUpdate(`/trip/${trip.id}/signup`)}
+      ></BOCButton>
+    </div>
+  )
+  const SignupsClosed = <Informational text="Signups have closed"/>
+  const SignedUp = <Informational text="You are signed up! We'll let you know once the lottery has run if you were selected." />
+  const NotSelected = <BadNews text="Unfortunately, you were not selected for this trip. Your odds of getting on a future trip are now increased!"/>
   const Selected = ( 
     <div className="flex gap-2">
       <div className="flex flex-col gap-1 w-1/4 flex-shrink-0">
-        <BOCButton text="Confirm" onClick={() => confirm()}></BOCButton>
-        <BOCButton text="Cancel" onClick={() => cancel()} negative></BOCButton>
+        <BOCButton text="Confirm" onClick={() => simpleUpdate(`/trip/${trip.id}/participate/confirm`)}></BOCButton>
+        <BOCButton text="Cancel" onClick={() => setShowPopup(true)} negative></BOCButton>
       </div>
       <GoodNews text="Congrats, you were selected! Now, confirm your spot so we know you're still interested." />
     </div>
   )
-  const Confirmed = <GoodNews text="Thanks for confirming your spot!" />
-  const Attended = <GoodNews text="Thanks for exploring with us!" />
-  const NoShow = <BadNews text="You were recorded as a no show." />
+  const ConfirmedFree = <GoodNews text="Thanks for confirming your spot!"/>
+  const Confirmed = (
+    <div className="flex gap-2">
+      <GoodNews text="Thanks for confirming your spot! Remember to pay when you can!"/>
+      { payBar }
+    </div>
+  )
+  const ConfirmedAndPaid = <GoodNews text="Thanks for confirming and paying - you're all set for the trip!"/>
+  const Attended = <GoodNews text="Thanks for exploring with us! Please join us again soon!"/>
+  const AttendedNeedPay = (
+    <div className="flex gap-2">
+      <GoodNews text="Thanks for exploring with us! Remember to pay when you can (or we'll pester you)!"/>
+      { payBar }
+    </div>
+  )
+  const NoShow = <BadNews text="You were recorded as a no show. This will negatively impact your odds of getting on future trips." />
 
   //Return based on trip role and trip status
   const role = ( trip.userData ? trip.userData.tripRole : TripRole.None );
@@ -76,11 +89,17 @@ export default function SignupButton({ trip, reqs }:{ trip: TripWithSignup, reqs
         content = NotSelected
         break;
       case SignupStatus.Selected:
-        if (trip.userData!.confirmed) content = Confirmed
-        else content = Selected
+        if (trip.userData!.confirmed) {
+          if (trip.class == TripClass.Free) content = ConfirmedFree
+          else {
+            if (trip.userData!.paid) content = ConfirmedAndPaid
+            else content = Confirmed
+          }
+        } else content = Selected
         break;
       case SignupStatus.Attended:
-        content = Attended
+        if (trip.userData!.paid || trip.class == TripClass.Free ) content = Attended
+        else content = AttendedNeedPay
         break;
       case SignupStatus.NoShow:
         content = NoShow
@@ -93,47 +112,17 @@ export default function SignupButton({ trip, reqs }:{ trip: TripWithSignup, reqs
     else content = SignupsClosed
   }
   return (
-    <div className="flex-grow">
-      {content}
-    </div>
+    <>
+      <div className="flex-grow">
+        {content}
+      </div>
+      { showPopup && (<Popup onClose={() => setShowPopup(false)}>
+        <div className="flex flex-col justify-center gap-2">
+          <h1 className="text-boc_green font-funky text-center">Are you sure?</h1>
+          <p>This action is not reversible.</p>
+          <BOCButton text="Cancel" onClick={() => simpleUpdate(`/trip/${trip.id}/participate/cancel`)} negative></BOCButton>
+        </div>
+      </Popup>)}
+    </>
   )
-    // <>
-    //   {trip?.status.toLowerCase() != "open" ? (
-    //     <div className="mt-2 p-4 bg-gray-200 border border-grey-400 rounded-lg">
-    //       <p className="text-grey-600">Signups have closed.</p>
-    //     </div>
-    //   ) : (
-    //     <div>
-    //       {role == TripRole.None ? (
-    //         <div className="mt-2 p-4 bg-[#F2DEDE] border border-red-200 rounded-lg">
-    //           <p className="text-red-600">
-    //             In order to signup for this trip, you must be{" "}
-    //             <Login>
-    //               <u>logged in</u>
-    //             </Login>
-    //             .
-    //           </p>
-    //         </div>
-    //       ) : (
-    //         <div>
-    //           <div className="w-fit">
-    //             {true ? (
-    //               <div>You are signed up!</div>
-    //             ) : (
-    //               <div>
-    //                 <BOCButton
-    //                   text="Signup for this trip!"
-    //                   onClick={() => signup()}
-    //                 ></BOCButton>
-    //                 <div className="mt-2 p-4 bg-[#D9EDF7] border border-blue-200 rounded-lg">
-    //                   <p className="text-blue-600">Signups are now open!</p>
-    //                 </div>
-    //               </div>
-    //             )}
-    //           </div>
-    //         </div>
-    //       )}
-    //     </div>
-    //   )}
-    // </>
 }

@@ -1,4 +1,5 @@
 export enum TripStatus { Staging = 'Staging', Open = 'Open', PreTrip = "Pre-Trip", PostTrip = "Post-Trip", Complete = "Complete"}
+export enum TripClass { A = 'A', B = 'B', C = 'C', D = 'D', E = 'E', F = 'F', G = 'G', H = 'H', I = 'I', J = 'J', Free = 'Z' } //I know this looks silly, plz don't make fun of me
 export interface Trip { 
   //Backend fields
   id: number,
@@ -7,7 +8,7 @@ export interface Trip {
   plannedDate: string,
   plannedEndDate: string | null,
   maxSize: number,
-  class: string | null,
+  class: TripClass | null,
   priceOverride: number | null, 
   sentenceDesc: string | null, 
   blurb: string | null, 
@@ -33,7 +34,8 @@ export interface TripSignUp {
   tripRole: TripRole;
   status: string | null;
   needPaperwork: boolean | null;
-  confirmed: boolean | null;
+  confirmed: boolean;
+  paid: boolean
   createdAt: string;
   updatedAt: string;
 }

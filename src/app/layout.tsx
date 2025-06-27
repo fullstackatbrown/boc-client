@@ -38,6 +38,7 @@ export default function RootLayout({
           <div className="min-h-screen">
             <Header />
             {children}
+            <div id="popup-root" />
           </div>
           <Footer />
         </body>
