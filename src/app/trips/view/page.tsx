@@ -5,7 +5,8 @@ import { useState, useEffect } from "react";
 
 // import api from "@/scripts/api";
 import { useSession } from "next-auth/react";
-import { makeRequesters }from "@/scripts/requests"
+import { makeRequesters }from "@/scripts/requests";
+import { TripWithSignup } from "@/models/models";
 
 import TripPageContents from "./TripPageContents";
 
@@ -13,7 +14,7 @@ export default function TripPage() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
-  const [trip, setTrip] = useState<any>(null);
+  const [trip, setTrip] = useState<TripWithSignup|null>(null);
   const [loading, setLoading] = useState(true);
 
   const { status } = useSession();
@@ -47,6 +48,6 @@ export default function TripPage() {
   if (loading) {
     return <div className="px-20 flex justify-center">Loading...</div>;
   } else {
-    return <TripPageContents trip={trip} reqs={reqs}/>
+    return <TripPageContents trip={trip!} reqs={reqs}/>
   }
 }

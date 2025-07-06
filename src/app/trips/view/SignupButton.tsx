@@ -21,16 +21,16 @@ function GoodNews({ text }: { text: string }) { return <Message text={text} bgCo
 export default function SignupButton({ trip, reqs }:{ trip: TripWithSignup, reqs: Requesters }) {
   //Signup/confirm/cancel functionality
   const { backendPost } = reqs;
-  function simpleUpdate(path: string) {
-    backendPost(path, {});
+  async function simpleUpdate(path: string) {
+    await backendPost(path, {});
     window.location.reload(); 
   }
   const [showPopup, setShowPopup] = useState(false);
   //Helper Components
   const payBar = ( 
     <div className="flex flex-col gap-1 flex-shrink-0">
-      <BOCButton text="Pay" onClick={() => { 
-        backendPost(`/trip/${trip.id}/participate/pay`, {});
+      <BOCButton text="Pay" onClick={async () => { 
+        await backendPost(`/trip/${trip.id}/participate/pay`, {});
         window.open("https://payment.brown.edu/C20460_ustores/web/store_cat.jsp?STOREID=2&CATID=396", "_blank");
         window.location.reload();
       }} grow/>

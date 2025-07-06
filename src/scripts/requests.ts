@@ -13,12 +13,21 @@ export interface Requesters {
   backendPost: (path: string, body: Object) => Promise<AxiosResponse<any, any>>,
 }
 
+export enum AuthStat { Auth = "authenticated", Unauth = "unauthenticated" }
+
 export function makeRequesters() {
   const { data: session, status } = useSession();
   const waiters = useRef<((token: string) => void)[]>([]);
+  const loadWaiters = useRef<((stat: AuthStat) => void)[]>([]);
 
   // When session becomes ready, resolve any pending calls
   useEffect(() => {
+    if (status !== "loading") {
+      console.log(status)
+      console.log(session)
+      loadWaiters.current.forEach((resolve)=>resolve(status as AuthStat));
+      loadWaiters.current = [];
+    }
     const token = session?.jwt?.accessToken;
     if (status === "authenticated" && token) {
       waiters.current.forEach((resolve) => resolve(token));
@@ -36,6 +45,20 @@ export function makeRequesters() {
       }
     });
 
+  const waitUntilLoaded = () =>
+    new Promise<AuthStat>((resolve) => {
+      if (status !== "loading") {
+        console.log(status)
+        resolve(status as AuthStat)
+      } else {
+        loadWaiters.current.push(resolve);
+      }
+    });
+
+  const sessionStatus = async () => {
+    return await waitUntilLoaded();
+  }
+
   const backendGet = async (path: string, noAuth: boolean = false) => {
     if (noAuth) {
       return api.get(path)
@@ -52,5 +75,5 @@ export function makeRequesters() {
     return api.post(path, body, { headers: { token } });
   };
 
-  return { backendGet, backendPost };
+  return { backendGet, backendPost, sessionStatus };
 }
