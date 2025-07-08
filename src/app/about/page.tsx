@@ -90,16 +90,18 @@ export default function About() {
           </Paragraph>
 
           <Paragraph>
-            We offer climbing and backpacking classes each year and run service
-            trips to improve outdoor spaces, especially around Rhode Island.
-            This year, we’re reviving movie nights, lectures, and workshops on
-            outdoor topics.
+            If you'd like to lead your own trips, our gear room should be able to
+            provide you with everything you need to propetly suit up. Consider also
+            joining our Friends of the BOC slack group or one of our general body meetings,
+            for help planning you outings and to potentially meet other adventurers with 
+            similar tastes.
           </Paragraph>
 
           <Paragraph>
-            If you’re drawn to the outdoors for community, challenge, or
+            If you're drawn to the outdoors for community, challenge, or
             renewal, join our 3,000+ member mailing list of students, faculty,
-            and staff. Want to support our mission? Donate to the BOC!
+            and staff. And then join a trip! With new trips announced and ran nearly 
+            every week, journeying out and about with us couldn't be easier!
           </Paragraph>
 
         </div>
