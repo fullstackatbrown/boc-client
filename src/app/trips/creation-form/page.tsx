@@ -33,11 +33,15 @@ const emptyForm = {
   blurb: '',
 };
 
+interface Success {
+  desc: string, 
+  link: string,
+}
 
 export default function CreateTripForm() {
   const [form, setForm] = useState<TripForm>({ ...emptyForm });
   const [error, setError] = useState<string>('');
-  const [success, setSuccess] = useState<string>('');
+  const [success, setSuccess] = useState<Success|null>(null);
   const [availableLeaders, setAvailableLeaders] = useState<string[]>([])
 
   const { backendGet, backendPost } = makeRequesters();
@@ -67,7 +71,7 @@ export default function CreateTripForm() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
+    setSuccess(null);
 
     if (!(form.class || form.priceOverride)) {
       return setError('You must provide either a class or a price override.');
@@ -90,8 +94,12 @@ export default function CreateTripForm() {
     };
 
     backendPost("/leader/create-trip", payload)
-    .then(()=>{
-      setSuccess('Trip created successfully!');
+    .then((resp)=>{
+      console.log(resp.data.id);
+      setSuccess({
+        desc: 'Trip created successfully!', 
+        link: `/trips/view?id=${resp.data.id}`
+      });
       setForm({ ...emptyForm });
     }).catch((err)=>{
       let msg;
@@ -117,7 +125,6 @@ export default function CreateTripForm() {
   useEffect(() => {
     backendGet("/leaders")
       .then((res): void => {
-        console.log(res.data)
         setAvailableLeaders(res.data.map((obj: Leader) => obj.email))
       })
       .catch((err): void => {
@@ -263,7 +270,7 @@ export default function CreateTripForm() {
 
         {/* Feedback */}
         {error && <p className="text-red-600">{error}</p>}
-        {success && <p className="text-green-600">{success}</p>}
+        {success && <p className="text-green-600">{success.desc} View trip page <a href={success.link} className="underline">here</a>.</p>}
 
         {/* Submit */}
         <button

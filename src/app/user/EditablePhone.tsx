@@ -18,7 +18,7 @@ export default function EditablePhone({ currPhone, submitPhone }: {currPhone: st
         alert("Phone number cannot be longer than 15 characters");
         setPhone("")
       } else {
-        await submitPhone(phone);
+        await submitPhone(phone)
         setShowInput(false);
       }
     }

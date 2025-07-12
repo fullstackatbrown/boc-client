@@ -23,8 +23,6 @@ export function makeRequesters() {
   // When session becomes ready, resolve any pending calls
   useEffect(() => {
     if (status !== "loading") {
-      console.log(status)
-      console.log(session)
       loadWaiters.current.forEach((resolve)=>resolve(status as AuthStat));
       loadWaiters.current = [];
     }
@@ -48,7 +46,6 @@ export function makeRequesters() {
   const waitUntilLoaded = () =>
     new Promise<AuthStat>((resolve) => {
       if (status !== "loading") {
-        console.log(status)
         resolve(status as AuthStat)
       } else {
         loadWaiters.current.push(resolve);
