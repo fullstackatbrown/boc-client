@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { TripWithSignup, TripRole, TripStatus, SignupStatus, TripClass } from "@/models/models";
 import BOCButton from "@/components/BOCButton";
-import { Requesters } from "@/scripts/requests";
+import { AuthStat, Requesters } from "@/scripts/requests";
 import Popup from "@/components/Popup";
+import { signIn } from "next-auth/react";
 
 function Message({ text, bgColor, textColor}: { text: string, bgColor: string, textColor: string }) {
   return (
@@ -20,8 +21,12 @@ function GoodNews({ text }: { text: string }) { return <Message text={text} bgCo
 
 export default function SignupButton({ trip, reqs }:{ trip: TripWithSignup, reqs: Requesters }) {
   //Signup/confirm/cancel functionality
-  const { backendPost } = reqs;
+  const { backendPost, sessionStatus } = reqs;
   async function simpleUpdate(path: string) {
+    let stat = await sessionStatus()
+    if (stat != AuthStat.Auth) { //Users may not be signed in
+      await signIn();
+    }
     await backendPost(path, {});
     window.location.reload(); 
   }

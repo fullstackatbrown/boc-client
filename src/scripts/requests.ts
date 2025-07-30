@@ -11,6 +11,7 @@ import { AxiosResponse } from "axios";
 export interface Requesters {
   backendGet: (path: string, noAuth?: boolean) => Promise<AxiosResponse<any, any>>,
   backendPost: (path: string, body: Object) => Promise<AxiosResponse<any, any>>,
+  sessionStatus: () => Promise<AuthStat>,
 }
 
 export enum AuthStat { Auth = "authenticated", Unauth = "unauthenticated" }

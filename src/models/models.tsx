@@ -51,3 +51,9 @@ export interface SimpleUser {
   lastName: string,
   email: string,
 }
+
+export interface TripParticipant extends SimpleUser {
+  status: string,
+  confirmed: boolean,
+  paid: boolean,
+}

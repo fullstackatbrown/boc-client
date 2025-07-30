@@ -5,6 +5,7 @@ import Title from "@/components/Title";
 import TripInfoBar from "./TripInfoBar";
 import { EditIcon, EditableComponent } from "./editable";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
+import BottomLeaderControls from "./BottomLeaderControls";
 
 export default function TripPageContents({ trip, reqs }:{ trip: TripWithSignup, reqs: Requesters }) {
 
@@ -29,7 +30,7 @@ export default function TripPageContents({ trip, reqs }:{ trip: TripWithSignup, 
       <Title text={trip.tripName}/>
     )}
   }
-  
+
   function TripBlurb({ editable }:{ editable: boolean }) {
     if (editable) {
       return <EditableComponent 
@@ -46,7 +47,7 @@ export default function TripPageContents({ trip, reqs }:{ trip: TripWithSignup, 
         />
     } else { return (
       <p className="my-4">{trip.blurb}</p>
-    )}
+    )} 
   }
 
   return (
@@ -57,6 +58,10 @@ export default function TripPageContents({ trip, reqs }:{ trip: TripWithSignup, 
         <main className="px-[min(13rem,20%)]">
           <TripInfoBar trip={trip} reqs={reqs}/>
           <TripBlurb editable={trip.userData?.tripRole == TripRole.Leader}/>
+          { trip.userData?.tripRole == TripRole.Leader 
+            ? <BottomLeaderControls trip={trip} reqs={reqs}/>
+            : <></>
+          }
         </main>
       </div>
     </div>
