@@ -31,6 +31,11 @@ export function makeRequesters() {
     if (status === "authenticated" && token) {
       waiters.current.forEach((resolve) => resolve(token));
       waiters.current = [];
+    } else if (status === "unauthenticated") {
+      if (waiters.current.length !== 0) {
+        //throw new Error("User unauthenticated - function requiring authentication shouldn't have been called");
+        console.log(`Unauthenticated - all authenticated backend requests will hang - pending request count: ${waiters.current.length}`);
+      }
     }
   }, [status, session]);
 
@@ -39,6 +44,9 @@ export function makeRequesters() {
       const token = session?.jwt?.accessToken;
       if (status === "authenticated" && token) {
         resolve(token);
+      } else if (status === "unauthenticated") {
+        //throw new Error("User unauthenticated - function requiring authentication shouldn't have been called");
+        console.log(`Unauthenticated - backend requests currently hanging`);
       } else {
         waiters.current.push(resolve);
       }

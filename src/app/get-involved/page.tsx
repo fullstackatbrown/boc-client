@@ -10,7 +10,9 @@ export default function MailingList() {
   const { backendPost, backendGet, sessionStatus } = makeRequesters();
 
   const handleSubmit = async () => {
-    await signIn("google")
+    if (await sessionStatus() == AuthStat.Unauth) {
+      await signIn("google")
+    }
     backendPost("/user/listserv-add", {})
       .then((_): void => { window.location.reload(); })
       .catch((err): void => { 
@@ -28,9 +30,9 @@ export default function MailingList() {
   function checkListservStatus() {
     sessionStatus()
       .then((res) => {
+        console.log(res)
         if (res == AuthStat.Unauth) setJoined(false) //User isn't logged in, so we don't know if they are signed up or not
         else {
-          console.log(res)
           backendGet("/user/")
             .then((res): void => { setJoined(res.data.joinedListserv); })
             .catch((err): void => { console.log(err); })
