@@ -1,22 +1,4 @@
 import { TripParticipant, TripStatus, TripWithSignup } from "@/models/models";
-
-type Day = {
-    day: string;
-    hours: string[];
-    info?: string;
-  };
-  
-  let dates: Day[] = [
-    {
-      day: "Monday",
-      hours: ["2pm - 4pm"],
-      info: "Gas Available (3pm - 4pm)",
-    },
-    { day: "Tuesday", hours: ["11am - 4pm", "5pm - 6pm"] },
-    { day: "Wednesday", hours: ["7:30pm - 8:30pm"] },
-    { day: "Thursday", hours: ["4:30pm - 5:30pm"], info: "Gas Available" },
-    { day: "Friday", hours: ["4pm - 5pm"], info: "Gas Available" },
-  ];
   
   export default function ParticipantList({ trip, participants }:{ trip: TripWithSignup, participants: TripParticipant[] }) {
     const extraData = !([TripStatus.Staging, TripStatus.Open].includes(trip.status));
