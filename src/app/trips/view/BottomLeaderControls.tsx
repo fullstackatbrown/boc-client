@@ -6,6 +6,7 @@ import { EditIcon, EditableComponent } from "./editable";
 import { Dispatch, ReactNode, SetStateAction, useState } from "react";
 import KeyInfoBar from "./KeyInfoBar";
 import Popup from "@/components/Popup";
+import AttendanceForm from "./AttendanceForm";
 
 
 enum StatusState { Past, Current, Next, Future }
@@ -22,7 +23,7 @@ interface StatusButtonInfo {
   onClick: ()=>void,
 }
 
-const statusButtonInfos = (trip: TripWithSignup, reqs: Requesters, setPopup: Dispatch<SetStateAction<boolean>>) => {
+const statusButtonInfos = (trip: TripWithSignup, reqs: Requesters, setPopup: Dispatch<SetStateAction<boolean>>, showAttendanceForm: boolean, setShowAttendanceForm: Dispatch<SetStateAction<boolean>>) => {
   const { backendPost } = reqs;
   const simpleUpdate = (path: string) => {
     backendPost(path, {})
@@ -74,7 +75,8 @@ const statusButtonInfos = (trip: TripWithSignup, reqs: Requesters, setPopup: Dis
         future: "Attendance",
       },
       onClick: ()=>{
-        //ATTENDANCE TAKING FUNCTIONALITY
+        if (showAttendanceForm) setShowAttendanceForm(false)
+        else setShowAttendanceForm(true)
       }
     }
   ]
@@ -124,30 +126,33 @@ const statusMap = {
   "Complete": 4,
 }
 
-function TripStatusBar({ trip, reqs, setPopup }:{ trip: TripWithSignup, reqs: Requesters, setPopup: Dispatch<SetStateAction<boolean>> }) {
+function TripStatusBar({ trip, reqs, setPopup, showAttendanceForm, setShowAttendanceForm }:{ trip: TripWithSignup, reqs: Requesters, setPopup: Dispatch<SetStateAction<boolean>>, showAttendanceForm: boolean, setShowAttendanceForm: Dispatch<SetStateAction<boolean>> }) {
   return (
-    <div className="flex gap-2">
-      { 
-        statusButtonInfos(trip, reqs, setPopup).map((buttonInf: StatusButtonInfo)=>{
-          let state;
-          if (statusMap[buttonInf.stat] < statusMap[trip.status]) { state = StatusState.Past }
-          else if (statusMap[buttonInf.stat] == statusMap[trip.status]) { state = StatusState.Current }
-          else if (statusMap[buttonInf.stat] == statusMap[trip.status] + 1) { state = StatusState.Next }
-          else { state = StatusState.Future }
-          return <StatusButton 
-              key={buttonInf.stat}
-              state={state} 
-              text={buttonInf.text} 
-              onClick={buttonInf.onClick}
-            />
-        }) 
-      }
-    </div>
+    trip.status == TripStatus.Complete 
+      ? <div className="py-4 text-xl rounded-xl text-center bg-boc_medbrown text-white font-funky">Trip Complete!</div>
+      : <div className="flex gap-2">
+        { 
+          statusButtonInfos(trip, reqs, setPopup, showAttendanceForm, setShowAttendanceForm).map((buttonInf: StatusButtonInfo)=>{
+            let state;
+            if (statusMap[buttonInf.stat] < statusMap[trip.status]) { state = StatusState.Past }
+            else if (statusMap[buttonInf.stat] == statusMap[trip.status]) { state = StatusState.Current }
+            else if (statusMap[buttonInf.stat] == statusMap[trip.status] + 1) { state = StatusState.Next }
+            else { state = StatusState.Future }
+            return <StatusButton 
+                key={buttonInf.stat}
+                state={state} 
+                text={buttonInf.text} 
+                onClick={buttonInf.onClick}
+              />
+          }) 
+        }
+      </div>
   )
 }
 
 export default function BottomLeaderControls({ trip, reqs }:{ trip: TripWithSignup, reqs: Requesters }) {
   const [popup, setPopup] = useState(false);
+  const [showAttendanceForm, setShowAttendanceForm] = useState(false);
   const sentenceDesc = <EditableComponent
       currVal={trip.sentenceDesc ? trip.sentenceDesc : ""}
       withIcon={
@@ -188,7 +193,8 @@ export default function BottomLeaderControls({ trip, reqs }:{ trip: TripWithSign
         </div>
       </div>
       <KeyInfoBar trip={trip} reqs={reqs}/>
-      <TripStatusBar trip={trip} reqs={reqs} setPopup={setPopup}/>
+      <TripStatusBar trip={trip} reqs={reqs} setPopup={setPopup} showAttendanceForm={showAttendanceForm} setShowAttendanceForm={setShowAttendanceForm}/>
+      { showAttendanceForm ? <AttendanceForm trip={trip} reqs={reqs}/> : <></> }
       { popup 
         ? <Popup onClose={()=>{setPopup(false)}}>
             <p className="mt-2">Trip will "run" automatically upon trip date</p>

@@ -1,6 +1,6 @@
 "use client"
 
-import { TripParticipant, TripStatus, TripWithSignup } from "@/models/models";
+import { SignupStatus, TripParticipant, TripStatus, TripWithSignup } from "@/models/models";
 import { Requesters } from "@/scripts/requests";
 import { AxiosResponse } from "axios";
 import { ReactNode, useState, useEffect } from "react";
@@ -131,7 +131,32 @@ export default function KeyInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs: 
       }
       break;
     case TripStatus.PostTrip:
-      content = <></>;
+      if (signups) {
+        const paidNum = signups.reduce((accum: number, tp: TripParticipant) => (tp.paid ? accum + 1 : accum), 0);
+        const bar = Bar(<div className="flex gap-3">
+            <p><span className="font-bold">Paid:</span>&nbsp;{paidNum} / <span className="text-red-500">?</span>&nbsp;<span className="italic">Take attendance to know how many payments are needed</span></p>
+          </div>);
+        content = <div className="flex flex-col gap-1">
+          <ParticipantDropdown header="Participant List" signups={signups} trip={trip}/>
+          { bar }
+        </div>
+      }
+      break;
+    case TripStatus.Complete:
+      if (signups) {
+        const paidNum = signups.reduce((accum: number, tp: TripParticipant) => (tp.paid && (tp.status == SignupStatus.Attended) ? accum + 1 : accum), 0);
+        const paymentsNeeded = signups.reduce((accum: number, tp: TripParticipant) => (tp.status == SignupStatus.Attended ? accum + 1: accum), 0);
+        const bar = Bar(<div className="flex gap-3">
+            <p>
+              <span className="font-bold">Paid:</span>&nbsp;{paidNum} / {paymentsNeeded}&nbsp;
+              { paidNum < paymentsNeeded ? <>❌</> : <>✅</> }
+            </p>
+          </div>);
+        content = <div className="flex flex-col gap-1">
+          <ParticipantDropdown header="Participant List" signups={signups} trip={trip}/>
+          { bar }
+        </div>
+      }
       break;
   }
   return (content ? content : <></>)
