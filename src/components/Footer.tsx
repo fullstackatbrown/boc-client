@@ -9,9 +9,9 @@ export default function Footer() {
   const pathname = usePathname();
 
   return (
-    <footer className={`${pathname == "/" ? "hidden" : ""} relative text-[#fcecc5] px-6 py-10 overflow-hidden`}>
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-10">
-        <div className="absolute inset-0 -z-10 -bottom-200 opacity-75">
+    <footer className={`${pathname == "/" ? "hidden" : ""} relative text-[#fcecc5] px-6 py-10 h-52 overflow-hidden`}>
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-start items-start gap-20 h-full">
+        <div className="absolute inset-0 -z-20 -bottom-200 opacity-75">
           <Image
             src={BOCBackground.src}
             alt="Footer background"
@@ -22,19 +22,21 @@ export default function Footer() {
         </div>
         <div className="absolute inset-0 bg-[#FF8A2A] opacity-30 -z-0" />
         {/* Logo and Copyright */}
-        <div className="flex flex-col items-start -z-5">
-          <Image
-            src={BOCLogo.src}
-            alt="Brown Outing Club Logo"
-            width={100}
-            height={60}
-            className="mb-2"
-          />
-          <p className="text-sm">© 2025 Brown Outing Club</p>
+        <div className="flex flex-col items-start z-10">
+          <div className="relative h-28 w-40">
+            <Image
+              src={BOCLogo.src}
+              alt="Brown Outing Club Logo"
+              fill
+              style={{ objectFit: 'contain' }}
+            />
+          </div>
+          <p className="text-sm text-boc_earthyorange">© 2025 Brown Outing Club</p>
         </div>
-
+        {/* Bar Spacer */}
+        <div className="h-full my-auto w-1 bg-boc_earthyorange"/>
         {/* Key Links */}
-        <div>
+        <div className="z-10 text-boc_earthyorange">
           <h3 className="font-bold text-lg mb-2">KEY LINKS</h3>
           <ul className="space-y-1">
             <li>
@@ -56,7 +58,7 @@ export default function Footer() {
         </div>
 
         {/* Social Links */}
-        <div>
+        <div className="z-10 text-boc_earthyorange">
           <h3 className="font-bold text-lg mb-2">FOLLOW US!</h3>
           <ul className="space-y-1">
             <li>

@@ -66,7 +66,7 @@ function NavBar() {
         { label: "Land Tribute", url: "/about/land-tribute" },
         { label: "Financial Aid", url: "/about/financial-aid"},
         { label: "Our Team", url: "/about/our-team" },
-        { label: "Photo Album", url: "/about/photo-album" },
+        //{ label: "Photo Album", url: "/about/photo-album" }, - We just gonna pretend that doesn't exist
       ],
     },
     {

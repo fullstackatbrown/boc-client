@@ -8,6 +8,7 @@ import { useRef, useState, useEffect, ReactElement } from "react";
 import { EditIcon, EditableString } from "./editable";
 import { UserPlusIcon } from "@heroicons/react/24/outline";
 import EditableCost from "./EditableCost";
+import { formatDateString } from "@/utils/utils"
 
 function classToCost(cls: string): number | undefined {
   const mapping: Record<string, number> = { //Thanks Chat
@@ -24,13 +25,6 @@ function classToCost(cls: string): number | undefined {
     Z: 0
   };
   return mapping[cls];
-}
-
-//Expects dates of the form yyyy-mm-dd (as they are stored on the backend)
-//Use this - NOT new Date().toLocaleString()! THIS WILL SHIFT THE DATE BACK A DAY (stupid timezone thing)
-function formatDateString(dateStr: string): string {
-  const [year, month, day] = dateStr.split('-');
-  return `${Number(month)}/${Number(day)}/${year}`; // e.g., 7/8/2025
 }
 
 async function findLeaderEmails(trip: TripWithSignup, reqs: Requesters): Promise<string[]> {

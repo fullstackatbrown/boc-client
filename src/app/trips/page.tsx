@@ -4,26 +4,26 @@ import Title from "@/components/Title";
 import Dropdown from "@/components/Dropdown";
 import CreationButton from "./CreationButton";
 import TripDisp from "./TripDisp";
-import { Trip, Role } from "@/models/models"
+import { Trip, Role, TripStatus } from "@/models/models"
 import { useEffect, useState, useRef } from "react";
 //import axios from "axios";
 import { makeRequesters }from "@/scripts/requests";
 
-function findSplit(trips: Trip[]): number {
-  const now = new Date();
-  for (let [idx, trip] of trips.entries()) { 
-    if (trip.date!.getTime() > now.getTime()) { 
-      return idx;
-    }
-  }
-  return trips.length
-}
+// function findSplit(trips: Trip[]): number {
+//   const now = new Date();
+//   for (let [idx, trip] of trips.entries()) { 
+//     if (trip.date!.getTime() > now.getTime()) { 
+//       return idx;
+//     }
+//   }
+//   return trips.length
+// }
+
 
 export default function Trips() {
   //Filter utilities
   const [trips, setTrips] = useState<Trip[]>([]);
   const [filteredTrips, setFilteredTrips] = useState<Trip[]>([]);
-  const [splitIdx, setSplitIdx] = useState<number>(0);
   // Filter states
   const [nameFilter, setNameFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
@@ -34,6 +34,17 @@ export default function Trips() {
   const { backendGet } = makeRequesters();
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [userRole, setUserRole] = useState<Role | null>(null)
+  const [currTrips, setCurrTrips] = useState<Trip[]>([]);
+  const [pastTrips, setPastTrips] = useState<Trip[]>([]);
+  
+  useEffect(() => { //Alter past and present trips whenever filtered trips changes
+    const [curr, past] = filteredTrips.reduce(([satisfiers, nonsatisfiers]: [Trip[], Trip[]], trip) => {
+      trip.status == TripStatus.Open ? satisfiers.push(trip) : nonsatisfiers.push(trip)
+      return [satisfiers, nonsatisfiers]
+    }, [[],[]]);
+    setCurrTrips(curr)
+    setPastTrips(past)
+  }, [filteredTrips])
 
   useEffect(() => { //Grab user's role
     backendGet("/user")
@@ -55,14 +66,13 @@ export default function Trips() {
       .then((res): void => {
         //Tie date objects to each trip, sort them by date, and initially set both trips and filtered Trips
         let trips = res.data;
-        trips.forEach((trip: Trip) => { trip.date = new Date(trip.plannedDate) })
-        trips.sort((trip1: Trip, trip2: Trip) => { return trip1.date!.getTime() - trip2.date!.getTime() })
+        // trips.forEach((trip: Trip) => { trip.date = new Date(trip.plannedDate) })
+        // trips.sort((trip1: Trip, trip2: Trip) => { return trip1.date!.getTime() - trip2.date!.getTime() })
         setTrips(trips);
         setFilteredTrips(trips);
         //Determine the idx in the trips list splitting current and past trips
-        setSplitIdx(findSplit(trips))
+        // setSplitIdx(findSplit(trips))
       }).catch((e): void => console.error("Fetching trips failed: "+e))
-      .finally(() => console.log(trips));
   }, []);
 
   // Apply filters whenever filter values change
@@ -94,7 +104,7 @@ export default function Trips() {
     }
 
     setFilteredTrips(result);
-    setSplitIdx(findSplit(result))
+    //setSplitIdx(findSplit(result))
   }, [nameFilter, dateFilter, sizeFilter, trips]);
 
   // Reset all filters
@@ -169,8 +179,8 @@ export default function Trips() {
           <h2 className="font-funky text-2xl text-boc_medbrown" >Upcoming Trips!</h2>
           <hr className="bg-boc_green border-0 h-[2px] my-3" />
         </div>
-        <TripDisp trips={filteredTrips.slice(splitIdx)}/>
-        <Dropdown header="Past Trips" content={<TripDisp trips={filteredTrips.slice(0, splitIdx)} />}/>
+        <TripDisp trips={currTrips}/>
+        <Dropdown header="Past/Closed Trips" content={<TripDisp trips={pastTrips} />}/>
       </section>
       { userRole && [Role.Leader, Role.Admin].includes(userRole) //Display trip creation button if user is a leader/admin
         ? ( 

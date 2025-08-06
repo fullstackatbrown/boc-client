@@ -5,6 +5,8 @@ import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import db from "@/scripts/firebase";
 import Title from "@/components/Title";
 
+//PAGE DISABLED CURRENTLY
+
 type ResourceData = {
   name: string;
   date: {

@@ -23,7 +23,8 @@ const config: Config = {
         boc_medbrown: "#A2826D",
         boc_lightbrown: "#FDE6BB",
         boc_yellow: "#FFE8B6",
-        boc_slate: "#425863"
+        boc_slate: "#425863",
+        boc_earthyorange: "#fece99" //"#FF8A2A"
       },
       fontSize: {
         'boc_logo_size': '75px', // Customize as needed

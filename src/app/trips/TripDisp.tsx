@@ -2,6 +2,7 @@ import { Trip } from "@/models/models"
 import Logo from "@/assets/images/header/logo.svg"
 import yArrow from "@/assets/images/trips/arrow-yellow.svg"
 import gArrow from "@/assets/images/trips/arrow-green.svg"
+import { formatDateString } from "@/utils/utils"
 
 export default function TripDisp({ trips }:{ trips: Trip[] }) {
     return (
@@ -10,7 +11,7 @@ export default function TripDisp({ trips }:{ trips: Trip[] }) {
         <div className="grid grid-cols-1 gap-2">
           {trips.length > 0 ? (
             trips.map((trip, index) => (
-              <a key={index} href={`/trips/view?id=${index + 1}`}>
+              <a key={index} href={`/trips/view?id=${trip.id}`}>
                 <div
                   className={`w-[calc(100% - 1.5rem)] pl-4 pt-4 pr-2 pb-2 rounded-[20px] drop-shadow-lg font-standard mx-3 mb-2 flex flex-col h-36
                   shadow-[4px] ${index % 2 == 0 ? "bg-boc_yellow text-black" : "bg-boc_darkgreen text-white"}`}
@@ -20,7 +21,7 @@ export default function TripDisp({ trips }:{ trips: Trip[] }) {
                     <div className="ml-4 h-12">
                       <h2 className="text-lg mb-0">{trip.tripName}</h2>
                       <p className={`mt-0 text-sm ${index % 2 == 0 ? "text-boc_medbrown" : "text-boc_slate"}`}>
-                        Date: {new Date(trip.plannedDate).toLocaleString('default', { month: 'long', day: 'numeric' })}
+                        Date: {formatDateString(trip.plannedDate)}
                       </p>
                     </div>
                   </div>
