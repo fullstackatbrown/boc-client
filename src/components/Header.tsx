@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
+import axios from 'axios';
 import api from "@/scripts/api";
 import { usePathname } from "next/navigation";
 
@@ -64,7 +65,7 @@ function NavBar() {
       dropdown: [
         { label: "About Us", url: "/about" },
         { label: "Land Tribute", url: "/about/land-tribute" },
-        { label: "Financial Aid", url: "/about/financial-aid"},
+        { label: "Financial Aid", url: "/about/financial-aid" },
         { label: "Our Team", url: "/about/our-team" },
         //{ label: "Photo Album", url: "/about/photo-album" }, - We just gonna pretend that doesn't exist
       ],
@@ -107,9 +108,10 @@ function NavBar() {
 
       const { data: userData } = await api.get("/user/profile", {
         headers: {
-          token: session.accessToken,
+          Authorization: `Bearer ${session.accessToken}`,
         },
       });
+
       setUser(`${userData.firstName} ${userData.lastName}`);
       setLoading(false);
     } catch (error) {
@@ -123,7 +125,6 @@ function NavBar() {
       updateLogin();
     }
   }, [status]);
-
 
   return (
     <nav className="px-8 py-8 flex justify-between">

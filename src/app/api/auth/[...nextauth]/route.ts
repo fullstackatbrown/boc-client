@@ -1,26 +1,63 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 
-const { handlers, signIn, signOut, auth } = NextAuth({
+export const authOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [Google],
   callbacks: {
     async jwt({ token, account, profile }) {
-      // On sign in, persist the OAuth access token to the token right here
       if (account) {
         token.accessToken = account.access_token;
-        token.id = profile.sub; // Google user ID
+        token.refreshToken = account.refresh_token;
+        token.accessTokenExpires = account.expires_at * 1000; // milliseconds
       }
-      return token;
-    },
 
+      if (Date.now() < token.accessTokenExpires) {
+        return token;
+      }
+
+      return refreshAccessToken(token);
+    },
     async session({ session, token }) {
-      // Add the token info to the session so you can access it on the client
-      session.jwt = token;
-      session.user.id = token.id; // optional
-      session.accessToken = token.accessToken; // if you want
+      // attach Google tokens to session
+      session.user = token.user;
+      session.accessToken = token.accessToken;
+      session.refreshToken = token.refreshToken;
       return session;
     },
   },
-});
+};
 
-export const { GET, POST } = handlers
+async function refreshAccessToken(token) {
+  try {
+    const url = "https://oauth2.googleapis.com/token";
+    const params = new URLSearchParams({
+      client_id: process.env.AUTH_GOOGLE_ID,
+      client_secret: process.env.AUTH_GOOGLE_SECRET,
+      grant_type: "refresh_token",
+      refresh_token: token.refreshToken,
+    });
+
+    const response = await fetch(url, {
+      method: "POST",
+      body: params,
+    });
+
+    const refreshedTokens = await response.json();
+
+    if (!response.ok) throw refreshedTokens;
+
+    return {
+      ...token,
+      accessToken: refreshedTokens.access_token,
+      accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
+      refreshToken: refreshedTokens.refresh_token ?? token.refreshToken, // fallback
+    };
+  } catch (error) {
+    console.error("Error refreshing access token", error);
+    return { ...token, error: "RefreshAccessTokenError" };
+  }
+}
+
+const { handlers, signIn, signOut, auth } = NextAuth(authOptions);
+export const { GET, POST } = handlers;

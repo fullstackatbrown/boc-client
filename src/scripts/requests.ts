@@ -3,11 +3,6 @@ import { useSession } from "next-auth/react";
 import { useRef, useEffect } from "react";
 import { AxiosResponse } from "axios";
 
-// export type Requesters = [
-//   (path: string, noAuth?: boolean) => Promise<AxiosResponse<any, any>>, 
-//   (path: string, body: Object) => Promise<AxiosResponse<any, any>>,
-// ];
-
 export interface Requesters {
   backendGet: (path: string, noAuth?: boolean) => Promise<AxiosResponse<any, any>>,
   backendPost: (path: string, body: Object) => Promise<AxiosResponse<any, any>>,
@@ -27,7 +22,7 @@ export function makeRequesters() {
       loadWaiters.current.forEach((resolve)=>resolve(status as AuthStat));
       loadWaiters.current = [];
     }
-    const token = session?.jwt?.accessToken;
+    const token = session?.accessToken;
     if (status === "authenticated" && token) {
       waiters.current.forEach((resolve) => resolve(token));
       waiters.current = [];
@@ -41,7 +36,8 @@ export function makeRequesters() {
 
   const waitUntilReady = () =>
     new Promise<string>((resolve) => {
-      const token = session?.jwt?.accessToken;
+      const token = session?.accessToken;
+      console.log(status)
       if (status === "authenticated" && token) {
         resolve(token);
       } else if (status === "unauthenticated") {
@@ -71,14 +67,14 @@ export function makeRequesters() {
     } else {
       const token = await waitUntilReady();
       if (!token) throw new Error("Token non-truthy - requests has a bug :(")
-      return api.get(path, { headers: { token } });
+      return api.get(path, { headers: { Authorization: `Bearer ${token}` } });
     }
   };
 
   const backendPost = async (path: string, body: Object) => {
     const token = await waitUntilReady();
     if (!token) throw new Error("Token non-truthy - requests has a bug :(")
-    return api.post(path, body, { headers: { token } });
+    return api.post(path, body, { headers: { Authorization: `Bearer ${token}` } });
   };
 
   return { backendGet, backendPost, sessionStatus };

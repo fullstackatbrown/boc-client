@@ -3,7 +3,6 @@
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 
-// import api from "@/scripts/api";
 import { useSession } from "next-auth/react";
 import { AuthStat, makeRequesters }from "@/scripts/requests";
 import { TripWithSignup } from "@/models/models";
@@ -15,9 +14,7 @@ export default function TripPage() {
   const id = searchParams.get("id");
 
   const [trip, setTrip] = useState<TripWithSignup|null>(null);
-  //const [loading, setLoading] = useState(true);
 
-  //const { status } = useSession();
   const reqs = makeRequesters();
   const { backendGet, sessionStatus } = reqs;
 

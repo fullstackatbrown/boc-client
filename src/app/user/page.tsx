@@ -171,7 +171,6 @@ export default function User() {
       console.error(error);
       setUserProfile(null);
       setTripDetails([]);
-      console.log("ERROR");
       setLoading(false);
     }
   };
@@ -179,10 +178,6 @@ export default function User() {
   const submitPhone = (newPhone: string) => {
     return backendPost("/user/add-phone", { phoneNum: newPhone })
   };
-
-  // const submitPhone = async () => {
-  //   await backendPost("/user/add-phone", { phoneNum: phone })
-  // };
 
   useEffect(() => {
     if (status !== "loading") {
@@ -196,20 +191,6 @@ export default function User() {
 
   return (
     <div className="h-full min-h-screen w-full px-40 py-10">
-      {/* Phone Number Edit Screen */}
-      {/* {showPhone ? (
-        <div className="fixed inset-0 bg-gray-400 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-gray-200 p-5">
-            Set Phone Number:{" "}
-            <input onChange={(e) => setPhone(e.target.value)} />
-            <div className="flex space-x-5 justify-center items-end">
-              <button onClick={() => setShowPhone(false)}>Cancel</button>
-              <button onClick={() => submitPhone()}>Submit</button>
-            </div>
-          </div>
-        </div>
-      ) : null} */}
-      {/* Site content */}
       <ProfileBar userProfile={userProfile!} submitPhone={submitPhone}/>
       <br/>
       {/* Your trips table */}

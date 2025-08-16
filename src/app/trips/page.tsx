@@ -6,19 +6,7 @@ import CreationButton from "./CreationButton";
 import TripDisp from "./TripDisp";
 import { Trip, Role, TripStatus } from "@/models/models"
 import { useEffect, useState, useRef } from "react";
-//import axios from "axios";
 import { makeRequesters }from "@/scripts/requests";
-
-// function findSplit(trips: Trip[]): number {
-//   const now = new Date();
-//   for (let [idx, trip] of trips.entries()) { 
-//     if (trip.date!.getTime() > now.getTime()) { 
-//       return idx;
-//     }
-//   }
-//   return trips.length
-// }
-
 
 export default function Trips() {
   //Filter utilities
@@ -177,7 +165,6 @@ export default function Trips() {
         <Dropdown header="Filters" content={filterEl}/>
         <div className="mx-4 mb-4">
           <h2 className="font-funky text-2xl text-boc_medbrown" >Upcoming Trips!</h2>
-          <hr className="bg-boc_green border-0 h-[2px] my-3" />
         </div>
         <TripDisp trips={currTrips}/>
         <Dropdown header="Past/Closed Trips" content={<TripDisp trips={pastTrips} />}/>
