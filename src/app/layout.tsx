@@ -2,24 +2,14 @@ import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { SessionProvider } from "next-auth/react";
-import { Chelsea_Market, Gabarito } from "next/font/google";
+
+import { chelseaMarket, gabarito } from "@/styles/fonts.ts";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
   title: "Brown Outing Club",
   description: "Brown Unversity Outing Club",
 };
-
-export const chelseaMarket = Chelsea_Market({
-  weight: "400", // Chelsea Market only has one weight
-  subsets: ["latin"],
-  display: "swap",
-});
-
-export const gabarito = Gabarito({
-  subsets: ["latin"],
-  display: "swap",
-});
 
 export default function RootLayout({
   children,
