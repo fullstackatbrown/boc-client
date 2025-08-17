@@ -34,7 +34,7 @@ function NavButton(props: { item: any }) {
       text-boc_darkbrown rounded-b-md opacity-0 invisible border-[2px] border-boc_green
       group-hover:visible group-hover:opacity-100 z-10"
         >
-          {props.item.dropdown.map((option, i) => (
+          {props.item.dropdown.map((option: any, i: any) => (
             <li
               key={i}
               onClick={() => {
@@ -115,7 +115,7 @@ function NavBar() {
       setUser(`${userData.firstName} ${userData.lastName}`);
       setLoading(false);
     } catch (error) {
-      setUser(null);
+      setUser("");
       setLoading(false);
     }
   };

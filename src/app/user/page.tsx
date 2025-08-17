@@ -114,7 +114,7 @@ function tripTable(tripsType: String, trips: Trip[]) {
   );
 }
 
-export default function User() {
+export default function Profile() {
   const [userProfile, setUserProfile] = useState<User | null>(null);
   const [tripDetails, setTripDetails] = useState<Trip[]>([]);
   const [showPastTrips, setShowPastTrips] = useState(false);

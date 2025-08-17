@@ -24,7 +24,7 @@ export default function Team() {
 
   const [selectedResource, setSelectedResource] = useState<ResourceData>();
 
-  const eventSorter = (a: Event, b: Event) => {
+  const eventSorter = (a: any, b: any) => {
     // Events without dates should go to beginning
     if (a.date && !b.date) {
       return 1;

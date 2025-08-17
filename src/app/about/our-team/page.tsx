@@ -86,7 +86,7 @@ export default function Team() {
           documents.map((doc) => [doc.id, doc.data()]),
         );
         setData(data);
-        setTeamLink(queryAssets.data().link);
+        setTeamLink(queryAssets?.data()?.link);
       } catch (error) {
         console.error("Error fetching Firestore data:", error);
       } finally {

@@ -1,6 +1,5 @@
 "use client";
 import Title from "@/components/Title";
-import Schedule from "./schedule";
 
 function Subheading(props: { children: React.ReactNode }) {
   return <h1 className="text-2xl font-bold mb-5 mt-10">{props.children}</h1>;

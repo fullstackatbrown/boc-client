@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { SessionProvider } from "next-auth/react";
 
-import { chelseaMarket, gabarito } from "@/styles/fonts.ts";
+import { chelseaMarket, gabarito } from "@/styles/fonts";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
