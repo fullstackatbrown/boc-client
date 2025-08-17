@@ -4,9 +4,9 @@ import Title from "@/components/Title";
 import Dropdown from "@/components/Dropdown";
 import CreationButton from "./CreationButton";
 import TripDisp from "./TripDisp";
-import { Trip, Role, TripStatus } from "@/models/models"
+import { Trip, Role, TripStatus } from "@/models/models";
 import { useEffect, useState, useRef } from "react";
-import { makeRequesters }from "@/scripts/requests";
+import { makeRequesters } from "@/scripts/requests";
 
 export default function Trips() {
   //Filter utilities
@@ -21,28 +21,36 @@ export default function Trips() {
   // Non-filter resources
   const { backendGet } = makeRequesters();
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const [userRole, setUserRole] = useState<Role | null>(null)
+  const [userRole, setUserRole] = useState<Role | null>(null);
   const [currTrips, setCurrTrips] = useState<Trip[]>([]);
   const [pastTrips, setPastTrips] = useState<Trip[]>([]);
-  
-  useEffect(() => { //Alter past and present trips whenever filtered trips changes
-    const [curr, past] = filteredTrips.reduce(([satisfiers, nonsatisfiers]: [Trip[], Trip[]], trip) => {
-      trip.status == TripStatus.Open ? satisfiers.push(trip) : nonsatisfiers.push(trip)
-      return [satisfiers, nonsatisfiers]
-    }, [[],[]]);
-    setCurrTrips(curr)
-    setPastTrips(past)
-  }, [filteredTrips])
 
-  useEffect(() => { //Grab user's role
+  useEffect(() => {
+    const curr: Trip[] = [];
+    const past: Trip[] = [];
+
+    filteredTrips.forEach((trip) => {
+      if (trip.status === TripStatus.Open) {
+        curr.push(trip);
+      } else {
+        past.push(trip);
+      }
+    });
+
+    setCurrTrips(curr);
+    setPastTrips(past);
+  }, [filteredTrips]);
+
+  useEffect(() => {
+    //Grab user's role
     backendGet("/user")
       .then((res): void => setUserRole(res.data.role))
       .catch((e): void => {
-        console.log(e.status, e.status !== 401)
-        if (e.status !== 401) console.error(`Fetching user data failed: ${e}`)
-        else setUserRole(Role.None) //If status is 401, user is just not logged in
-      })
-  }, [])
+        console.log(e.status, e.status !== 401);
+        if (e.status !== 401) console.error(`Fetching user data failed: ${e}`);
+        else setUserRole(Role.None); //If status is 401, user is just not logged in
+      });
+  }, []);
 
   useEffect(() => {
     if (fetched.current) {
@@ -60,7 +68,8 @@ export default function Trips() {
         setFilteredTrips(trips);
         //Determine the idx in the trips list splitting current and past trips
         // setSplitIdx(findSplit(trips))
-      }).catch((e): void => console.error("Fetching trips failed: "+e))
+      })
+      .catch((e): void => console.error("Fetching trips failed: " + e));
   }, []);
 
   // Apply filters whenever filter values change
@@ -152,7 +161,7 @@ export default function Trips() {
         Reset Filters
       </button>
     </div>
-  )
+  );
 
   return (
     <div className="relative w-full pb-10 px-20">
@@ -162,21 +171,30 @@ export default function Trips() {
       more!
       <section className="pt-5">
         {/* Filters */}
-        <Dropdown header="Filters" content={filterEl}/>
+        <Dropdown header="Filters" content={filterEl} />
         <div className="mx-4 mb-4">
-          <h2 className="font-funky text-2xl text-boc_medbrown" >Upcoming Trips!</h2>
+          <h2 className="font-funky text-2xl text-boc_medbrown">
+            Upcoming Trips!
+          </h2>
         </div>
-        <TripDisp trips={currTrips}/>
-        <Dropdown header="Past/Closed Trips" content={<TripDisp trips={pastTrips} />}/>
+        <TripDisp trips={currTrips} />
+        <Dropdown
+          header="Past/Closed Trips"
+          content={<TripDisp trips={pastTrips} />}
+        />
       </section>
-      { userRole && [Role.Leader, Role.Admin].includes(userRole) //Display trip creation button if user is a leader/admin
-        ? ( 
-          <div>
-            <CreationButton footerRef={sentinelRef} />
-            <div ref={sentinelRef} className="w-full absolute bottom-0"></div> {/* Sentinel for positioning the creation button */}
-          </div>
-        ) : (<></>)
-      }
+      {userRole && [Role.Leader, Role.Admin].includes(userRole) ? ( //Display trip creation button if user is a leader/admin
+        <div>
+          <CreationButton footerRef={sentinelRef} />
+          <div
+            ref={sentinelRef}
+            className="w-full absolute bottom-0"
+          ></div>{" "}
+          {/* Sentinel for positioning the creation button */}
+        </div>
+      ) : (
+        <></>
+      )}
     </div>
   );
 }
