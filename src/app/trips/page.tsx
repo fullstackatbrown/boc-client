@@ -29,6 +29,7 @@ export default function Trips() {
     const curr: Trip[] = [];
     const past: Trip[] = [];
 
+    console.log(typeof(filteredTrips))
     filteredTrips.forEach((trip) => {
       if (trip.status === TripStatus.Open) {
         curr.push(trip);
@@ -62,12 +63,8 @@ export default function Trips() {
       .then((res): void => {
         //Tie date objects to each trip, sort them by date, and initially set both trips and filtered Trips
         let trips = res.data;
-        // trips.forEach((trip: Trip) => { trip.date = new Date(trip.plannedDate) })
-        // trips.sort((trip1: Trip, trip2: Trip) => { return trip1.date!.getTime() - trip2.date!.getTime() })
         setTrips(trips);
         setFilteredTrips(trips);
-        //Determine the idx in the trips list splitting current and past trips
-        // setSplitIdx(findSplit(trips))
       })
       .catch((e): void => console.error("Fetching trips failed: " + e));
   }, []);
