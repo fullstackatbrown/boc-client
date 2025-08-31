@@ -9,7 +9,7 @@ import { signIn } from "next-auth/react";
 
 function Message({ text, bgColor, textColor}: { text: string, bgColor: string, textColor: string }) {
   return (
-    <div className={`p-4 rounded-lg ${bgColor} flex-grow`}>
+    <div className={`p-4 rounded-lg ${bgColor}`}>
       <p className={`line-clamp-2 overflow-scroll ${textColor}`}>{text}</p>
     </div>
   )
@@ -118,9 +118,7 @@ export default function SignupButton({ trip, reqs }:{ trip: TripWithSignup, reqs
   }
   return (
     <>
-      <div className="flex-grow">
-        {content}
-      </div>
+      {content}
       { showPopup && (<Popup onClose={() => setShowPopup(false)}>
         <div className="flex flex-col justify-center gap-2">
           <h1 className="text-boc_green font-funky text-center">Are you sure?</h1>

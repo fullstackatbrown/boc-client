@@ -1,11 +1,12 @@
 'use client'
 
 import { TripWithSignup, SimpleUser, TripRole } from "@/models/models";
-import pizzaAlan from "@/assets/images/trips/pizza-alan.jpeg"
+import imgPlaceholder from "@/assets/images/trips/img-placeholder.png"
+import Logo from "@/assets/images/header/logo.svg"
 import SignupButton from "./SignupButton";
 import { Requesters } from "@/scripts/requests";
 import { useRef, useState, useEffect, ReactElement } from "react";
-import { EditIcon, EditableString } from "./editable";
+import { EditIcon, EditableComponent, EditableString } from "./editable";
 import { UserPlusIcon } from "@heroicons/react/24/outline";
 import EditableCost from "./EditableCost";
 import { formatDateString } from "@/utils/utils"
@@ -51,6 +52,7 @@ interface EditSpecs {
   leaders: EditItems,
   tripCategory: EditItems, 
   date: EditItems,
+  endDate: EditItems,
 }
 
 const tripCats = ['Hiking', 'Camping', 'Backpacking', 'Biking', 'Climbing', 'Skiing', 'Water', 'Event', 'Running', 'Exploration', 'Local', 'Special'];
@@ -84,6 +86,14 @@ async function createEditSpecs(trip: TripWithSignup, reqs: Requesters): Promise<
           return { plannedDate: newVal } 
         },
         createCurrVal: (currVal: string) => { return (new Date(currVal)).toISOString().split('T')[0] }
+    },
+    endDate: {
+      editEl: <input type="date"/>,
+      createBody: (newVal: string) => { 
+        //alert(newVal)
+        return { plannedEndDate: newVal } 
+      },
+      createCurrVal: (currVal: string) => { return (new Date(currVal)).toISOString().split('T')[0] }
     }
   }
 }
@@ -92,7 +102,7 @@ export default function TripInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs:
   //Annoying stuff to properly set the height the image
   const infoRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState<number | undefined>(undefined);
+  const [height, setHeight] = useState<number>(0);
   const [editSpecs, setEditSpecs] = useState<EditSpecs|null>(null);
 
   useEffect(()=>{ 
@@ -134,8 +144,40 @@ export default function TripInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs:
     }
   }
 
+  function TripImage() {
+    const src = (trip.image ? trip.image : imgPlaceholder.src)
+    const baseImg = (
+      <div ref={imageRef} style={{ height }} className="w-80 flex-shrink-0 relative">
+        <img
+          src={src}
+          className="w-full h-full object-cover rounded-2xl"
+          style={{ objectPosition: 'center' }}
+        />
+      </div>
+    )
+    if (trip.userData?.tripRole == TripRole.Leader) {
+      return (
+        <EditableComponent
+          currVal={trip.image ? trip.image : ""}
+          withIcon={<>
+            {baseImg}
+            <div className="absolute top-2 right-2 bg-gray-50 aspect-square h-7 pl-1 pb-1 rounded-lg">
+              {EditIcon}
+            </div>
+          </>}
+          editEl={<input type="text" placeholder="Image URL"/>}
+          createBody={(newVal: string) => { return { image: newVal } }}
+          trip={trip}
+          reqs={reqs}
+        />
+      )
+    } else {
+      return baseImg
+    }
+  }
+
   useEffect(() => { //Effect to properly set image height - can't be done right with CSS unfortunately
-    if (infoRef.current && imageRef.current) {
+    if (infoRef.current) {
       const infoHeight = infoRef.current.offsetHeight;
       setHeight(infoHeight);
     }
@@ -147,16 +189,12 @@ export default function TripInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs:
     <div className="w-full pt-4">
       <div className="flex flex-row gap-x-4">
         {/* Image wrapper with dynamic height */}
-        <div ref={imageRef} style={{ height }} className="w-80 flex-shrink-0">
-          <img
-            src={pizzaAlan.src}
-            className="w-full h-full object-cover rounded-2xl"
-            style={{ objectPosition: 'center' }}
-          />
+        <div style={{ height }} className="w-80 flex-shrink-0 relative">
+          { TripImage() }
         </div>
 
         {/* Info panel with dynamic height reference */}
-        <div ref={infoRef} className="flex-grow flex flex-col gap-4">
+        <div ref={infoRef} className="flex flex-col gap-4 flex-grow">
           <div className="w-full bg-boc_lightgreen rounded-2xl pt-4 pb-8 px-10">
             <h2 className="w-full text-center text-boc_green font-funky text-3xl mb-3">Trip Info</h2>
             <div className="flex justify-around flex-col">
@@ -166,9 +204,15 @@ export default function TripInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs:
               <TripInfo lead="Trip Category" text={trip.category || "Not specified"} editable={
                 trip.userData?.tripRole == TripRole.Leader ? editSpecs?.tripCategory : undefined
               }/>
-              <TripInfo lead="Date" text={trip.plannedDate ? formatDateString(trip.plannedDate) : "Date not set"} editable={
+              <TripInfo lead={trip.plannedEndDate ? "Start Date" : "Date"} text={trip.plannedDate ? formatDateString(trip.plannedDate) : "Date not set"} editable={
                 trip.userData?.tripRole == TripRole.Leader ? editSpecs?.date : undefined
               } />
+              { trip.plannedEndDate
+              ? <TripInfo lead="End Date" text={formatDateString(trip.plannedEndDate)} editable={
+                trip.userData?.tripRole == TripRole.Leader ? editSpecs?.endDate : undefined
+              } />
+              : <></>
+              }
               <TripInfo lead="Cost" text={cost === 0 ? "Free!" : "$" + String(cost)} editable={
                 trip.userData?.tripRole == TripRole.Leader ? <EditableCost trip={trip} reqs={reqs} cost={cost}/> : undefined
               }/>

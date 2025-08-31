@@ -1,19 +1,21 @@
 'use client'
 
-import { useState, ChangeEvent, FormEvent, useMemo, useEffect } from 'react';
+import { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import { makeRequesters }from "@/scripts/requests"
+import { startAfter } from 'firebase/firestore';
 
 interface TripForm {
   leaders: string[];
   tripName: string;
-  //category: string;
+  category: string;
   plannedDate: string;
-  //plannedEndDate: string;
+  plannedEndDate: string;
   maxSize: string;
   class: string;
   priceOverride: string;
   sentenceDesc: string;
   blurb: string;
+  image: string;
 }
 
 interface Leader {
@@ -25,13 +27,18 @@ interface Leader {
 const emptyForm = {
   leaders: [''],
   tripName: '',
+  category: '',
   plannedDate: '',
+  plannedEndDate: '',
   maxSize: '',
   class: '',
   priceOverride: '',
   sentenceDesc: '',
   blurb: '',
+  image: '',
 };
+
+const categories = ['Hiking', 'Camping', 'Backpacking', 'Biking', 'Climbing', 'Skiing', 'Water', 'Event', 'Running', 'Exploration', 'Local', 'Special']
 
 interface Success {
   desc: string, 
@@ -43,10 +50,11 @@ export default function CreateTripForm() {
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<Success|null>(null);
   const [availableLeaders, setAvailableLeaders] = useState<string[]>([])
+  const [userEmail, setUserEmail] = useState<string|null>(null)
 
   const { backendGet, backendPost } = makeRequesters();
   
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -79,18 +87,25 @@ export default function CreateTripForm() {
     if (form.class && form.priceOverride) {
       return setError('Please provide only one: class or price override.');
     }
+    // const startDate = new Date(form.plannedDate) //MONITOR DATE USAGE!!!
+    // const endDate = (form.plannedEndDate && form.plannedEndDate !== form.plannedDate ? new Date(form.plannedEndDate) : null)
+    const endDate = (form.plannedEndDate && form.plannedEndDate !== form.plannedDate ? form.plannedEndDate : null)
+    if (endDate && new Date(form.plannedDate) > new Date(endDate)) {
+      return setError('End date must not be before start date.')
+    }
 
     const payload = {
       leaders: form.leaders.filter(email => email.trim() !== ''),
       tripName: form.tripName,
-      category: 'Special', //NEEDS TO BE CHANGED LATER
-      plannedDate: new Date(form.plannedDate),
-      plannedEndDate: null, //NEEDS TO BE CHANGED LATER
+      category: form.category,
+      plannedDate: form.plannedDate,//startDate,
+      plannedEndDate: endDate,
       maxSize: parseInt(form.maxSize, 10),
       class: form.class || null,
       priceOverride: form.priceOverride ? parseFloat(form.priceOverride) : null,
       sentenceDesc: form.sentenceDesc || null,
       blurb: form.blurb || null,
+      image: form.image || null,
     };
 
     backendPost("/leader/create-trip", payload)
@@ -123,14 +138,29 @@ export default function CreateTripForm() {
   };
 
   useEffect(() => {
-    backendGet("/leaders")
-      .then((res): void => {
-        setAvailableLeaders(res.data.map((obj: Leader) => obj.email))
-      })
-      .catch((err): void => {
-        console.error(err)
-      })
+    if (!userEmail) {
+      backendGet("/user/")
+        .then((res): void => {
+          setUserEmail(res.data.email)
+        })
+        .catch((err): void => {
+          console.error(err)
+          alert(`You shouldn't be seeing this! Please alert a website admin to this error. ERROR: ${err}`)
+        })
+    }
   }, [])
+
+  useEffect(() => {
+    if (userEmail) {
+      backendGet("/leaders")
+        .then((res): void => {
+          setAvailableLeaders(res.data.map((obj: Leader) => obj.email).filter((email: string) => email !== userEmail))
+        })
+        .catch((err): void => {
+          console.error(err)
+        })
+    }
+  }, [userEmail])
 
   const labelStyle = "block font-semibold mb-2";
   const iptStyle = "w-full p-2 border border-boc_green rounded";
@@ -175,7 +205,19 @@ export default function CreateTripForm() {
             </button>
           </div>
         </div>
-
+        {/* Category */}
+        <div>
+          <label className={labelStyle}>Category</label>
+          <select 
+            name="category"
+            value={form.category}
+            onChange={handleChange}
+            className={iptStyle}
+          >
+            <option value="" disabled>Select category</option>
+            {categories.map((cat: string) => <option key={cat} value={cat}>{cat}</option>)}
+          </select>
+        </div>
         {/* Trip Name */}
         <div>
           <label className={labelStyle}>Trip Name</label>
@@ -190,16 +232,29 @@ export default function CreateTripForm() {
           />
         </div>
         {/* Date */}
-        <div>
-          <label className={labelStyle}>Planned Date</label>
-          <input
-            name="plannedDate"
-            type="date"
-            value={form.plannedDate}
-            required
-            onChange={handleChange}
-            className={iptStyle}
-          />
+        <div className="grid grid-cols-2 gap-4 w-full">
+          <div>
+            <label className={labelStyle}>Start Date</label>
+            <input
+              name="plannedDate"
+              type="date"
+              value={form.plannedDate}
+              required
+              onChange={handleChange}
+              className={iptStyle}
+            />
+          </div>
+          <div>
+            <label className={labelStyle}>End Date (change if multi-day)</label>
+              <input
+                name="plannedEndDate"
+                type="date"
+                value={form.plannedEndDate || form.plannedDate}
+                required
+                onChange={handleChange}
+                className={iptStyle}
+              />
+          </div>
         </div>
         {/* Max Size */}
         <div>
@@ -218,7 +273,7 @@ export default function CreateTripForm() {
         {/* Class or Price Override */}
         <div className="grid grid-cols-2 gap-4 w-full">
           <div>
-            <label className={labelStyle}>Trip Class (A–J or Z for free)</label>
+            <label className={labelStyle}>Trip Class (A-J or Z for free)</label>
             <input
               name="class"
               type="text"
@@ -244,6 +299,18 @@ export default function CreateTripForm() {
               disabled={!!form.class}
             />
           </div>
+        </div>
+        {/* Display Image */}
+        <div>
+          <label className={labelStyle}>Display Image</label>
+          <input
+            name="image"
+            type="text"
+            value={form.image}
+            maxLength={512}
+            onChange={handleChange}
+            className={iptStyle}
+          />
         </div>
         {/* Descriptions */}
         <div>

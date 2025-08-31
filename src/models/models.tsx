@@ -12,6 +12,7 @@ export interface Trip {
   priceOverride: number | null, 
   sentenceDesc: string | null, 
   blurb: string | null, 
+  image: string | null,
   status: TripStatus,
   planningChecklist: string
   //Fields for Frontend convenience

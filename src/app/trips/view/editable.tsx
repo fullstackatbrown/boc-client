@@ -56,4 +56,8 @@ export function EditableComponent(props: EditParams) {
     )
 }
 
+// export function EditableImage(props: EditParams) {
+//   return 
+// }
+
 export const EditIcon = <PencilSquareIcon className="w-auto mb-1 h-5 inline text-boc_medbrown"/>;
