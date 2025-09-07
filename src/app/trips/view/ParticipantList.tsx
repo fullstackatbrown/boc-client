@@ -1,4 +1,4 @@
-import { TripParticipant, TripStatus, TripWithSignup } from "@/models/models";
+import { TripParticipant, SignupStatus, TripStatus, TripWithSignup } from "@/models/models";
   
   export default function ParticipantList({ trip, participants }:{ trip: TripWithSignup, participants: TripParticipant[] }) {
     const extraData = !([TripStatus.Staging, TripStatus.Open].includes(trip.status));
@@ -38,7 +38,7 @@ import { TripParticipant, TripStatus, TripWithSignup } from "@/models/models";
         { extraData 
         ? <>
           <Td>{part.confirmed ? "Yup!" : "Not Yet..."}</Td>
-          <Td>{part.paid ? "Yup!" : "Not Yet..."}</Td>
+          <Td>{part.status == SignupStatus.NoShow ? <span className="text-red-500">No Show</span> : part.paid ? "Yup!" : "Not Yet..."}</Td>
         </>
         : <></>
         }
@@ -48,7 +48,7 @@ import { TripParticipant, TripStatus, TripWithSignup } from "@/models/models";
   
   function Td(props: { children: React.ReactNode }) {
     return (
-      <td className="border-boc_green rounded-lg p-[5px] text-center text-boc_darkbrown border-2">
+      <td className="border-boc_green rounded-lg p-[5px] text-center text-boc_darkbrown border-2 overflow-x-scroll">
         {props.children}
       </td>
     );
