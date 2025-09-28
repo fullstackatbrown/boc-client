@@ -10,7 +10,7 @@ interface Trip { //Different from the Trip interface in models.tsx
   tripId: number;
   tripName: string;
   date: string;
-  blurb: string;
+  sentenceDesc: string;
   leaders: string[];
   lotteryInfo: string;
 }
@@ -62,7 +62,7 @@ function TripRow(data: Trip) {
     >
       <Td>
         <b className="text-blue-400">{data.tripName} </b>
-        <br /> {data.blurb}
+        <br /> {data.sentenceDesc}
       </Td>
       <Td>
         <div className="text-center w-full">{data.date}</div>
@@ -158,7 +158,7 @@ export default function Profile() {
             tripId: signup.tripId,
             tripName: tripInfo.tripName || "Unknown",
             date: new Date(tripInfo.plannedDate).toLocaleDateString(),
-            blurb: tripInfo.blurb || "No description",
+            sentenceDesc: tripInfo.sentenceDesc || "No description",
             leaders: leaders.length > 0 ? leaders : ["No leaders assigned"],
             lotteryInfo: signup.status || "Hosted Trip",
           };
