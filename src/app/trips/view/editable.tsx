@@ -1,17 +1,21 @@
 import { TripWithSignup } from "@/models/models";
 import { Requesters } from "@/scripts/requests";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
+import { AxiosResponse } from "axios";
 import { ChangeEvent, ReactElement, ReactNode, cloneElement, useState } from "react";
 
-export function EditableString(props: {currVal: string, editEl: ReactElement, onSubmit: (newVal: string)=>Promise<void>, children: ReactNode}) {
+export function EditableString(props: {currVal: string, editEl: ReactElement, onSubmit: (newVal: string)=>Promise<AxiosResponse<any,any>>, children: ReactNode}) {
   const [showInput, setShowInput] = useState(false);
   const [iptVal, setIptVal] = useState(props.currVal);
 
   const handleKeyDown = async (key: string) => {
     if (key === "Enter") {
-      await props.onSubmit(iptVal)
-      //setShowInput(false);
-      window.location.reload();
+      props.onSubmit(iptVal)
+        .then(() => window.location.reload())
+        .catch((err)=>{
+          console.log(err);
+          alert(`Request failed. More info may be found in the console. Error: ${err}"`);
+        })
     }
   };
 
@@ -48,7 +52,7 @@ export function EditableComponent(props: EditParams) {
   return (
       <EditableString currVal={props.currVal} editEl={props.editEl} onSubmit={
         async (newVal: string) => { 
-          props.reqs.backendPost(`/trip/${props.trip.id}/lead/alter`, props.createBody(newVal))
+          return props.reqs.backendPost(`/trip/${props.trip.id}/lead/alter`, props.createBody(newVal))
         }
       }>
         {props.withIcon}

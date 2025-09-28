@@ -123,11 +123,7 @@ export default function TripInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs:
       return (
         <EditableString currVal={editable.createCurrVal(text)} editEl={editable.editEl} onSubmit={
           async (newVal: string) => { 
-            reqs.backendPost(`/trip/${trip.id}/lead/alter`, editable.createBody(newVal))
-              .catch((err)=>{
-                console.log(err);
-                alert(`Request failed. More info may be found in the console. Error: ${err}"`);
-              })
+            return reqs.backendPost(`/trip/${trip.id}/lead/alter`, editable.createBody(newVal))
           }
         }>
           <div className="mb-1">
