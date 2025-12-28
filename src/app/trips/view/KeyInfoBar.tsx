@@ -7,6 +7,7 @@ import { ReactNode, useState, useEffect } from "react";
 import ParticipantList from "./ParticipantList";
 import Dropdown from "@/components/Dropdown";
 import { ArrowDownTrayIcon, ClipboardDocumentCheckIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
+import HoverButton from "@/components/HoverButton";
 
 function copyStringsToClipboard(strings: string[]) {
   const text = strings.join('\n');
@@ -59,18 +60,20 @@ function downloadSingupsCsv(signups: TripParticipant[]) {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
+
+const copyIcon = <ClipboardDocumentIcon className={`w-5 h-5 text-boc_darkgreen`}/>
+const copiedIcon = <ClipboardDocumentCheckIcon className={`w-5 h-5 text-boc_darkgreen`}/>
 function ParticipantDropdown({ header, signups, trip }:{ header: string, signups: TripParticipant[], trip: TripWithSignup }) {
-  const copyIcon = <ClipboardDocumentIcon className={`w-5 h-5 text-boc_darkgreen`}/>;
   const [currCopyIcon, setCurrCopyIcon] = useState<ReactNode>(copyIcon);
   return <Dropdown
     header={header}
     content={<ParticipantList trip={trip} participants={signups}/>}
     sideActions={[
       { 
-        header: "Copy All Emails",
+        header: "Copy Emails",
         icon: copyIcon,
         repIcon: {
-          replacementIcon: <ClipboardDocumentCheckIcon className={`w-5 h-5 text-boc_darkgreen`}/>,
+          replacementIcon: copiedIcon,
           currIcon: currCopyIcon,
           setCurrIcon: setCurrCopyIcon,
         },
@@ -85,13 +88,47 @@ function ParticipantDropdown({ header, signups, trip }:{ header: string, signups
   />
 }
 
+function NonSelectedEmailButtons({ signups }:{ signups: TripParticipant[] }) {
+  const waitlistedEmails = signups.filter((su) => su.status == SignupStatus.Waitlisted).map((su) => su.email);
+  const notSelectedEmails = signups.filter((su) => su.status == SignupStatus.NotSelected).map((su) => su.email);
+  const [currWaitlistCopyIcon, setCurrWaitlistCopyIcon] = useState<ReactNode>(copyIcon);
+  const [currNotSelectedCopyIcon, setCurrNotSelectedCopyIcon] = useState<ReactNode>(copyIcon);
+  return (
+    <div className="w-full flex justify-start">
+      <HoverButton 
+        header="Copy Waitlist Emails" 
+        icon={copyIcon}
+        repIcon={{
+          replacementIcon: copiedIcon,
+          currIcon: currWaitlistCopyIcon,
+          setCurrIcon: setCurrWaitlistCopyIcon,
+        }}
+        onClick={() => copyStringsToClipboard(waitlistedEmails)}
+      />
+      <HoverButton 
+        header="Copy Not Selected Emails" 
+        icon={copyIcon}
+        repIcon={{
+          replacementIcon: copiedIcon,
+          currIcon: currNotSelectedCopyIcon,
+          setCurrIcon: setCurrNotSelectedCopyIcon,
+        }}
+        onClick={() => copyStringsToClipboard(notSelectedEmails)}
+      />
+    </div>
+  )
+}
+
 export default function KeyInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs: Requesters }) {
   const { backendGet } = reqs;
   const [signups, setSignups] = useState<TripParticipant[]|null>(null);
+  const [selectedSignups, setSelectedSignups] = useState<TripParticipant[]|null>(null);
   useEffect(()=>{
     backendGet(`/trip/${trip.id}/lead/participants`)
-      .then((res: AxiosResponse<any,any>) => setSignups(res.data))
-      .catch((err) => alert(`ERROR: ${err}`));
+      .then((res: AxiosResponse<any,any>) => {
+        setSignups(res.data)
+        setSelectedSignups(res.data.filter((signup: TripParticipant) => signup.status == SignupStatus.Selected))
+      }).catch((err) => alert(`ERROR: ${err}`));
   },[])
   const Bar = (text: ReactNode) => <div className="p-4 rounded-lg bg-gray-200 w-full">{text}</div>
   let content;
@@ -115,18 +152,17 @@ export default function KeyInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs: 
       }
       break;
     case TripStatus.PreTrip:
-      if (signups) {
-        const confirmedNum = signups.reduce((accum: number, tp: TripParticipant) => (tp.confirmed ? accum + 1 : accum), 0);
-        const pendingNum = signups.length - confirmedNum;
-        const paidNum = signups.reduce((accum: number, tp: TripParticipant) => (tp.paid ? accum + 1 : accum), 0);
+      if (signups && selectedSignups) {
+        const confirmedNum = selectedSignups.reduce((accum: number, tp: TripParticipant) => (tp.confirmed ? accum + 1 : accum), 0);
+        const paidNum = selectedSignups.reduce((accum: number, tp: TripParticipant) => (tp.paid ? accum + 1 : accum), 0);
         const bar = Bar(<div className="flex gap-3">
-            <p><span className="font-bold">Pending:</span>&nbsp;{pendingNum}</p>
-            <p><span className="font-bold">Confirmed:</span>&nbsp;{confirmedNum}</p>
-            <p><span className="font-bold">Paid:</span>&nbsp;{paidNum}</p>
+            <p><span className="font-bold">Confirmed:</span>&nbsp;{confirmedNum} / {selectedSignups.length}</p>
+            <p><span className="font-bold">Paid:</span>&nbsp;{paidNum} / {selectedSignups.length}</p>
           </div>);
         content = <div className="flex flex-col gap-1">
-          <ParticipantDropdown header="Participant List" signups={signups} trip={trip}/>
+          <ParticipantDropdown header="Participant List" signups={selectedSignups} trip={trip}/>
           { bar }
+          <NonSelectedEmailButtons signups={signups} />
         </div>
       }
       break;

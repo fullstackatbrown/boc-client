@@ -29,7 +29,7 @@ export interface User extends SimpleUser {
 }
 
 export enum TripRole { Leader = 'Leader', Participant = 'Participant', None = 'None' }
-export enum SignupStatus { SignedUp = 'Signed Up', Selected = 'Selected', NotSelected = 'Not Selected', Attended = 'Attended', NoShow = 'No Show' }
+export enum SignupStatus { SignedUp = 'Signed Up', Selected = 'Selected', NotSelected = 'Not Selected', Waitlisted = 'Waitlisted', Attended = 'Attended', NoShow = 'No Show' }
 export interface TripSignUp {
   tripId: number;
   tripRole: TripRole;

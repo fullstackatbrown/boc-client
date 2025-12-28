@@ -41,6 +41,8 @@ function TripRow(data: Trip) {
         return "bg-green-500 text-white";
       case "selected":
         return "bg-green-500 text-black";
+      case "waitlisted":
+        return "bg-blue-500 text-black";
       case "not selected":
         return "bg-orange-500 text-black";
       case "attended":

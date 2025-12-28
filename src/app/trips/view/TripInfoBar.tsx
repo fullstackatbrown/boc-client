@@ -135,7 +135,7 @@ export default function TripInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs:
           </div>
         </EditableString>
       )
-    } else { //We know now that editable is a ReactElement and can just be returned as is - this exist to handle EditableCost
+    } else { //We know now that editable is a ReactElement and can just be returned as is - this exists to handle EditableCost
       return editable
     }
   }

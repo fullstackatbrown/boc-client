@@ -1,23 +1,12 @@
 import { Dispatch, ReactNode, SetStateAction, useState } from 'react';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
-
-interface ReplaceableIcon {
-  replacementIcon: ReactNode;
-  currIcon: ReactNode;
-  setCurrIcon: Dispatch<SetStateAction<ReactNode>>;
-}
-
-interface SideAction {
-  header: string;
-  icon: ReactNode;
-  repIcon?: ReplaceableIcon;
-  onClick: () => void;
-}
+import HoverButton from '@/components/HoverButton';
+import { HoverButtonProps } from '@/components/HoverButton';
 
 interface DropdownProps {
   header: string;
   content: ReactNode;
-  sideActions?: SideAction[];
+  sideActions?: HoverButtonProps[];
 }
 
 const Dropdown: React.FC<DropdownProps> = ({ header, content, sideActions }) => {
@@ -39,19 +28,20 @@ const Dropdown: React.FC<DropdownProps> = ({ header, content, sideActions }) => 
         </button>
         { sideActions
           ? sideActions.map((sideAc) => {
-            return (
-              <button
-                key={sideAc.header}
-                className="flex justify-start items-center px-4 py-3 text-lef hover:bg-boc_lightbrown transition rounded-2xl"
-                onClick={() => {
-                  if (sideAc.repIcon) { sideAc.repIcon.setCurrIcon(sideAc.repIcon.replacementIcon) }
-                  sideAc.onClick()
-                }}
-              >
-                <span className="text-boc_darkgreen font-medium mr-2">{sideAc.header}</span>
-                {sideAc.repIcon ? sideAc.repIcon.currIcon : sideAc.icon}
-              </button>
-            )
+            return <HoverButton key={sideAc.header} header={sideAc.header} icon={sideAc.icon} repIcon={sideAc.repIcon} onClick={sideAc.onClick}/>
+            // (
+            //   <button
+            //     key={sideAc.header}
+            //     className="flex justify-start items-center px-4 py-3 text-lef hover:bg-boc_lightbrown transition rounded-2xl"
+            //     onClick={() => {
+            //       if (sideAc.repIcon) { sideAc.repIcon.setCurrIcon(sideAc.repIcon.replacementIcon) }
+            //       sideAc.onClick()
+            //     }}
+            //   >
+            //     <span className="text-boc_darkgreen font-medium mr-2">{sideAc.header}</span>
+            //     {sideAc.repIcon ? sideAc.repIcon.currIcon : sideAc.icon}
+            //   </button>
+            // )
           })
           : <></>}
       </div>

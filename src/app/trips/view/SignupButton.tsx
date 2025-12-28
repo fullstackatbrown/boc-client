@@ -65,6 +65,16 @@ export default function SignupButton({ trip, reqs }:{ trip: TripWithSignup, reqs
       <GoodNews text="Congrats, you were selected! Now, confirm your spot so we know you're still interested." />
     </div>
   )
+  const Waitlisted = ( 
+    <div className="flex gap-2">
+      <div className="flex flex-col gap-1 w-1/4 flex-shrink-0">
+        <BOCButton text="Confirm" onClick={() => simpleUpdate(`/trip/${trip.id}/participate/confirm`)}></BOCButton>
+        <BOCButton text="Cancel" onClick={() => setShowPopup(true)} negative></BOCButton>
+      </div>
+      <Informational text="You are currently on the waitlist. Confirm your interest now to jump to the top of the waitlist!"/>
+    </div>
+  )
+  const WaitlistedConfrimed = <Informational text="Thanks for confirming your interest! Your status will update to Selected if you are chosen off the waitlist." />
   const ConfirmedFree = <GoodNews text="Thanks for confirming your spot!"/>
   const Confirmed = (
     <div className="flex gap-2">
@@ -92,6 +102,10 @@ export default function SignupButton({ trip, reqs }:{ trip: TripWithSignup, reqs
         break;
       case SignupStatus.NotSelected:
         content = NotSelected
+        break;
+      case SignupStatus.Waitlisted:
+        if (trip.userData!.confirmed) content = WaitlistedConfrimed
+        else content = Waitlisted
         break;
       case SignupStatus.Selected:
         if (trip.userData!.confirmed) {
