@@ -3,11 +3,12 @@
 import { SignupStatus, TripParticipant, TripStatus, TripWithSignup } from "@/models/models";
 import { Requesters } from "@/scripts/requests";
 import { AxiosResponse } from "axios";
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState, useEffect, SetStateAction, Dispatch } from "react";
 import ParticipantList from "./ParticipantList";
 import Dropdown from "@/components/Dropdown";
-import { ArrowDownTrayIcon, ClipboardDocumentCheckIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
+import { ArrowDownTrayIcon, ClipboardDocumentCheckIcon, ClipboardDocumentIcon, UserPlusIcon } from "@heroicons/react/24/outline";
 import HoverButton from "@/components/HoverButton";
+import Popup from "@/components/Popup";
 
 function copyStringsToClipboard(strings: string[]) {
   const text = strings.join('\n');
@@ -61,30 +62,47 @@ function downloadSingupsCsv(signups: TripParticipant[]) {
   URL.revokeObjectURL(url);
 }
 
+function addParticipant(trip: TripWithSignup, reqs: Requesters, setAddParticipantPopup: Dispatch<SetStateAction<boolean>>) {
+  const { backendPost } = reqs;
+  backendPost(`/trip/${trip.id}/lead/add-participant`, {})
+    .then((res) => {
+      if (res.data.success) window.location.reload();
+      else setAddParticipantPopup(true);
+    })
+    .catch((err) => alert(`You shouldn't be seeing this! Send this message to a site administrator. ERROR: ${err}`));
+}
+
 const copyIcon = <ClipboardDocumentIcon className={`w-5 h-5 text-boc_darkgreen`}/>
 const copiedIcon = <ClipboardDocumentCheckIcon className={`w-5 h-5 text-boc_darkgreen`}/>
-function ParticipantDropdown({ header, signups, trip }:{ header: string, signups: TripParticipant[], trip: TripWithSignup }) {
+function ParticipantDropdown({ header, signups, trip, reqs, setParticipantPopup }:{ header: string, signups: TripParticipant[], trip: TripWithSignup, reqs?: Requesters, setParticipantPopup?: Dispatch<SetStateAction<boolean>> }) {
+  const addParticipantsIcon = <UserPlusIcon className={`w-5 h-5 text-boc_darkgreen`}/>;
   const [currCopyIcon, setCurrCopyIcon] = useState<ReactNode>(copyIcon);
+  let sideActions = [
+    { 
+      header: "Copy Emails",
+      icon: copyIcon,
+      repIcon: {
+        replacementIcon: copiedIcon,
+        currIcon: currCopyIcon,
+        setCurrIcon: setCurrCopyIcon,
+      },
+      onClick: () => { copyStringsToClipboard(signups.map((tp) => tp.email)) }
+    },
+    {
+      header: "Download Table as CSV",
+      icon: <ArrowDownTrayIcon className={`w-5 h-5 text-boc_darkgreen`}/>,
+      onClick: () => { downloadSingupsCsv(signups) }
+    }
+  ];
+  if (setParticipantPopup && reqs) sideActions.push({
+    header: "Add Participant from Waitlist",
+    icon: addParticipantsIcon,
+    onClick: () => { addParticipant(trip, reqs, setParticipantPopup) }
+  })
   return <Dropdown
     header={header}
-    content={<ParticipantList trip={trip} participants={signups}/>}
-    sideActions={[
-      { 
-        header: "Copy Emails",
-        icon: copyIcon,
-        repIcon: {
-          replacementIcon: copiedIcon,
-          currIcon: currCopyIcon,
-          setCurrIcon: setCurrCopyIcon,
-        },
-        onClick: () => { copyStringsToClipboard(signups.map((tp) => tp.email)) }
-      },
-      {
-        header: "Download Table as CSV",
-        icon: <ArrowDownTrayIcon className={`w-5 h-5 text-boc_darkgreen`}/>,
-        onClick: () => { downloadSingupsCsv(signups) }
-      }
-    ]}
+    content={<ParticipantList trip={trip} participants={signups} reqs={reqs}/>}
+    sideActions={sideActions}
   />
 }
 
@@ -123,6 +141,7 @@ export default function KeyInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs: 
   const { backendGet } = reqs;
   const [signups, setSignups] = useState<TripParticipant[]|null>(null);
   const [selectedSignups, setSelectedSignups] = useState<TripParticipant[]|null>(null);
+  const [addParticipantPopup, setAddParticipantPopup] = useState<boolean>(false);
   useEffect(()=>{
     backendGet(`/trip/${trip.id}/lead/participants`)
       .then((res: AxiosResponse<any,any>) => {
@@ -160,7 +179,7 @@ export default function KeyInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs: 
             <p><span className="font-bold">Paid:</span>&nbsp;{paidNum} / {selectedSignups.length}</p>
           </div>);
         content = <div className="flex flex-col gap-1">
-          <ParticipantDropdown header="Participant List" signups={selectedSignups} trip={trip}/>
+          <ParticipantDropdown header="Participant List" signups={selectedSignups} trip={trip} reqs={reqs} setParticipantPopup={setAddParticipantPopup}/>
           { bar }
           <NonSelectedEmailButtons signups={signups} />
         </div>
@@ -195,5 +214,14 @@ export default function KeyInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs: 
       }
       break;
   }
-  return (content ? content : <></>)
+  return (content 
+    ? <>
+      { content }
+      { addParticipantPopup 
+        ? <Popup onClose={()=>{setAddParticipantPopup(false)}}>
+            <p className="mt-2">No more signups on the waitlist to add.</p>
+          </Popup>
+        : <></>
+      }
+    </> : <></>)
 }

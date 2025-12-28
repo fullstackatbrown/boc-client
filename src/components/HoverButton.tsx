@@ -10,6 +10,7 @@ export interface HoverButtonProps {
     header: string;
     icon: ReactNode;
     repIcon?: ReplaceableIcon;
+    negative?: boolean;
     onClick: () => void;
   }
 
@@ -22,7 +23,7 @@ export default function HoverButton(props: HoverButtonProps) {
             props.onClick()
           }}
         >
-          <span className="text-boc_darkgreen font-medium mr-2">{props.header}</span>
+          <span className={`${props.negative ? "text-red-500" : "text-boc_darkgreen"} font-medium mr-2`}>{props.header}</span>
           {props.repIcon ? props.repIcon.currIcon : props.icon}
         </button>
       )
