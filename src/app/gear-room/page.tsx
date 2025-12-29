@@ -1,7 +1,11 @@
 "use client";
 import Title from "@/components/Title";
 import Schedule from "./schedule"
+import { Day } from "./schedule"
 import BigDropdown from "@/components/BigDropdown";
+import { useEffect, useState } from "react";
+import { doc, getDoc, getDocs } from "firebase/firestore";
+import db from "@/scripts/firebase";
 
 // function Subheading(props: { children: React.ReactNode }) {
 //   return (
@@ -21,9 +25,31 @@ function HorSeparator() {
   return <div className="h-0 w-[99%] mx-[0.5%] border border-boc_lightgreen rounded-full"></div>
 }
 
-
-
 export default function GearRoom() {
+  const [managers, setManagers] = useState<string>("loading...");
+  const [email, setEmail] = useState<string>("");
+  const [hours, setHours] = useState<Day[]>([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const contact = (await getDoc(doc(db, "gear-room", "contact"))).data();
+        const hours = (await getDoc(doc(db, "gear-room", "hours"))).data();
+        if (!contact) throw new Error("Unable to find data in contact doc");
+        else {
+          setManagers(contact.managers);
+          setEmail(contact.email);
+        }
+        if (!hours) throw new Error("Unable to find data in hours doc");
+        else {
+          setHours(hours.schedule);
+        }
+      } catch (error) {
+        console.error("Error fetching Firestore data:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
     <div className="h-full w-full px-20 py-10">
       <Title text="Gear Room" />
@@ -43,7 +69,7 @@ export default function GearRoom() {
           visit our gear room during open hours!
         </Paragraph>
         <BigDropdown header="Gear Room Hours" content={
-          <Schedule />
+          <Schedule dates={hours}/>
         }/>
         <HorSeparator/>
         <BigDropdown header="Rental Information" content={
@@ -77,8 +103,8 @@ export default function GearRoom() {
         <HorSeparator/>
         <p className="text-xl font-[100] text-justify leading-10 mt-3">
           More questions regarding gear rental or our inventory?
-          Please email us at outing@brown.edu or contact our gear room managers
-          Cate & Ayo [<a href="mailto:ifadayo_engel-halfkenny@brown.edu;catherine_latimer@brown.edu" target="_blank" className="underline">email us!</a>].
+          Please email us at outing@brown.edu or contact our gear room managers 
+          {` ${managers} `} [<a href={`mailto:${email}`} target="_blank" className="underline">email us!</a>].
         </p>
         {/* <Subheading>Gear Room Open Hours</Subheading>
         <div className="flex">

@@ -3,8 +3,30 @@ import Title from "@/components/Title";
 import Dropdown from "@/components/Dropdown";
 
 import Rafting from "@/assets/images/about/rafting.jpg";
+import { useEffect, useState } from "react";
+import db from "@/scripts/firebase";
+import { getDoc, doc, collection, getDocs } from "firebase/firestore";
 
 export default function LandAcknowledgement() {
+  const [treasurers, setTreasurers] = useState<string>("loading...");
+  const [email, setEmail] = useState<string>("");
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const treasurer1 = (await getDoc(doc(db, "team", "treasurer1"))).data();
+        const treasurer2 = (await getDoc(doc(db, "team", "treasurer2"))).data();
+        if (!(treasurer1 && treasurer2)) throw new Error("Unable to find the treasurer data");
+        else {
+          setTreasurers(` ${treasurer1.name} and ${treasurer2.name} `);
+          setEmail(`${treasurer1.email};${treasurer2.email}`);
+        }
+      } catch (error) {
+        console.error("Error fetching Firestore data:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
     <div className="h-full w-full px-20 pt-10 pb-5">
       <Title text="Financial Aid" />
@@ -28,7 +50,7 @@ export default function LandAcknowledgement() {
           about payment if we don't have it!).
           <br/><br/>
           For questions about financial aid or reimbursements (or anything really!), please reach out to our treasurers 
-          William Stone and Alex Tully [<a href="mailto:william_l_stone@brown.edu;alexander_tully@brown.edu" className="underline">email us!</a>].
+          {treasurers} [<a href={`mailto:${email}`} className="underline">email us!</a>].
         </p>
         {/* <hr className="border-t-1.5 border-gray-300 w-24 mx-auto my-4" /> */}
         <div className="pl-24 flex-shrink-0">
