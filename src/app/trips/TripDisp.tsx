@@ -1,12 +1,17 @@
+"use client";
+
 import { Trip } from "@/models/models"
-import Logo from "@/assets/images/header/logo.svg"
+// Note: Logo import removed as it is replaced by dynamic TripIcon
 import yArrow from "@/assets/images/trips/arrow-yellow.svg"
 import gArrow from "@/assets/images/trips/arrow-green.svg"
 import { formatDateString } from "@/utils/utils"
+// CHANGE: Imported the new dynamic TripIcon component
+import TripIcon from "@/components/TripIcon"
 
 export default function TripDisp({ trips }:{ trips: Trip[] }) {
     return (
-      <div className="overflow-x-auto mt-2 mb-3 max-h-[36rem] overflow-y-scroll"> {/* 36rem is just enough to see 4 cards, which seems good to me... I'm amenable to changing though */}
+      /* 36rem is just enough to see 4 cards, which seems good to me... I'm amenable to changing though */
+      <div className="overflow-x-auto mt-2 mb-3 max-h-[36rem] overflow-y-scroll"> 
         {/* Trip Cards */} 
         <div className="grid grid-cols-1 gap-2">
           {trips.length > 0 ? (
@@ -17,7 +22,20 @@ export default function TripDisp({ trips }:{ trips: Trip[] }) {
                   shadow-[4px] ${index % 2 == 0 ? "bg-boc_yellow text-black" : "bg-boc_darkgreen text-white"}`}
                 >
                   <div className="w-full px-2 flex flex-grow-0" >
-                    <img src={Logo.src} className="aspect-square h-12 flex-grow-0"/> {/* Using logo as placeholder icon for now*/}
+                    {/* CHANGE: Replaced static Logo <img> with dynamic <TripIcon />.
+                      - items-center added to parent div to ensure vertical alignment.
+                      - size={44} matches the visual weight of previous h-12 img.
+                      - className logic ensures readability on both yellow and green cards.
+                    */}
+                    <div className="flex items-center justify-center h-12 flex-grow-0">
+                      <TripIcon 
+                        type={trip.category} 
+                        size={44} 
+                        weight="duotone"
+                        className={index % 2 == 0 ? "text-boc_medbrown" : "text-white"}
+                      />
+                    </div>
+                    
                     <div className="ml-4 h-12">
                       <h2 className="text-lg mb-0">{trip.tripName}</h2>
                       <p className={`mt-0 text-sm ${index % 2 == 0 ? "text-boc_medbrown" : "text-boc_slate"}`}>
@@ -40,4 +58,4 @@ export default function TripDisp({ trips }:{ trips: Trip[] }) {
         </div>
       </div>
     )
-  }
+}
