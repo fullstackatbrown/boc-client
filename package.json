@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@phosphor-icons/react": "^2.1.10",
     "axios": "^1.8.2",
     "firebase": "^11.2.0",
     "install": "^0.13.0",
