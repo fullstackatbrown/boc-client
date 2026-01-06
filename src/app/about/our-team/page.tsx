@@ -1,76 +1,46 @@
 "use client";
-import React from "react";
-import { useEffect, useState } from "react";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { collection, getDocs, doc, getDoc} from "firebase/firestore";
+import { useRouter } from "next/navigation";
 import Title from "@/components/Title";
 import db from "@/scripts/firebase";
 
 type ResourceData = {
+  id: string;
   name: string;
   image: string;
   index: number;
   display: boolean;
   position: string;
+  category: string;
+  email?: string;
 };
 
-function TeamHeader(props: any) {
-  return (
-    <b>
-      <h1 className="text-4xl py-5 mb-8">{props.text}</h1>
-    </b>
-  );
-}
-
 export default function Team() {
-  const [info, setData] = useState<Object>({});
-  const [teamLink, setTeamLink] = useState();
+  const [info, setData] = useState<ResourceData[]>([]);
+  const [teamLink, setTeamLink] = useState("");
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  const [selectedResource, setSelectedResource] = useState<ResourceData>();
+  function Card({ resource }: { resource: ResourceData }) {
+    const isGeneral = resource.category === "general";
+    const imagePath = resource.image || "https://via.placeholder.com/400?text=Photo+Coming+Soon";
 
-  function Card(props: any) {
     return (
-      <div className="rounded-lg p-6 flex flex-col items-center max-w-sm">
-        <img
-          className="w-80 h-80 object-cover rounded-2xl mb-4 mx-auto shadow-lg"
-          src={props.resource.image}
-          alt={props.resource.name}
-        />
-        <h2 className="font-funky text-gray-800 text-2xl font-semibold text-center py-2">
-          {props.resource.name}
-        </h2>
-        <h2 className="text-gray-800 text-2xl font-semibold text-center py-2">
-          {props.resource.position}
-        </h2>
-      </div>
-    );
-  }
-
-  function Section(props: any) {
-    return (
-      <div className="flex flex-col items-center justify-center">
-        <TeamHeader text={props.header} />
-        <div className={`flex flex-wrap justify-center gap-6 px-10`}>
-          {Object.values(info)
-            .sort((a, b) => a.index - b.index)
-            .map((resource, index) => (
-              <Card resource={resource} key={index} />
-            ))}
+      <div 
+        onClick={() => router.push(`/team/${resource.id}`)}
+        className="flex flex-col items-center w-full max-w-sm cursor-pointer group outline-none"
+      >
+        <div className="w-full aspect-square overflow-hidden rounded-2xl shadow-lg mb-4 transition-transform duration-200 group-hover:scale-[1.02]">
+          <img className="w-full h-full object-cover" src={imagePath} alt={resource.name} />
         </div>
-      </div>
-    );
-  }
-
-  function TeamPicture() {
-    return (
-      <div className="flex flex-col items-center justify-center">
-        <TeamHeader text="Team Picture" />
-        <div className={`flex flex-wrap justify-center gap-6 px-10`}>
-          <img
-            className="object-cover rounded-2xl mb-4 mx-auto shadow-lg"
-            src={teamLink}
-          />
-        </div>
+        <h2 className="font-funky text-gray-800 text-2xl font-semibold text-center leading-tight">
+          {resource.name}
+        </h2>
+        {/* Hide position for general trip leaders to avoid redundancy */}
+        {!isGeneral && (
+          <p className="text-gray-600 text-lg text-center mt-1">{resource.position}</p>
+        )}
       </div>
     );
   }
@@ -80,12 +50,11 @@ export default function Team() {
       try {
         const querySnapshot = await getDocs(collection(db, "team"));
         const queryAssets = await getDoc(doc(db, "assets", "team-picture"));
-
-        const documents = querySnapshot.docs;
-        const data = Object.fromEntries(
-          documents.map((doc) => [doc.id, doc.data()]),
-        );
-        setData(data);
+        const documents = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        } as ResourceData));
+        setData(documents);
         setTeamLink(queryAssets?.data()?.link);
       } catch (error) {
         console.error("Error fetching Firestore data:", error);
@@ -93,21 +62,39 @@ export default function Team() {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
+  const coreLeadership = info.filter(m => m.category === "core" && m.display !== false).sort((a, b) => a.index - b.index);
+  const tripLeaders = info.filter(m => m.category === "general" && m.display !== false).sort((a, b) => a.index - b.index);
+
+  if (loading) return <div className="p-20 text-center font-funky text-xl">Loading...</div>;
+
   return (
-    <div className="h-full w-full px-20 py-10">
+    <div className="min-h-screen w-full px-10 md:px-20 py-10">
+
       <Title text="Our Team" />
-      <section className="flex flex-col items-center justify-center">
-        <div className="flex flex-col items-center justify-center pb-10">
-          <div className="flex flex-col items-center justify-center">
-            <Section header="Core Leadership" keyword="Leadership" width={3} />
-            <hr className="my-10" />
-            <TeamPicture />
-          </div>
+      
+      <section className="flex flex-col items-center mt-8">
+        <h1 className="text-4xl font-bold py-5 mb-4 text-center">Core Leadership</h1>
+        <div className="flex flex-wrap justify-center gap-10">
+          {coreLeadership.map((member) => <Card resource={member} key={member.id} />)}
         </div>
+
+        {/* Spacer replaces the blue lines */}
+        <div className="h-20 w-full" />
+
+        <h1 className="text-4xl font-bold py-5 mb-4 text-center">Trip Leaders</h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12 w-full max-w-7xl px-4">
+          {tripLeaders.map((member) => <Card resource={member} key={member.id} />)}
+        </div>
+
+        <div className="h-24 w-full" />
+        
+        {/* <h1 className="text-4xl font-bold py-5 mb-4 text-center">Team Picture</h1>
+        <div className="w-full flex justify-center">
+          <img className="w-full max-w-5xl object-cover rounded-3xl shadow-xl" src={teamLink} alt="Outing Club Group" />
+        </div> */}
       </section>
     </div>
   );
