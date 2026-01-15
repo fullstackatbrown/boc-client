@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { TripWithSignup, TripRole, TripStatus, SignupStatus, TripClass } from "@/models/models";
 import BOCButton from "@/components/BOCButton";
 import { AuthStat, Requesters } from "@/scripts/requests";
@@ -20,7 +20,15 @@ function Informational({ text }:{ text: string }) { return <Message text={text} 
 function BadNews({ text }: { text: string }) { return <Message text={text} bgColor="bg-red-200" textColor="text-red-600"/> }
 function GoodNews({ text }: { text: string }) { return <Message text={text} bgColor="bg-boc_lightgreen" textColor="text-boc_darkgreen"/> }
 
-export default function SignupButton({ trip, reqs }:{ trip: TripWithSignup, reqs: Requesters }) {
+export default function SignupButton({ trip, reqs }:{ trip: TripWithSignup, reqs: Requesters }) { //Any component that uses useSearchParams MUST be wrapped in a Suspense component as of the latest Next version
+  return (
+    <Suspense fallback={<div className="px-20 text-center">Loading...</div>}>
+      <SignupButtonContent trip={trip} reqs={reqs}/>
+    </Suspense>
+  )
+}
+
+function SignupButtonContent({ trip, reqs }:{ trip: TripWithSignup, reqs: Requesters }) {
   //Signup/confirm/cancel functionality
   const { backendPost, sessionStatus } = reqs;
   const searchParams = useSearchParams();

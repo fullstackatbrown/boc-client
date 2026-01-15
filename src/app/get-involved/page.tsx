@@ -1,12 +1,20 @@
 "use client";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { makeRequesters, AuthStat } from "@/scripts/requests";
 import { signIn } from "next-auth/react";
 import Login from "@/components/Login";
 import BOCButton from "@/components/BOCButton";
 import { usePathname, useSearchParams } from "next/navigation";
 
-export default function MailingList() {
+export default function MailingList() { //Any component that uses useSearchParams MUST be wrapped in a Suspense component as of the latest Next version
+  return (
+    <Suspense fallback={<div className="px-20 text-center">Loading...</div>}>
+      <MailingListContent/>
+    </Suspense>
+  )
+}
+
+function MailingListContent() {
   const [joined, setJoined] = useState<boolean|null>(null);
   const { backendPost, backendGet, sessionStatus } = makeRequesters();
   const searchParams = useSearchParams();
