@@ -48,6 +48,12 @@ const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn({ account, profile }) { //Users without brown/risd emails don't ever receive sessions - instead, they get booted to the error page
+      if (account?.provider === "google") {
+        return (profile?.email?.endsWith("@brown.edu") || profile?.email?.endsWith("@risd.edu")) ?? false;
+      }
+      return true;
+    },
     async jwt({ token, account, profile }) {
       if (account) {
         token.accessToken = account.access_token;
@@ -68,5 +74,8 @@ const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
   },
+  pages: {
+    error: "/api/auth/error", // Create this page in your app
+  }
 });
 export const { GET, POST } = handlers;
