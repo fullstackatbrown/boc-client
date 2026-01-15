@@ -4,27 +4,33 @@ import { makeRequesters, AuthStat } from "@/scripts/requests";
 import { signIn } from "next-auth/react";
 import Login from "@/components/Login";
 import BOCButton from "@/components/BOCButton";
+import { usePathname, useSearchParams } from "next/navigation";
 
 export default function MailingList() {
   const [joined, setJoined] = useState<boolean|null>(null);
   const { backendPost, backendGet, sessionStatus } = makeRequesters();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   const handleSubmit = async () => {
     if (await sessionStatus() == AuthStat.Unauth) {
-      await signIn("google")
+      await signIn("google", { callbackUrl: `${window.location.origin}${pathname}?post_login_action=subscribe` })
+    } else {
+      if (!joined) {
+        backendPost("/user/listserv-add", {})
+        .then((_): void => { window.location.href = window.location.href.split("?")[0]; })
+        .catch((err): void => { 
+          switch (err.status) {
+            case (401): //Do nothing, user just isn't logged in, which is fine
+              break;
+            default:
+              alert(`ERROR. You shouldn't be seeing this! Contact the website's admin and send them a picture of this message! ${err}`)
+              console.log(err);
+              break;
+          }
+        })
+      }
     }
-    backendPost("/user/listserv-add", {})
-      .then((_): void => { window.location.reload(); })
-      .catch((err): void => { 
-        switch (err.status) {
-          case (401): //Do nothing, user just isn't logged in, which is fine
-            break;
-          default:
-            alert(`ERROR. You shouldn't be seeing this! Contact the website's admin and send them a picture of this message! ${err}`)
-            console.log(err);
-            break;
-        }
-      })
   };
 
   function checkListservStatus() {
@@ -41,8 +47,15 @@ export default function MailingList() {
       .catch((err) => { console.log(err); })
   }
 
+  function checkSubscribeParam() {
+    const action = searchParams.get("post_login_action");
+    if (joined != null && action === 'subscribe') { handleSubmit() }
+  }
+
+  useEffect(checkSubscribeParam, [searchParams, joined]);
   useEffect(checkListservStatus, []);
   if (joined === null) return <div className="text-center">Loading...</div>
+
   return (
     <div className="h-full w-full">
       {/* Dynamic spacer based on header height */}
@@ -55,7 +68,7 @@ export default function MailingList() {
           className="text-xl font-light leading-8 mb-12 text-center max-w-2xl"
         >
           You will receive one weekly newsletter email informing you of the
-          trips going out for the week. We don't spam—we promise! :-)
+          trips going out soon. We don't spam—we promise! :-)
         </p>
 
         {/* Centered email form */}
