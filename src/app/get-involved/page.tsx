@@ -36,7 +36,6 @@ export default function MailingList() {
   function checkListservStatus() {
     sessionStatus()
       .then((res) => {
-        console.log(res)
         if (res == AuthStat.Unauth) setJoined(false) //User isn't logged in, so we don't know if they are signed up or not
         else {
           backendGet("/user/")

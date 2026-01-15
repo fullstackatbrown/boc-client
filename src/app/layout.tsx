@@ -5,6 +5,7 @@ import { SessionProvider } from "next-auth/react";
 
 import { chelseaMarket, gabarito } from "@/styles/fonts";
 import "@/styles/globals.css";
+import ConsoleBear from "@/components/PrintBear";
 
 export const metadata: Metadata = {
   title: "Brown Outing Club",
@@ -40,6 +41,8 @@ export default function RootLayout({
             </div>
             <Footer />
           </main>
+          {/* For Funnsies */}
+          <ConsoleBear/>
         </body>
       </html>
     </SessionProvider>

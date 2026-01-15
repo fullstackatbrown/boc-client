@@ -37,7 +37,6 @@ export function makeRequesters() {
   const waitUntilReady = () =>
     new Promise<string>((resolve) => {
       const token = session?.accessToken;
-      console.log(status)
       if (status === "authenticated" && token) {
         resolve(token);
       } else if (status === "unauthenticated") {

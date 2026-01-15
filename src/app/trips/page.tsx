@@ -29,8 +29,6 @@ export default function Trips() {
     const curr: Trip[] = [];
     const past: Trip[] = [];
 
-    console.log(typeof(filteredTrips))
-    console.log(filteredTrips)
     filteredTrips.forEach((trip) => {
       if (trip.status === TripStatus.Open) {
         curr.push(trip);
