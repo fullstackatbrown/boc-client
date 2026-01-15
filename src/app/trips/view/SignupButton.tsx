@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TripWithSignup, TripRole, TripStatus, SignupStatus, TripClass } from "@/models/models";
 import BOCButton from "@/components/BOCButton";
 import { AuthStat, Requesters } from "@/scripts/requests";
 import Popup from "@/components/Popup";
 import { signIn } from "next-auth/react";
+import { usePathname, useSearchParams } from "next/navigation";
 
 function Message({ text, bgColor, textColor}: { text: string, bgColor: string, textColor: string }) {
   return (
@@ -22,13 +23,37 @@ function GoodNews({ text }: { text: string }) { return <Message text={text} bgCo
 export default function SignupButton({ trip, reqs }:{ trip: TripWithSignup, reqs: Requesters }) {
   //Signup/confirm/cancel functionality
   const { backendPost, sessionStatus } = reqs;
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  function AutoSignupIfParam() {
+    useEffect(() => {
+      const action = searchParams.get("post_login_action");
+      if (action === 'signup') {
+        sessionStatus()
+          .then((stat: AuthStat) => {
+            if (stat == AuthStat.Auth) { simpleUpdate(`/trip/${trip.id}/signup`) }
+            else { console.error("Someone's messing with URL params...") } 
+          })
+      }
+    }, [searchParams])
+    return <></>
+  }
+
   async function simpleUpdate(path: string) {
     let stat = await sessionStatus()
+    const params = new URLSearchParams(searchParams.toString());
     if (stat != AuthStat.Auth) { //Users may not be signed in
-      await signIn();
+      if (!path.endsWith("signup")) { //Sanity check that user is indeed using the Sign Up button and not another button (shouldn't be possible)
+        alert("You shouldn't be seeing this message! Please report this to a site admin if possible. ERROR: Unauthenticated user pushed non-signup button");
+        return
+      }
+      params.set("post_login_action", "signup");
+      await signIn("google", { callbackUrl: `${window.location.origin}${pathname}?${params.toString()}`});
     }
     await backendPost(path, {});
-    window.location.reload(); 
+    params.delete("post_login_action"); //In case it was in use
+    window.location.href = `${pathname}?${params.toString()}`;
   }
   const [showPopup, setShowPopup] = useState(false);
   //Helper Components
@@ -133,6 +158,7 @@ export default function SignupButton({ trip, reqs }:{ trip: TripWithSignup, reqs
   return (
     <>
       {content}
+      <AutoSignupIfParam/>
       { showPopup && (<Popup onClose={() => setShowPopup(false)}>
         <div className="flex flex-col justify-center gap-2">
           <h1 className="text-boc_green font-funky text-center">Are you sure?</h1>
