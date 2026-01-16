@@ -12,9 +12,17 @@ export function EditableString(props: {currVal: string, editEl: ReactElement, on
     if (key === "Enter") {
       props.onSubmit(iptVal)
         .then(() => window.location.reload())
-        .catch((err)=>{
-          console.log(err);
-          alert(`Request failed. More info may be found in the console. Error: ${err}"`);
+        .catch((err) => {
+          switch (err.status) {
+            case (403):
+            case (422):
+              alert(`The backend didn't like what you just tried to do. Here's what it had to say about it: ${err.response.data.errMessage}`);
+              break;
+            default:
+              alert(`ERROR. You shouldn't be seeing this! Contact the website's admin and send them a picture of this message! ${err}`)
+              console.log(err);
+              break;
+          }
         })
     }
   };

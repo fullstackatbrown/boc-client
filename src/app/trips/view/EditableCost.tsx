@@ -32,7 +32,19 @@ export default function EditableCost(props: { trip: TripWithSignup, reqs: Reques
         setShowInput(false);
         return;
       }
-      await props.reqs.backendPost(`/trip/${props.trip.id}/lead/alter`, body);
+      await props.reqs.backendPost(`/trip/${props.trip.id}/lead/alter`, body)
+        .catch((err)=>{
+          switch (err.status) {
+            case (403):
+            case (422):
+              alert(`The backend didn't like what you just tried to do. Here's what it had to say about it: ${err.response.data.errMessage}`);
+              break;
+            default:
+              alert(`ERROR. You shouldn't be seeing this! Contact the website's admin and send them a picture of this message! ${err}`)
+              console.log(err);
+              break;
+          }
+        });
       window.location.reload();
     }
   };
