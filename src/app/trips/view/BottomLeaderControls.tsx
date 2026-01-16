@@ -28,7 +28,18 @@ const statusButtonInfos = (trip: TripWithSignup, reqs: Requesters, setPopup: Dis
   const simpleUpdate = (path: string) => {
     backendPost(path, {})
       .then(() => window.location.reload())
-      .catch((err) => alert(`You should not be seeing this! Please send a screenshot of this to the site's administrator.\n${err}`))
+      .catch((err) => {
+        switch (err.status) {
+          case (403):
+          case (422):
+            alert(`The backend didn't like what you just tried to do. Here's what it had to say about it: ${err.response.data.errMessage}`);
+            break;
+          default:
+            alert(`ERROR. You shouldn't be seeing this! Contact the website's admin and send them a picture of this message! ${err}`);
+            console.log(err);
+            break;
+        }
+      })
   }
   return [
     {
