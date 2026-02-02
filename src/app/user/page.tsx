@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { makeRequesters }from "@/scripts/requests"
 import { User, TripSignUp } from "@/models/models"
+import { formatDateString } from "@/utils/utils"
 import ProfileBar from "./ProfileBar";
 
 interface Trip { //Different from the Trip interface in models.tsx 
@@ -159,7 +160,7 @@ export default function Profile() {
           return {
             tripId: signup.tripId,
             tripName: tripInfo.tripName || "Unknown",
-            date: new Date(tripInfo.plannedDate).toLocaleDateString(),
+            date: formatDateString(tripInfo.plannedDate),
             sentenceDesc: tripInfo.sentenceDesc || "No description",
             leaders: leaders.length > 0 ? leaders : ["No leaders assigned"],
             lotteryInfo: signup.status || "Hosted Trip",
