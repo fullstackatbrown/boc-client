@@ -198,8 +198,8 @@ export default function KeyInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs: 
       }
       break;
     case TripStatus.Complete:
-      if (selectedSignups) {
-        const attendedSignups = selectedSignups.filter((tp: TripParticipant) => tp.status == SignupStatus.Attended);
+      if (signups) {
+        const attendedSignups = signups.filter((tp: TripParticipant) => tp.status == SignupStatus.Attended);
         const paidNum = attendedSignups.reduce((accum: number, tp: TripParticipant) => (tp.paid ? accum + 1 : accum), 0);
         const paymentsNeeded = attendedSignups.length;
         const bar = Bar(<div className="flex gap-3">
