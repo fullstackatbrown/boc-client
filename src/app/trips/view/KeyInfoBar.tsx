@@ -186,21 +186,22 @@ export default function KeyInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs: 
       }
       break;
     case TripStatus.PostTrip:
-      if (signups) {
-        const paidNum = signups.reduce((accum: number, tp: TripParticipant) => (tp.paid ? accum + 1 : accum), 0);
+      if (selectedSignups) {
+        const paidNum = selectedSignups.reduce((accum: number, tp: TripParticipant) => (tp.paid ? accum + 1 : accum), 0);
         const bar = Bar(<div className="flex gap-3">
             <p><span className="font-bold">Paid:</span>&nbsp;{paidNum} / <span className="text-red-500">?</span>&nbsp;<span className="italic">Take attendance to know how many payments are needed</span></p>
           </div>);
         content = <div className="flex flex-col gap-1">
-          <ParticipantDropdown header="Participant List" signups={signups} trip={trip}/>
+          <ParticipantDropdown header="Participant List" signups={selectedSignups} trip={trip}/>
           { bar }
         </div>
       }
       break;
     case TripStatus.Complete:
-      if (signups) {
-        const paidNum = signups.reduce((accum: number, tp: TripParticipant) => (tp.paid && (tp.status == SignupStatus.Attended) ? accum + 1 : accum), 0);
-        const paymentsNeeded = signups.reduce((accum: number, tp: TripParticipant) => (tp.status == SignupStatus.Attended ? accum + 1: accum), 0);
+      if (selectedSignups) {
+        const attendedSignups = selectedSignups.filter((tp: TripParticipant) => tp.status == SignupStatus.Attended);
+        const paidNum = attendedSignups.reduce((accum: number, tp: TripParticipant) => (tp.paid ? accum + 1 : accum), 0);
+        const paymentsNeeded = attendedSignups.length;
         const bar = Bar(<div className="flex gap-3">
             <p>
               <span className="font-bold">Paid:</span>&nbsp;{paidNum} / {paymentsNeeded}&nbsp;
@@ -208,7 +209,7 @@ export default function KeyInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs: 
             </p>
           </div>);
         content = <div className="flex flex-col gap-1">
-          <ParticipantDropdown header="Participant List" signups={signups} trip={trip}/>
+          <ParticipantDropdown header="Participant List" signups={attendedSignups} trip={trip}/>
           { bar }
         </div>
       }
