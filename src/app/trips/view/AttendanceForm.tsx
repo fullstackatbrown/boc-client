@@ -115,10 +115,11 @@ const AttendanceForm: React.FC<AttendanceFormProps> = ({ trip, reqs }) => {
   useEffect(() => {
     backendGet(`/trip/${trip.id}/lead/participants`)
       .then((res) => {
-        setParticipants(res.data);
+        const selectedParticipants = res.data.filter((p: TripParticipant) => p.status == "Selected");
+        setParticipants(selectedParticipants);
         // initialize all participants with "No Show"
         const initialStatuses: Record<string, AttendanceStatus> = {};
-        res.data.forEach((p: TripParticipant) => {
+        selectedParticipants.forEach((p: TripParticipant) => {
           initialStatuses[p.email] = AttendanceStatus.NoShow;
         });
         setParticipantStatuses(initialStatuses);
