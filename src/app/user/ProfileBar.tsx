@@ -59,7 +59,7 @@ export default function ProfileBar({ userProfile, submitPhone }:{ userProfile: U
                 className="w-full h-auto p-2"
                 ></img>
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white font-bold text-5xl px-4 py-2 rounded-lg">
-                {userProfile.tripsParticipated}
+                {userProfile.tripsParticipated + userProfile.tripsLead} {/*Currently, just adding trips lead to trips participated, but one day, we can hopefully split this*/}
                 </div>
             </div>
             <div className="pb-7">
