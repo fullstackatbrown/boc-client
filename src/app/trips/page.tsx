@@ -166,8 +166,7 @@ export default function Trips() {
       Find all of our upcoming trips on this page and click on them to learn
       more!
       <section className="pt-5">
-        {/* Filters */}
-        <Dropdown header="Filters" content={filterEl} />
+        {/* <Dropdown header="Filters" content={filterEl} /> */} {/* Filters - Commented out because they're lowkey just kinda silly */}
         <div className="mx-4 mb-4">
           <h2 className="font-funky text-2xl text-boc_medbrown">
             Upcoming Trips!
