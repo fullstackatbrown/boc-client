@@ -6,6 +6,7 @@ import BigDropdown from "@/components/BigDropdown";
 import { useEffect, useState } from "react";
 import { doc, getDoc, getDocs } from "firebase/firestore";
 import db from "@/scripts/firebase";
+import Image1 from "@/assets/images/gear-room/main.jpg"
 
 // function Subheading(props: { children: React.ReactNode }) {
 //   return (
@@ -57,17 +58,24 @@ export default function GearRoom() {
       {/* Site content */}
 
       <div>
-        <Paragraph>
-          The BOC has a gear room in the ground floor of the Campus Center
-          (directions below), where we have a large selection of outdoor gear.
-          We use these items for the trips we sponsor, but we also offer the
-          opportunity for students to rent out gear from us. If you're
-          interested in renting gear for your own trip with friends, we also
-          provide consulting about what you might need, how to plan your trip,
-          and any other questions. If you're interested in renting gear, or just
-          want to come see our selection and learn about how to use things, come
-          visit our gear room during open hours!
-        </Paragraph>
+        <div className="flex space-x-10">
+		<div className="text-center max-w-[75%]">
+			<Paragraph>
+				  The BOC has a gear room in the ground floor of the Campus Center
+				  (directions below), where we have a large selection of outdoor gear.
+				  We use these items for the trips we sponsor, but we also offer the
+				  opportunity for students to rent out gear from us. If you're
+				  interested in renting gear for your own trip with friends, we also
+				  provide consulting about what you might need, how to plan your trip,
+				  and any other questions. If you're interested in renting gear, or just
+				  want to come see our selection and learn about how to use things, come
+				  visit our gear room during open hours!
+			</Paragraph>
+		</div>
+		<div className="max-w-[25%] h-auto">
+			<img src={Image1.src} className="rounded-xl h-auto" />
+		</div>
+	</div>
         <BigDropdown header="Gear Room Hours" content={
           <Schedule dates={hours}/>
         }/>
@@ -76,7 +84,7 @@ export default function GearRoom() {
           <>
             <Paragraph>
               BOC gear is available for personal use by any Brown community member. To rent gear,
-              visit our gear room (directions below) during any of our hours (above), and we'll
+              visit our gear room (directions below) during any of or hours (above), and we'll
               help you find what you need. Rental prices are <strong>very cheap</strong> (typically, 
               no more than a handful of dollars) even for extended periods of time, but if you lose or
               damage the gear, you will need to pay for replacements. Cash is accepted, but not necessary;
