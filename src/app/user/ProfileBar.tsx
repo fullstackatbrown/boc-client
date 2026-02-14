@@ -7,6 +7,49 @@ import { AxiosResponse } from "axios";
 import EditablePhone from "./EditablePhone";
 import { subscribe } from "diagnostics_channel";
 
+const Badge = ({title, count, label} : {title: string, count: number, label: string} ) => (
+	<>
+            <div className="flex-grow"></div>
+            <div className="w-1/5 text-center rounded-lg float-right">
+            <p className="text-2xl font-bold text-boc_darkbrown">{title}</p>
+
+            <div className="relative w-full">
+                <img
+                src={tripsBadge.src}
+                alt="trips badge"
+                className="w-full h-auto p-2"
+                ></img>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white font-bold text-5xl px-4 py-2 rounded-lg">
+		{count}
+                </div>
+            </div>
+            <div className="pb-7">
+                <p className="text-2xl font-bold text-boc_darkbrown">{label}</p>
+            </div>
+            </div>
+	    </>
+);
+
+function Badges({ role, tripsParticipated, tripsLead } : {role: string, tripsParticipated: number, tripsLead: number}) {
+		return (
+			<>
+			<Badge
+				title="SUMMIT SEEKER"
+				count={tripsParticipated + tripsLead}
+				label="TOTAL TRIPS"
+			/>
+			
+			{role === 'Leader' && (
+				<Badge
+					title="LEADER STATS"
+					count={tripsLead}
+					label="TRIPS LED"
+				/>
+			)}
+			</>
+		);
+}
+
 export default function ProfileBar({ userProfile, submitPhone }:{ userProfile: User, submitPhone: (newPhone: string) => Promise<AxiosResponse<any, any>> }) {
     return (
         <div id="content" className="flex justify-between items-start gap-8">
@@ -46,26 +89,13 @@ export default function ProfileBar({ userProfile, submitPhone }:{ userProfile: U
                 </div>
             </div>
             </div>
-            {/* Flex Spacer */}
-            <div className="flex-grow"></div>
-            {/* Trips Badge */}
-            <div className="w-1/5 text-center rounded-lg float-right">
-            <p className="text-2xl font-bold text-boc_darkbrown">SUMMIT SEEKER</p>
+	    
+	    <Badges
+	    	role = {userProfile.role}
+		tripsParticipated = {userProfile.tripsParticipated}
+		tripsLead = {userProfile.tripsLead}
+	    	/>
 
-            <div className="relative w-full">
-                <img
-                src={tripsBadge.src}
-                alt="trips badge"
-                className="w-full h-auto p-2"
-                ></img>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white font-bold text-5xl px-4 py-2 rounded-lg">
-                {userProfile.tripsParticipated + userProfile.tripsLead} {/*Currently, just adding trips lead to trips participated, but one day, we can hopefully split this*/}
-                </div>
-            </div>
-            <div className="pb-7">
-                <p className="text-2xl font-bold text-boc_darkbrown">TOTAL TRIPS</p>
-            </div>
-            </div>
         </div>
     );
 }
