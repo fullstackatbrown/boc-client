@@ -59,7 +59,7 @@ export default function GearRoom() {
 
       <div>
         <div className="flex space-x-10">
-		<div className="text-center max-w-[75%]">
+		<div className="text-center max-w-[70%]">
 			<Paragraph>
 				  The BOC has a gear room in the ground floor of the Campus Center
 				  (directions below), where we have a large selection of outdoor gear.
@@ -72,7 +72,7 @@ export default function GearRoom() {
 				  visit our gear room during open hours!
 			</Paragraph>
 		</div>
-		<div className="max-w-[25%] h-auto">
+		<div className="max-w-[30%] h-auto">
 			<img src={Image1.src} className="rounded-xl h-auto" />
 		</div>
 	</div>
@@ -83,17 +83,19 @@ export default function GearRoom() {
         <BigDropdown header="Rental Information" content={
           <>
             <Paragraph>
-              BOC gear is available for personal use by any Brown community member. To rent gear,
-              visit our gear room (directions below) during any of or hours (above), and we'll
-              help you find what you need. Rental prices are <strong>very cheap</strong> (typically, 
-              no more than a handful of dollars) even for extended periods of time, but if you lose or
-              damage the gear, you will need to pay for replacements. Cash is accepted, but not necessary;
-              a phone will do just fine (we have a QR code that lets you pay online).
+	    	BOC gear is available for personal use by any Brown community member. To rent 
+		gear, visit our gear room (directions below) during any of our hours (above), 
+		and we'll help you find what you need. Rental prices are very cheap (typically, 
+		no more than a handful of dollars) even for extended periods of time, but if you 
+		lose or damage the gear, you will need to pay for replacements. You will be 
+		expected to pay online using a card.
             </Paragraph>
+		{/*
             <Paragraph>
               Available inventory is listed in&nbsp;
               <a href="https://docs.google.com/spreadsheets/d/1ci2doRaTHVR3lXRH500HjU7dkhFb5p5PH-QRZwUal_0/edit?usp=sharing" target="_blank" className="underline">this spreadsheet</a>.
             </Paragraph>
+	    */}
           </>
         }/>
         <HorSeparator/>

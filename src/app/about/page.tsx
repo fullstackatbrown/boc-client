@@ -36,8 +36,6 @@ function Faces() {
             acknowledge the myriad of barriers to outdoor recreation and
             facilitate access for Brown community members of all identities,
             backgrounds, experience levels, and financial circumstances;
-            actively reach individuals and groups who might not otherwise get
-            outside;
           </p>
         </div>
         <div>
@@ -81,26 +79,25 @@ export default function About() {
         <div className="text-center max-w-[70%]">
           <Paragraph>
             The BOC organizes everything from local walks and bike rides to
-            weekend backpacking, kayaking, skiing, and climbing trips! Our
+            weekend backpacking, kayaking, skiing, and camping trips! Our
             longest adventures happen over fall and spring break, with recent
-            destinations like the Adirondacks, Blue Ridge, and White Mountains.
+            destinations like the Adirondacks and the White Mountains.
             Popular trips include short walks and outdoor socials, plus
-            subsidized ski trips each winter and whitewater rafting in spring
-            and fall.
+            subsidized ski trips each winter and whitewater rafting in spring.
           </Paragraph>
 
           <Paragraph>
             If you'd like to lead your own trips, our gear room should be able to
-            provide you with everything you need to propetly suit up. Consider also
+            provide you with everything you need to properly suit up. Consider also
             joining our Friends of the BOC slack group or one of our general body meetings,
-            for help planning you outings and to potentially meet other adventurers with 
+            for help planning your outings and to potentially meet other adventurers with 
             similar tastes.
           </Paragraph>
 
           <Paragraph>
             If you're drawn to the outdoors for community, challenge, or
-            renewal, join our 3,000+ member mailing list of students, faculty,
-            and staff. And then join a trip! With new trips announced and ran nearly 
+            renewal, join our 4,200+ member mailing list of students, faculty,
+            and staff. And then join a trip! With new trips announced and run nearly 
             every week, journeying out and about with us couldn't be easier!
           </Paragraph>
 

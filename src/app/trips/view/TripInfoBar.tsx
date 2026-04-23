@@ -9,7 +9,8 @@ import { useRef, useState, useEffect, ReactElement } from "react";
 import { EditIcon, EditableComponent, EditableString } from "./editable";
 import { UserPlusIcon } from "@heroicons/react/24/outline";
 import EditableCost from "./EditableCost";
-import { formatDateString } from "@/utils/utils"
+import { formatDateString } from "@/utils/utils";
+import Link from "next/link";
 
 function classToCost(cls: string): number | undefined {
   const mapping: Record<string, number> = { //Thanks Chat
@@ -194,9 +195,12 @@ export default function TripInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs:
           <div className="w-full bg-boc_lightgreen rounded-2xl pt-4 pb-8 px-10">
             <h2 className="w-full text-center text-boc_green font-funky text-3xl mb-3">Trip Info</h2>
             <div className="flex justify-around flex-col">
-              <TripInfo lead="Leaders" text={trip.leaders.map((leader: SimpleUser) => `${leader.firstName} ${leader.lastName}`).join(", ") || "No leaders assigned"} editable={
-                trip.userData?.tripRole == TripRole.Leader ? editSpecs?.leaders : undefined
-              }/>
+	      <div className="flex items-baseline gap-2 mb-0">
+                <TripInfo lead="Leaders" text={trip.leaders.map((leader: SimpleUser) => `${leader.firstName} ${leader.lastName}`).join(", ") || "No leaders assigned"} editable={
+                  trip.userData?.tripRole == TripRole.Leader ? editSpecs?.leaders : undefined
+                }/>
+	        <Link className="underline" href="/about/our-team">(who?)</Link>
+	      </div>
               <TripInfo lead="Trip Category" text={trip.category || "Not specified"} editable={
                 trip.userData?.tripRole == TripRole.Leader ? editSpecs?.tripCategory : undefined
               }/>

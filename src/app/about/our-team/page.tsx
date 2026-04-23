@@ -102,6 +102,15 @@ export default function Team() {
           <img className="w-full max-w-5xl object-cover rounded-3xl shadow-xl" src={teamLink} alt="Outing Club Group" />
         </div> */}
       </section>
+
+      <section>
+      <div className="w-full px-10 md:px-20 py-10">
+      <hr className="bg-boc_medbrown border-0 h-[2px] my-5" />
+      <h2 className="text-2xl font-bold text-center">Can't find who you're looking for?</h2>
+	<p className="text-center">Check out our <a href="https://docs.google.com/presentation/d/126AAnBdr9MDmfMszCapoj9YNie0rActtkxj0L3VLH9w/edit#slide=id.ge9c455096b_0_1941" 
+	className="underline text-blue-600">complete BOC roster</a> here!</p>
+      </div>
+      </section>
     </div>
   );
 }
