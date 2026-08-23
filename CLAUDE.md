@@ -26,6 +26,7 @@ Almost nothing on this site renders usefully without the backend running. For an
 Env vars (`.env` / `.env.local`, both gitignored):
 - `NEXT_PUBLIC_BACKEND` - base URL for the Express server; consumed by `src/scripts/api.ts`
 - `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` - Google OAuth app credentials
+- `NEXT_PUBLIC_E2E` - set to `1` to register the test-login provider (see Test Logins). Never set in a deployed environment.
 - `AUTH_SECRET` - next-auth JWT secret. Note the auth route reads `process.env.NEXTAUTH_SECRET`, which is unset; next-auth v5 falls back to `AUTH_SECRET`, so this works, but the explicit `secret:` line is misleading.
 
 Firebase config is **hardcoded** in `src/scripts/firebase.ts`, not env-driven. That is a public client config (Firestore read rules do the actual protecting), but it means the Firebase project cannot be swapped per-environment without editing code.
@@ -130,7 +131,7 @@ page.tsx               fetches GET /trip/:id (auth-aware), handles 401/404, rend
 - **Post-login actions.** Signing up for a trip or joining the listserv while logged out redirects to Google with a `post_login_action` query param, then an effect on return performs the action. Preserve that param plumbing if you touch those flows.
 - **Styling.** Use the palette tokens in `tailwind.config.ts` (`boc_green`, `boc_darkbrown`, `boc_lightgreen`, `boc_yellow`, `boc_medbrown`, `boc_slate`, ...) rather than raw hex or stock Tailwind colors. `font-funky` (Chelsea Market) is for headings; `font-standard` (Gabarito) is body; `font-montserrat` is nav.
 - **Navigation** is done with `window.location.href` and plain `<a>` tags throughout, not `next/link`. Consistent, if not idiomatic.
-- **Desktop-only, for now.** `layout.tsx` contains a mobile-view blocker that hides the site below 1150px. Bringing in real mobile views is a goal but has not been started — assume desktop layouts when writing new UI, and don't assume a component is responsive. There is currently an uncommitted local change in `layout.tsx` that comments the blocker out; that's a local convenience, not the committed behavior.
+- **Desktop-only, for now.** Layouts assume a viewport of at least 1150px; nothing below that has been designed. `layout.tsx` still contains the mobile-view blocker that used to hide the site below that width, but it is currently commented out, so small screens get the desktop layout rather than the explanatory message. Bringing in real mobile views is a goal that hasn't been started — assume desktop when writing new UI, and don't assume any existing component is responsive.
 - `@types/react` is pinned at 18.x while `react` is 19.x. Typecheck passes anyway; don't "fix" this without checking it doesn't cascade.
 
 ## Firebase / Firestore Content Model
@@ -144,14 +145,39 @@ Firestore holds editable club *content* so it can be changed without a deploy. R
 Note the split: leader *identity/photos* live in Firebase, while leader *trip statistics* come from the Express server's `/public/leader-stats` and `/public/leader-trips` routes (matched by first and last name, which is fragile).
 
 ## Verification Loop
-There is no automated test suite in this repo. The current bar for a change is:
-1. `npx tsc --noEmit` passes clean (it currently does — a new error means you introduced it)
-2. `npm run build` succeeds for anything touching routing, Suspense boundaries, or server/client component boundaries
-3. Manual browser check with `boc-server` running locally. State which pages and which roles you exercised. Because so much UI branches on trip status and viewer role, say explicitly which branch you verified — e.g. "checked as leader on an Open trip" — and which you did not.
+The current bar for a change is:
+1. `npm test` passes (Vitest, see Tests below)
+2. `npx tsc --noEmit` passes clean (it currently does — a new error means you introduced it)
+3. `npm run build` succeeds for anything touching routing, Suspense boundaries, or server/client component boundaries
+4. Manual browser check with `boc-server` running locally. State which pages and which roles you exercised. Because so much UI branches on trip status and viewer role, say explicitly which branch you verified — e.g. "checked as leader on an Open trip" — and which you did not.
+
+### Tests
+```
+npm test          # one-shot run
+npm run test:watch # re-runs on save
+```
+Vitest, configured in `vitest.config.ts`, picking up `src/**/*.test.ts`. There is deliberately **no jsdom and no @testing-library** — these are pure-logic tests over plain TypeScript functions, which is why they need no DOM, no mocks, and no running backend, and finish in well under a second.
+
+What's covered today is the trip page's decision logic, extracted out of its components precisely so it could be tested:
+- `src/app/trips/view/signupVariant.ts` — `selectSignupVariant(trip)` returns which of 15 signup panels a viewer should see, given trip status, their role, and their signup's status/confirmed/paid. The JSX for each panel stays in `SignupButton.tsx` (it closes over request helpers and component state); only the choice is extracted.
+- `src/app/trips/view/statusBarState.ts` — `stageState(stage, current)` decides Past/Current/Next/Future for each button in the leader status bar.
+
+Both use a compile-time exhaustiveness guard (`const _exhaustive: never = ...`), so adding a new `SignupStatus` or `TripStatus` breaks the typecheck until every branch is handled. The guard deliberately does not throw at runtime.
+
+When adding logic to the trip page, prefer this shape: pure decision function in its own module, JSX mapping in the component. Component-level tests would need jsdom and `@testing-library/react` added — don't reach for that without discussing it first.
 
 To exercise leader/participant branches locally, seed with `node default_insts.mjs` in ../boc-server (users 1-4, trips 1-9 spanning Staging/Open/Pre-Trip/Post-Trip) and switch identity via the `TESTID` constant with `phonyAuth` enabled in server.mjs.
 
-A real frontend test setup (component tests and/or an e2e pass over the trip lifecycle) is something the maintainer wants to discuss but has not decided on. Don't stand one up unprompted.
+### Test Logins
+Automated tests and manual multi-user testing both need to act as several different people in one session, which real Google auth can't do. Setting `NEXT_PUBLIC_E2E=1` registers an extra next-auth Credentials provider (id `e2e`) that signs in as any @brown.edu / @risd.edu address without contacting Google:
+
+```ts
+signIn("e2e", { email: "ada.lovelace@brown.edu" })
+```
+
+The session it mints carries an `e2e:<email>` access token in place of a Google one, which `boc-server` accepts while its own `DEVELOPING` flag is set. Both halves must be enabled for this to work, and both are separately gated off in production builds. See the Test Identity Bypass section of `../boc-server/CLAUDE.md` for the backend side and the security caveats.
+
+This is what makes the trip lifecycle testable at all — reaching Pre-Trip or attendance states needs a leader plus several participants acting in sequence.
 
 ## Known Dead / Broken Code
 Documented so you don't waste time on it. Leave it alone unless asked:

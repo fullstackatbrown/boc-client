@@ -1,5 +1,37 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
+
+//
+// TEST IDENTITY BYPASS
+//
+// Signs in as an arbitrary Brown/RISD address without going through Google, so that
+// automated tests can drive multi-user flows (several participants on one trip) that
+// are otherwise untestable. The session it mints carries an `e2e:<email>` access token,
+// which boc-server accepts in place of a real Google token while DEVELOPING is set.
+//
+// SAFETY: this provider is only registered when NEXT_PUBLIC_E2E === "1" AND the build is
+// not a production build. Never set NEXT_PUBLIC_E2E in a deployed environment.
+const E2E_AUTH_ENABLED =
+  process.env.NEXT_PUBLIC_E2E === "1" && process.env.NODE_ENV !== "production";
+
+const e2eProvider = CredentialsProvider({
+  id: "e2e",
+  name: "E2E Test Login",
+  credentials: { email: { label: "Email", type: "text" } },
+  async authorize(credentials) {
+    const email = String(credentials?.email ?? "").trim().toLowerCase();
+    //Mirror the domain restriction enforced on the Google path
+    if (!email.endsWith("@brown.edu") && !email.endsWith("@risd.edu")) return null;
+    const [localPart] = email.split("@");
+    const [first, ...rest] = localPart.split(".");
+    return {
+      id: email,
+      email,
+      name: `${first} ${rest.length > 0 ? rest.join(".") : "E2E"}`,
+    };
+  },
+});
 
 async function refreshAccessToken(token: any) {
   try {
@@ -46,6 +78,7 @@ const { handlers, signIn, signOut, auth } = NextAuth({
         },
       },
     }),
+    ...(E2E_AUTH_ENABLED ? [e2eProvider] : []),
   ],
   callbacks: {
     async signIn({ account, profile }) { //Users without brown/risd emails don't ever receive sessions - instead, they get booted to the error page
@@ -54,7 +87,16 @@ const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return true;
     },
-    async jwt({ token, account, profile }) {
+    async jwt({ token, account, profile, user }) {
+      //Test identity sessions carry a synthetic token instead of a Google one, and never refresh
+      if (E2E_AUTH_ENABLED && account?.provider === "e2e") {
+        token.accessToken = `e2e:${user?.email ?? token.email}`;
+        token.refreshToken = undefined;
+        token.accessTokenExpires = undefined;
+        return token;
+      }
+      if (token.accessToken?.startsWith("e2e:")) return token;
+
       if (account) {
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
