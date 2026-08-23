@@ -1,6 +1,6 @@
 "use client"
 
-import { TripParticipant, TripWithSignup } from '@/models/models';
+import { SignupStatus, TripParticipant, TripWithSignup } from '@/models/models';
 import { Requesters } from '@/scripts/requests';
 import { AxiosError } from 'axios';
 import React, { useEffect, useState } from 'react';
@@ -115,7 +115,7 @@ const AttendanceForm: React.FC<AttendanceFormProps> = ({ trip, reqs }) => {
   useEffect(() => {
     backendGet(`/trip/${trip.id}/lead/participants`)
       .then((res) => {
-        const selectedParticipants = res.data.filter((p: TripParticipant) => p.status == "Selected");
+        const selectedParticipants = res.data.filter((p: TripParticipant) => p.status == SignupStatus.Selected);
         setParticipants(selectedParticipants);
         // initialize all participants with "No Show"
         const initialStatuses: Record<string, AttendanceStatus> = {};

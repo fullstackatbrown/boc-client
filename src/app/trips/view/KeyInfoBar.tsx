@@ -152,7 +152,8 @@ export default function KeyInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs: 
   const Bar = (text: ReactNode) => <div className="p-4 rounded-lg bg-gray-200 w-full">{text}</div>
   let content;
   switch (trip.status) {
-    case TripStatus.Staging || TripStatus.Complete:
+    case TripStatus.Staging:
+      //Complete is handled in its own case below - it is NOT a fall-through of this one
       content = <></>;
       break;
     case TripStatus.Open:

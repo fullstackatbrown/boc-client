@@ -33,7 +33,8 @@ export enum SignupStatus { SignedUp = 'Signed Up', Selected = 'Selected', NotSel
 export interface TripSignUp {
   tripId: number;
   tripRole: TripRole;
-  status: string | null;
+  //Always null for Leader-role signups - the backend nulls participant fields for leaders
+  status: SignupStatus | null;
   needPaperwork: boolean | null;
   confirmed: boolean;
   paid: boolean
@@ -54,7 +55,7 @@ export interface SimpleUser {
 }
 
 export interface TripParticipant extends SimpleUser {
-  status: string,
+  status: SignupStatus,
   confirmed: boolean,
   paid: boolean,
 }

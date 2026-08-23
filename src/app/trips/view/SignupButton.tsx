@@ -1,7 +1,8 @@
 'use client'
 
-import { Suspense, useEffect, useState } from "react";
-import { TripWithSignup, TripRole, TripStatus, SignupStatus, TripClass } from "@/models/models";
+import { ReactNode, Suspense, useEffect, useState } from "react";
+import { TripWithSignup } from "@/models/models";
+import { SignupVariant, selectSignupVariant } from "./signupVariant";
 import BOCButton from "@/components/BOCButton";
 import { AuthStat, Requesters } from "@/scripts/requests";
 import Popup from "@/components/Popup";
@@ -125,44 +126,25 @@ function SignupButtonContent({ trip, reqs }:{ trip: TripWithSignup, reqs: Reques
   )
   const NoShow = <BadNews text="You were recorded as a no show. This will negatively impact your odds of getting on future trips." />
 
-  //Return based on trip role and trip status
-  const role = ( trip.userData ? trip.userData.tripRole : TripRole.None );
-  let content;
-  if (role == TripRole.Participant) {
-    switch (trip.userData!.status) {
-      case SignupStatus.SignedUp:
-        content = SignedUp
-        break;
-      case SignupStatus.NotSelected:
-        content = NotSelected
-        break;
-      case SignupStatus.Waitlisted:
-        if (trip.userData!.confirmed) content = WaitlistedConfrimed
-        else content = Waitlisted
-        break;
-      case SignupStatus.Selected:
-        if (trip.userData!.confirmed) {
-          if (trip.class == TripClass.Free) content = ConfirmedFree
-          else {
-            if (trip.userData!.paid) content = ConfirmedAndPaid
-            else content = Confirmed
-          }
-        } else content = Selected
-        break;
-      case SignupStatus.Attended:
-        if (trip.userData!.paid || trip.class == TripClass.Free ) content = Attended
-        else content = AttendedNeedPay
-        break;
-      case SignupStatus.NoShow:
-        content = NoShow
-        break;
-    }
-  }
-  else if (trip.status == TripStatus.Staging) content = Staging;
-  else { //Leaders and non-participants see the same things
-    if (trip.status == TripStatus.Open) content = SignUpButton
-    else content = SignupsClosed
-  }
+  //Return based on trip role and trip status - see signupVariant.ts for the decision logic
+  const variants: Record<SignupVariant, ReactNode> = {
+    [SignupVariant.Staging]: Staging,
+    [SignupVariant.SignUp]: SignUpButton,
+    [SignupVariant.SignupsClosed]: SignupsClosed,
+    [SignupVariant.SignedUp]: SignedUp,
+    [SignupVariant.NotSelected]: NotSelected,
+    [SignupVariant.Waitlisted]: Waitlisted,
+    [SignupVariant.WaitlistedConfirmed]: WaitlistedConfrimed,
+    [SignupVariant.Selected]: Selected,
+    [SignupVariant.Confirmed]: Confirmed,
+    [SignupVariant.ConfirmedFree]: ConfirmedFree,
+    [SignupVariant.ConfirmedAndPaid]: ConfirmedAndPaid,
+    [SignupVariant.Attended]: Attended,
+    [SignupVariant.AttendedNeedPay]: AttendedNeedPay,
+    [SignupVariant.NoShow]: NoShow,
+    [SignupVariant.Nothing]: <></>,
+  };
+  const content = variants[selectSignupVariant(trip)];
   return (
     <>
       {content}

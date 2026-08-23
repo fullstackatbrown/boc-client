@@ -7,9 +7,9 @@ import { Dispatch, ReactNode, SetStateAction, useState } from "react";
 import KeyInfoBar from "./KeyInfoBar";
 import Popup from "@/components/Popup";
 import AttendanceForm from "./AttendanceForm";
+import { StatusState, stageState } from "./statusBarState";
 
 
-enum StatusState { Past, Current, Next, Future }
 
 interface StatusText {
   past: string,
@@ -129,14 +129,6 @@ function StatusButton({ state, text, onClick }:{ state: StatusState, text: Statu
   )
 }
 
-const statusMap = {
-  "Staging": 0,
-  "Open": 1,
-  "Pre-Trip": 2,
-  "Post-Trip": 3,
-  "Complete": 4,
-}
-
 function TripStatusBar({ trip, reqs, setPopup, showAttendanceForm, setShowAttendanceForm }:{ trip: TripWithSignup, reqs: Requesters, setPopup: Dispatch<SetStateAction<boolean>>, showAttendanceForm: boolean, setShowAttendanceForm: Dispatch<SetStateAction<boolean>> }) {
   return (
     trip.status == TripStatus.Complete 
@@ -144,11 +136,7 @@ function TripStatusBar({ trip, reqs, setPopup, showAttendanceForm, setShowAttend
       : <div className="flex gap-2">
         { 
           statusButtonInfos(trip, reqs, setPopup, showAttendanceForm, setShowAttendanceForm).map((buttonInf: StatusButtonInfo)=>{
-            let state;
-            if (statusMap[buttonInf.stat] < statusMap[trip.status]) { state = StatusState.Past }
-            else if (statusMap[buttonInf.stat] == statusMap[trip.status]) { state = StatusState.Current }
-            else if (statusMap[buttonInf.stat] == statusMap[trip.status] + 1) { state = StatusState.Next }
-            else { state = StatusState.Future }
+            const state = stageState(buttonInf.stat, trip.status);
             return <StatusButton 
                 key={buttonInf.stat}
                 state={state} 
