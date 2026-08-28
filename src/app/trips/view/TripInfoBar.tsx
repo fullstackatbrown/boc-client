@@ -111,7 +111,7 @@ export default function TripInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs:
       createEditSpecs(trip, reqs)
         .then((editSpecs) => setEditSpecs(editSpecs))
     };
-  }, [])
+  }, [trip, reqs])
 
   function TripInfo({ lead, text, editable }:{ lead: string, text: string, editable?: EditItems | ReactElement }) {
     if (!editable) {

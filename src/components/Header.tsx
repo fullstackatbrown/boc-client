@@ -1,11 +1,11 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
-import axios from 'axios';
-import api from "@/scripts/api";
+import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
 import Login from "@/components/Login";
 import { useSession } from "next-auth/react";
+import { useRequesters } from "@/scripts/requests";
+import Link from "next/link";
 
 import bear_vector from "@/assets/images/header/logo.svg";
 
@@ -15,18 +15,16 @@ function NavButton(props: { item: any }) {
 
   return (
     <div className="relative group">
-      <button
-        className={`py-2 px-4 rounded-lg
+      <Link
+        href={props.item.url}
+        className={`block py-2 px-4 rounded-lg
         ${isDropdown ? "group-hover:rounded-b-none" : ""}
           cursor-pointer font-montserrat font-bold text-[13pt]
           group-hover:bg-boc_green group-hover:text-white
       ${pathname.includes(props.item.url) ? "bg-boc_green text-white" : "bg-transparent text-boc_darkbrown"}`}
-        onClick={() => {
-          window.location.href = props.item.url;
-        }}
       >
         {props.item.label}
-      </button>
+      </Link>
 
       {isDropdown ? (
         <ul
@@ -36,15 +34,16 @@ function NavButton(props: { item: any }) {
         >
           {props.item.dropdown.map((option: any, i: any) => (
             <li
-              key={i}
-              onClick={() => {
-                window.location.href = option.url;
-              }}
-              className={`px-2 py-2 cursor-pointer hover:bg-green-100 
-                border-b-transparent rounded-b-[5px] text-center
+              key={option.url}
+              className={`border-b-transparent rounded-b-[5px]
               ${i > 0 ? "border-boc_darkgreen border-t-[2px]" : ""}`}
             >
-              {option.label}
+              <Link
+                href={option.url}
+                className="block px-2 py-2 cursor-pointer hover:bg-green-100 text-center rounded-b-[5px]"
+              >
+                {option.label}
+              </Link>
             </li>
           ))}
         </ul>
@@ -56,7 +55,8 @@ function NavButton(props: { item: any }) {
 function NavBar() {
   const [user, setUser] = useState("");
   const [loading, setLoading] = useState(true);
-  const { data: session, status } = useSession();
+  const { status } = useSession();
+  const { backendGet } = useRequesters();
 
   const menuItems = [
     {
@@ -101,23 +101,12 @@ function NavBar() {
 
   const updateLogin = async () => {
     try {
-      if (!session) {
-        setLoading(false);
-        return;
-      }
-
-      const { data: userData } = await api.get("/user/profile", {
-        headers: {
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-      });
-
+      const { data: userData } = await backendGet("/user/profile");
       setUser(`${userData.firstName} ${userData.lastName}`);
-      setLoading(false);
-    } catch (error) {
-      setUser("");
-      setLoading(false);
+    } catch (_error) {
+      setUser(""); //Includes the ordinary signed-out case, which rejects with a 401
     }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -128,16 +117,16 @@ function NavBar() {
 
   return (
     <nav className="px-8 py-8 flex justify-between">
-      <a href="/">
+      <Link href="/">
         <img
           src={bear_vector.src}
           alt="Bear Vector"
           className="cursor-pointer"
         />
-      </a>
+      </Link>
       <div className="flex space-x-[37px] px-10 py-4">
-        {menuItems.map((item, index) => (
-          <NavButton key={index} item={item} />
+        {menuItems.map((item) => (
+          <NavButton key={item.url} item={item} />
         ))}
 
         {loading ? (

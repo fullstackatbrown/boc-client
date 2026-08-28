@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useRequesters }from "@/scripts/requests"
 import { User, TripSignUp } from "@/models/models"
 import { formatDateString } from "@/utils/utils"
@@ -35,7 +36,7 @@ function Th(props: { children: React.ReactNode }) {
   );
 }
 
-function TripRow(data: Trip) {
+function TripRow(data: Trip & { onOpen: (tripId: number) => void }) {
   const getLotteryColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "signed up":
@@ -57,11 +58,9 @@ function TripRow(data: Trip) {
     }
   };
   return (
-    <tr 
+    <tr
     className="px-4 py-2"
-    onClick={()=>{
-      window.location.href = `/trips/view?id=${data.tripId}`
-    }}
+    onClick={() => data.onOpen(data.tripId)}
     >
       <Td>
         <b className="text-blue-400">{data.tripName} </b>
@@ -84,7 +83,7 @@ function TripRow(data: Trip) {
 }
 
 // create a table for all upcoming trips
-function tripTable(tripsType: String, trips: Trip[]) {
+function tripTable(tripsType: String, trips: Trip[], onOpen: (tripId: number) => void) {
   return (
     <div className="flex flex-col mb-10">
       <h1 className="text-2xl font-bold font-funky text-boc_darkgreen">
@@ -105,8 +104,8 @@ function tripTable(tripsType: String, trips: Trip[]) {
                 <Th>Date</Th>
                 <Th>Lottery Info</Th>
               </tr>
-              { trips.map((data, index) => (
-                <TripRow key={index} {...data} />
+              { trips.map((data) => (
+                <TripRow key={data.tripId} {...data} onOpen={onOpen} />
               ))}
             </tbody>
           </table>
@@ -127,7 +126,9 @@ export default function Profile() {
   // const [phone, setPhone] = useState("");
 
   const { backendGet, backendPost } = useRequesters();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
+  const router = useRouter();
+  const openTrip = (tripId: number) => router.push(`/trips/view?id=${tripId}`);
 
   const updateLogin = async () => {
     try {
@@ -191,7 +192,9 @@ export default function Profile() {
     if (status !== "loading") {
       updateLogin();
     }
-  }, [status]);
+    //backendGet is stable across renders (see useRequesters) - including it just means
+    //the profile refetches if the session changes, which is what we want
+  }, [status, backendGet]);
 
   if (loading) {
     return <div className="px-20 flex justify-center">Loading...</div>;
@@ -214,9 +217,7 @@ export default function Profile() {
         <div id="hostedTrips" className="flex flex-col">
           <button 
             className="ml-auto mr-10 bg-boc_darkbrown text-white font-bold py-2 px-4 rounded-full hover:bg-boc_darkgreen transition duration-300 ease-in-out"
-            onClick={() => {
-              window.location.href = "/trips/creation-form";
-            }}
+            onClick={() => router.push("/trips/creation-form")}
           >
             + Create a New Trip
           </button>
@@ -227,6 +228,7 @@ export default function Profile() {
                 trip.lotteryInfo === "Hosted Trip" &&
                 new Date(trip.date).getTime() >= new Date().getTime(),
             ),
+            openTrip,
           )}
         </div>
       )}
@@ -239,6 +241,7 @@ export default function Profile() {
             trip.lotteryInfo !== "Hosted Trip" &&
             new Date(trip.date).getTime() >= new Date().getTime(),
         ),
+        openTrip,
       )}
 
       {/* Past trips table */}
@@ -249,6 +252,7 @@ export default function Profile() {
             tripDetails.filter(
               (trip) => new Date(trip.date).getTime() < new Date().getTime(),
             ),
+            openTrip,
           )}
         </div>
       )}

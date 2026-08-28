@@ -1,10 +1,12 @@
 "use client";
 import BOCButton from "@/components/BOCButton";
 import SocialMedia from "@/components/SocialMedia";
+import { useRouter } from "next/navigation";
 
 import splash_graphic from "@/assets/images/home/splash_graphic.png";
 
 export default function Home() {
+  const router = useRouter();
   return (
     <div className="h-full w-full">
       {/* Splash Graphic */}
@@ -33,7 +35,7 @@ export default function Home() {
               BOC will help you get there!
             </p>
             <BOCButton
-              onClick={handleMailClick}
+              onClick={() => router.push("/get-involved")}
               text="Join our Mailing List!"
             ></BOCButton>
           </section>
@@ -43,7 +45,3 @@ export default function Home() {
     </div>
   );
 }
-
-const handleMailClick = () => {
-  window.location.href = "/get-involved";
-};

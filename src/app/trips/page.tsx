@@ -52,7 +52,7 @@ export default function Trips() {
         if (e.status !== 401) console.error(`Fetching user data failed: ${e}`);
         else setUserRole(Role.None); //If status is 401, user is just not logged in
       });
-  }, []);
+  }, [backendGet]);
 
   useEffect(() => {
     if (fetched.current) {

@@ -129,7 +129,7 @@ const AttendanceForm: React.FC<AttendanceFormProps> = ({ trip, reqs }) => {
     backendGet(`/trip/${trip.id}/lead/all-possible-participants`)
       .then((res) => setEmailOptions(res.data))
       .catch((err) => handleNetError(err));
-  }, []);
+  }, [trip.id, backendGet]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

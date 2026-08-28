@@ -28,8 +28,8 @@ export default function ParticipantList({ trip, participants, reqs }:{ trip: Tri
               </> 
               : <></>}
           </tr>
-          {participants.map((part, index) => (
-            <ParticipantRow key={index} part={part} extraData={extraData} trip={trip} reqs={reqs} />
+          {participants.map((part) => (
+            <ParticipantRow key={part.email} part={part} extraData={extraData} trip={trip} reqs={reqs} />
           ))}
         </tbody>
       </table>

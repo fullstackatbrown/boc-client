@@ -5,7 +5,6 @@ import wood from "@/assets/images/profile/wood.png";
 import { PencilSquareIcon } from '@heroicons/react/24/solid';
 import { AxiosResponse } from "axios";
 import EditablePhone from "./EditablePhone";
-import { subscribe } from "diagnostics_channel";
 
 const Badge = ({title, count, label} : {title: string, count: number, label: string} ) => (
 	<>

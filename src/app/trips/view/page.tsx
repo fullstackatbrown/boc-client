@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 
 import { useSession } from "next-auth/react";
@@ -13,6 +13,7 @@ import TripPageContents from "./TripPageContents";
 
 function TripPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const id = searchParams.get("id");
 
   const [trip, setTrip] = useState<TripWithSignup | null>(null);
@@ -45,13 +46,15 @@ function TripPage() {
                 );
                 break;
             }
-            window.location.href = "/trips";
+            router.push("/trips");
           });
       })
       .catch((err) => {
         alert(err);
       });
-  }, []);
+    //The requester functions are stable (see useRequesters), so this refetches when the
+    //trip id changes or the session resolves - not on every render
+  }, [id, sessionStatus, backendGet, router]);
 
   if (!trip) {
     return <div className="px-20 flex justify-center">Loading...</div>;

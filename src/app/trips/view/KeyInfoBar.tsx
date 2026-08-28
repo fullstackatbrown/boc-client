@@ -148,7 +148,7 @@ export default function KeyInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs: 
         setSignups(res.data)
         setSelectedSignups(res.data.filter((signup: TripParticipant) => signup.status == SignupStatus.Selected))
       }).catch((err) => alert(`ERROR: ${err}`));
-  },[])
+  },[trip.id, backendGet])
   const Bar = (text: ReactNode) => <div className="p-4 rounded-lg bg-gray-200 w-full">{text}</div>
   let content;
   switch (trip.status) {

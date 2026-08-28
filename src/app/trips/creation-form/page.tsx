@@ -2,7 +2,6 @@
 
 import { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import { useRequesters }from "@/scripts/requests"
-import { startAfter } from 'firebase/firestore';
 
 interface TripForm {
   leaders: string[];
@@ -154,7 +153,7 @@ export default function CreateTripForm() {
           }
         })
     }
-  }, [])
+  }, [backendGet])
 
   useEffect(() => {
     if (userEmail) {
@@ -166,7 +165,7 @@ export default function CreateTripForm() {
           console.error(err)
         })
     }
-  }, [userEmail])
+  }, [userEmail, backendGet])
 
   const labelStyle = "block font-semibold mb-2";
   const iptStyle = "w-full p-2 border border-boc_green rounded";

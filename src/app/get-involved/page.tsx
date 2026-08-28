@@ -60,7 +60,7 @@ function MailingListContent() {
   }
 
   useEffect(checkSubscribeParam, [searchParams, joined]);
-  useEffect(checkListservStatus, []);
+  useEffect(checkListservStatus, [sessionStatus, backendGet]);
   if (joined === null) return <div className="text-center">Loading...</div>
 
   return (

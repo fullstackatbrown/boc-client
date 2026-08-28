@@ -1,6 +1,6 @@
 import api from "@/scripts/api";
 import { useSession } from "next-auth/react";
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useMemo } from "react";
 import { AxiosResponse } from "axios";
 
 export interface Requesters {
@@ -90,5 +90,11 @@ export function useRequesters(): Requesters {
     return api.post(path, body, { headers: { Authorization: `Bearer ${token}` } });
   }, [waitUntilReady]);
 
-  return { backendGet, backendPost, sessionStatus };
+  //The object is memoized as well as the functions - components pass `reqs` around as a
+  //single prop and put it in dependency arrays, which a fresh object would break just as
+  //surely as a fresh function
+  return useMemo(
+    () => ({ backendGet, backendPost, sessionStatus }),
+    [backendGet, backendPost, sessionStatus],
+  );
 }

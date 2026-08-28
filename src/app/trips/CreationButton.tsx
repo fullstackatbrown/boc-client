@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect, useState, RefObject } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function CreationButton({ footerRef }:{ footerRef: RefObject<HTMLDivElement> }) {
   const [isAboveFooter, setIsAboveFooter] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -31,9 +33,7 @@ export default function CreationButton({ footerRef }:{ footerRef: RefObject<HTML
     >
       <button
         className="group flex items-center gap-2 bg-boc_darkbrown text-background text-lg font-semibold px-4 h-12 rounded-full transition-all duration-1000 overflow-hidden w-12 hover:w-36"
-        onClick={() => {
-          window.location.href = "/trips/creation-form";
-        }}
+        onClick={() => router.push("/trips/creation-form")}
       >
         <span className="text-2xl">+</span>
         <span className="opacity-0 group-hover:opacity-100 whitespace-nowrap transition-none">

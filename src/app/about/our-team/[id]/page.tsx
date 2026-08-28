@@ -4,6 +4,7 @@ import { useRequesters } from "@/scripts/requests";
 import db from "@/scripts/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { formatDateString } from "@/utils/utils";
 
 // Assets imported from your original structure
@@ -16,6 +17,7 @@ export default function LeaderProfile({ params }: { params: Promise<{ id: string
   const id = resolvedParams.id;
 
   const { backendGet } = useRequesters();
+  const router = useRouter();
   const [leader, setLeader] = useState<any>(null);
   const [notFound, setNotFound] = useState(false);
   const [tripCount, setTripCount] = useState(0);
@@ -146,7 +148,7 @@ export default function LeaderProfile({ params }: { params: Promise<{ id: string
                   <tr 
                     key={trip.tripId} 
                     className="group hover:scale-[1.01] transition-transform cursor-pointer"
-                    onClick={() => window.location.href = `/trips/view?id=${trip.tripId}`}
+                    onClick={() => router.push(`/trips/view?id=${trip.tripId}`)}
                   >
                     <td className="p-5 rounded-l-xl border-y-2 border-l-2 border-boc_darkbrown bg-white/40 group-hover:bg-white transition-colors">
                       <p className="font-bold text-2xl text-boc_darkbrown">{trip.tripName}</p>

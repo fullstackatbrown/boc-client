@@ -7,6 +7,7 @@ import gArrow from "@/assets/images/trips/arrow-green.svg"
 import { formatDateString } from "@/utils/utils"
 // CHANGE: Imported the new dynamic TripIcon component
 import TripIcon from "@/components/TripIcon"
+import Link from "next/link"
 
 export default function TripDisp({ trips }:{ trips: Trip[] }) {
     return (
@@ -16,7 +17,7 @@ export default function TripDisp({ trips }:{ trips: Trip[] }) {
         <div className="grid grid-cols-1 gap-2">
           {trips.length > 0 ? (
             trips.map((trip, index) => (
-              <a key={index} href={`/trips/view?id=${trip.id}`}>
+              <Link key={trip.id} href={`/trips/view?id=${trip.id}`}>
                 <div
                   className={`w-[calc(100% - 1.5rem)] pl-4 pt-4 pr-2 pb-2 rounded-[20px] drop-shadow-lg font-standard mx-3 mb-2 flex flex-col h-36
                   shadow-[4px] ${index % 2 == 0 ? "bg-boc_yellow text-black" : "bg-boc_darkgreen text-white"}`}
@@ -48,7 +49,7 @@ export default function TripDisp({ trips }:{ trips: Trip[] }) {
                     <img src={index % 2 == 0 ? gArrow.src : yArrow.src} className="aspect-square h-8"/>
                   </div>
                 </div>
-              </a>
+              </Link>
             ))
           ) : (
             <p className="col-span-full text-center text-gray-600">

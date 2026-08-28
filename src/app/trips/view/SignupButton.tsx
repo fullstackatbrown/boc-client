@@ -59,6 +59,8 @@ function SignupButtonContent({ trip, reqs }:{ trip: TripWithSignup, reqs: Reques
       }
       params.set("post_login_action", "signup");
       await signIn("google", { callbackUrl: `${window.location.origin}${pathname}?${params.toString()}`});
+      //signIn navigates away; the post is retried after login via post_login_action
+      return;
     }
     await backendPost(path, {});
     params.delete("post_login_action"); //In case it was in use
