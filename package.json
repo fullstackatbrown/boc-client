@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -25,6 +27,7 @@
     "react-router-dom": "^6.27.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@types/node": "20.17.30",
     "@types/react": "18.3.20",
     "@types/react-dom": "^18",

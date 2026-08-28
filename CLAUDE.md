@@ -146,6 +146,7 @@ Note the split: leader *identity/photos* live in Firebase, while leader *trip st
 
 ## Verification Loop
 The current bar for a change is:
+0. `npm run test:e2e` for anything touching the trip lifecycle (see End-to-end tests)
 1. `npm test` passes (Vitest, see Tests below)
 2. `npx tsc --noEmit` passes clean (it currently does — a new error means you introduced it)
 3. `npm run build` succeeds for anything touching routing, Suspense boundaries, or server/client component boundaries
@@ -165,6 +166,21 @@ What's covered today is the trip page's decision logic, extracted out of its com
 Both use a compile-time exhaustiveness guard (`const _exhaustive: never = ...`), so adding a new `SignupStatus` or `TripStatus` breaks the typecheck until every branch is handled. The guard deliberately does not throw at runtime.
 
 When adding logic to the trip page, prefer this shape: pure decision function in its own module, JSX mapping in the component. Component-level tests would need jsdom and `@testing-library/react` added — don't reach for that without discussing it first.
+
+### End-to-end tests
+```
+npm run test:e2e          # headless
+npm run test:e2e:headed   # watch it drive a real browser
+```
+Playwright, configured in `playwright.config.ts`. It boots **both** servers itself (`boc-server` with `DEVELOPING`, `next dev` with `NEXT_PUBLIC_E2E=1`) and reseeds the database in `e2e/global-setup.ts`, so **running it replaces your local dev data**. Takes about 15 seconds. This is a pre-PR check, not a save-hook.
+
+`e2e/lifecycle.spec.ts` walks one trip through the entire lifecycle — create, open, six signups, lottery, confirm, pay, remove a participant, pull a replacement off the waitlist, run the trip, take attendance (Attended / No Show / Excused Absence plus a walk-on who never signed up), and check the result on a participant's profile.
+
+Conventions worth preserving if you extend it:
+- **Actions go through the UI; the backend is queried only to discover state.** The lottery is random, so the test asks who was selected rather than assuming. `backendGet` in `e2e/fixtures/harness.ts` is for discovery only — don't use it to perform actions, or the test stops testing the wiring.
+- **Any `alert()` fails the test.** `watchDialogs` records every dialog; a walk that is supposed to succeed must raise none. Since this app reports every backend rejection through `alert()`, that one assertion covers every 403/422 the server can produce.
+- **Use `clickAndSettle` for anything that mutates.** Handlers here end in `window.location.reload()`, and navigating during that reload aborts it (`net::ERR_ABORTED`).
+- `Pre-Trip -> Post-Trip` has no UI trigger and no route — only the 5am cron does it — so the test shells out to `boc-server/test-helpers/run-trip.mjs`. That is the single place it reaches around the interface, and `runTrip`'s own guards still apply.
 
 To exercise leader/participant branches locally, seed with `node default_insts.mjs` in ../boc-server (users 1-4, trips 1-9 spanning Staging/Open/Pre-Trip/Post-Trip) and switch identity via the `TESTID` constant with `phonyAuth` enabled in server.mjs.
 
