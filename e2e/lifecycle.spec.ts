@@ -215,6 +215,12 @@ test("a trip runs from creation through attendance", async ({ page, request }) =
 
     await page.getByText("Attendance", { exact: true }).click();
 
+    // The form fires two independent fetches and the status selects are controlled by
+    // React state. Selecting while the second one is still in flight lets its re-render
+    // put the select back to its "No Show" default - a rare flake that silently records
+    // the wrong attendance. Wait for both to settle before touching anything.
+    await page.waitForLoadState("networkidle");
+
     // One of each outcome across the four selected participants.
     const outcomes: Record<string, string> = {
       [selected[0]]: "Attended",
@@ -223,8 +229,11 @@ test("a trip runs from creation through attendance", async ({ page, request }) =
       [selected[3]]: "Excused Absence",
     };
     for (const [email, outcome] of Object.entries(outcomes)) {
-      const row = page.locator("li").filter({ hasText: email });
-      await row.locator("select").selectOption(outcome);
+      const select = page.locator("li").filter({ hasText: email }).locator("select");
+      await select.selectOption(outcome);
+      // Confirm it stuck - a reverted select would otherwise only surface much later,
+      // as a confusing mismatch in the status assertions below.
+      await expect(select).toHaveValue(outcome);
     }
 
     // Somebody who never signed up but turned up anyway.
