@@ -1,6 +1,6 @@
 "use client";
 import { Suspense, useEffect, useState } from "react";
-import { makeRequesters, AuthStat } from "@/scripts/requests";
+import { useRequesters, AuthStat } from "@/scripts/requests";
 import { signIn } from "next-auth/react";
 import Login from "@/components/Login";
 import BOCButton from "@/components/BOCButton";
@@ -16,7 +16,7 @@ export default function MailingList() { //Any component that uses useSearchParam
 
 function MailingListContent() {
   const [joined, setJoined] = useState<boolean|null>(null);
-  const { backendPost, backendGet, sessionStatus } = makeRequesters();
+  const { backendPost, backendGet, sessionStatus } = useRequesters();
   const searchParams = useSearchParams();
   const pathname = usePathname();
 

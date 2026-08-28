@@ -1,10 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { collection, getDocs, doc, getDoc} from "firebase/firestore";
-import { useRouter } from "next/navigation";
 import Title from "@/components/Title";
 import db from "@/scripts/firebase";
 import Link from "next/link";
+import photoPlaceholder from "@/assets/images/profile/bear.png";
 
 type ResourceData = {
   id: string;
@@ -21,12 +21,11 @@ export default function Team() {
   const [info, setData] = useState<ResourceData[]>([]);
   const [teamLink, setTeamLink] = useState("");
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   // 1. Simplify the Card (Remove the router.push)
   function Card({ resource }: { resource: ResourceData }) {
     const isGeneral = resource.category === "general";
-    const imagePath = resource.image || "https://via.placeholder.com/400?text=Photo+Coming+Soon";
+    const imagePath = resource.image || photoPlaceholder.src;
 
     return (
       <div className="flex flex-col items-center w-full max-w-sm cursor-pointer group outline-none">

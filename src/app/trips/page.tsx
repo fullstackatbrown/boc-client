@@ -6,7 +6,7 @@ import CreationButton from "./CreationButton";
 import TripDisp from "./TripDisp";
 import { Trip, Role, TripStatus } from "@/models/models";
 import { useEffect, useState, useRef } from "react";
-import { makeRequesters } from "@/scripts/requests";
+import { useRequesters } from "@/scripts/requests";
 
 export default function Trips() {
   //Filter utilities
@@ -19,7 +19,7 @@ export default function Trips() {
   const fetched = useRef(false);
 
   // Non-filter resources
-  const { backendGet } = makeRequesters();
+  const { backendGet } = useRequesters();
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [userRole, setUserRole] = useState<Role | null>(null);
   const [currTrips, setCurrTrips] = useState<Trip[]>([]);
@@ -37,8 +37,11 @@ export default function Trips() {
       }
     });
 
-    setCurrTrips(curr);
-    setPastTrips(past);
+    //plannedDate is yyyy-mm-dd, so string comparison is already chronological - no Date
+    //parsing, and so none of the timezone shifting formatDateString exists to avoid.
+    const byDate = (a: Trip, b: Trip) => a.plannedDate.localeCompare(b.plannedDate);
+    setCurrTrips(curr.sort(byDate)); //Soonest first - the next trip you can sign up for
+    setPastTrips(past.sort((a, b) => byDate(b, a))); //Most recent first
   }, [filteredTrips]);
 
   useEffect(() => {
@@ -46,7 +49,6 @@ export default function Trips() {
     backendGet("/user")
       .then((res): void => setUserRole(res.data.role))
       .catch((e): void => {
-        console.log(e.status, e.status !== 401);
         if (e.status !== 401) console.error(`Fetching user data failed: ${e}`);
         else setUserRole(Role.None); //If status is 401, user is just not logged in
       });

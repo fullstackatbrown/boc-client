@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 
 import { useSession } from "next-auth/react";
-import { AuthStat, makeRequesters } from "@/scripts/requests";
+import { AuthStat, useRequesters } from "@/scripts/requests";
 import { TripWithSignup } from "@/models/models";
 
 import { Suspense } from "react";
@@ -17,7 +17,7 @@ function TripPage() {
 
   const [trip, setTrip] = useState<TripWithSignup | null>(null);
 
-  const reqs = makeRequesters();
+  const reqs = useRequesters();
   const { backendGet, sessionStatus } = reqs;
 
   useEffect(() => {

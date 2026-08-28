@@ -9,7 +9,7 @@ import { useRef, useState, useEffect, ReactElement } from "react";
 import { EditIcon, EditableComponent, EditableString } from "./editable";
 import { UserPlusIcon } from "@heroicons/react/24/outline";
 import EditableCost from "./EditableCost";
-import { formatDateString } from "@/utils/utils";
+import { formatCost, formatDateString } from "@/utils/utils";
 import Link from "next/link";
 
 function classToCost(cls: string): number | undefined {
@@ -181,7 +181,7 @@ export default function TripInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs:
   }, [trip, infoRef]);
 
   
-  const cost = (trip.class ? classToCost(trip.class)! : trip.priceOverride! )
+  const cost = (trip.class ? classToCost(trip.class) ?? null : trip.priceOverride)
   return (
     <div className="w-full pt-4">
       <div className="flex flex-row gap-x-4">
@@ -213,7 +213,7 @@ export default function TripInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs:
               } />
               : <></>
               }
-              <TripInfo lead="Cost" text={cost === 0 ? "Free!" : "$" + String(cost)} editable={
+              <TripInfo lead="Cost" text={formatCost(cost)} editable={
                 trip.userData?.tripRole == TripRole.Leader ? <EditableCost trip={trip} reqs={reqs} cost={cost}/> : undefined
               }/>
 

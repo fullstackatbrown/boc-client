@@ -1,4 +1,4 @@
-import { User } from "@/models/models"
+import { Role, User } from "@/models/models"
 import tripsBadge from "@/assets/images/profile/badge.png";
 import profilepic from "@/assets/images/profile/bear.png";
 import wood from "@/assets/images/profile/wood.png";
@@ -9,7 +9,6 @@ import { subscribe } from "diagnostics_channel";
 
 const Badge = ({title, count, label} : {title: string, count: number, label: string} ) => (
 	<>
-            <div className="flex-grow"></div>
             <div className="w-1/5 text-center rounded-lg float-right">
             <p className="text-2xl font-bold text-boc_darkbrown">{title}</p>
 
@@ -30,16 +29,21 @@ const Badge = ({title, count, label} : {title: string, count: number, label: str
 	    </>
 );
 
-function Badges({ role, tripsParticipated, tripsLead } : {role: string, tripsParticipated: number, tripsLead: number}) {
+function Badges({ role, tripsParticipated, tripsLead } : {role: Role, tripsParticipated: number, tripsLead: number}) {
+		//Admins lead trips too - checking for Leader alone hides this from most of the
+		//people who have actually led anything
+		const leads = role === Role.Leader || role === Role.Admin;
 		return (
 			<>
+			{/* Pushes the badges to the right edge, however many of them there are */}
+			<div className="flex-grow"></div>
 			<Badge
 				title="SUMMIT SEEKER"
 				count={tripsParticipated + tripsLead}
 				label="TOTAL TRIPS"
 			/>
-			
-			{role === 'Leader' && (
+
+			{leads && (
 				<Badge
 					title="LEADER STATS"
 					count={tripsLead}

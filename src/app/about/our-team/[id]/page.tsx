@@ -1,6 +1,6 @@
 "use client";
 import React, { use, useEffect, useState } from "react";
-import { makeRequesters } from "@/scripts/requests";
+import { useRequesters } from "@/scripts/requests";
 import db from "@/scripts/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import Link from "next/link";
@@ -8,47 +8,61 @@ import { formatDateString } from "@/utils/utils";
 
 // Assets imported from your original structure
 import tripsBadge from "@/assets/images/profile/badge.png";
+import photoPlaceholder from "@/assets/images/profile/bear.png";
 
 export default function LeaderProfile({ params }: { params: Promise<{ id: string }> }) {
   // 1. Unwrap params for Next.js 15
   const resolvedParams = use(params);
   const id = resolvedParams.id;
 
-  const { backendGet } = makeRequesters();
+  const { backendGet } = useRequesters();
   const [leader, setLeader] = useState<any>(null);
+  const [notFound, setNotFound] = useState(false);
   const [tripCount, setTripCount] = useState(0);
   const [pastTrips, setPastTrips] = useState<any[]>([]);
 
+  //NOTE: backendGet must NOT be a dependency here. It changes identity whenever the
+  //session does, and this effect sets state on every run - together that loops forever.
   useEffect(() => {
     const fetchPageData = async () => {
       // 2. Retrieve static leader data from Firestore
       const leaderSnap = await getDoc(doc(db, "team", id));
-      if (leaderSnap.exists()) {
-        const data = leaderSnap.data();
-        setLeader(data);
+      if (!leaderSnap.exists()) {
+        setNotFound(true);
+        return;
+      }
+      const data = leaderSnap.data();
+      setLeader(data);
 
-        const nameParts = data.name.split(" ");
-        const first = nameParts[0];
-        const last = nameParts.slice(1).join(" ");
+      const nameParts = data.name.split(" ");
+      const first = nameParts[0];
+      const last = nameParts.slice(1).join(" ");
 
-        try {
-          // 3. Retrieve relational stats and trip history from MySQL
-          const [statsRes, tripsRes] = await Promise.all([
-            backendGet(`/public/leader-stats/${first}/${last}`),
-            backendGet(`/public/leader-trips/${first}/${last}`)
-          ]);
-          
-          setTripCount(statsRes.data.totalTrips);
-          // Separate past trips using existing date logic
-          setPastTrips(tripsRes.data.filter((t: any) => new Date(t.date) < new Date()));
-        } catch (err) {
-          console.error("SQL fetch failed", err);
-        }
+      try {
+        // 3. Retrieve relational stats and trip history from MySQL
+        //These routes are public, so request them without auth - otherwise logged-out
+        //visitors get no stats at all, which is exactly who this page is for.
+        const [statsRes, tripsRes] = await Promise.all([
+          backendGet(`/public/leader-stats/${first}/${last}`, true),
+          backendGet(`/public/leader-trips/${first}/${last}`, true)
+        ]);
+
+        setTripCount(statsRes.data.totalTrips);
+        // Separate past trips using existing date logic
+        setPastTrips(tripsRes.data.filter((t: any) => new Date(t.date) < new Date()));
+      } catch (err) {
+        console.error("SQL fetch failed", err);
       }
     };
     fetchPageData();
-  }, [id, backendGet]);
+  }, [id]);
 
+  if (notFound) return (
+    <div className="p-10 text-center font-funky text-boc_darkbrown text-2xl">
+      We couldn't find that leader.{" "}
+      <Link href="/about/our-team" className="underline">Back to Our Team</Link>
+    </div>
+  );
   if (!leader) return <div className="p-10 text-center font-funky text-boc_darkbrown text-2xl">Loading...</div>;
 
   return (
@@ -71,7 +85,7 @@ export default function LeaderProfile({ params }: { params: Promise<{ id: string
         {/* Profile Photo: Single Frame */}
         <div className="flex justify-start">
           <div className="border-[6px] border-[#d2b48c] shadow-md overflow-hidden bg-white w-56 h-56 shrink-0">
-            <img src={leader.image} alt={leader.name} className="w-full h-full object-cover" />
+            <img src={leader.image || photoPlaceholder.src} alt={leader.name} className="w-full h-full object-cover" />
           </div>
         </div>
 

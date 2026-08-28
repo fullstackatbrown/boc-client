@@ -1,8 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
 
-import { useSession } from "next-auth/react";
-import { makeRequesters }from "@/scripts/requests"
+import { signIn, useSession } from "next-auth/react";
+import { useRequesters }from "@/scripts/requests"
 import { User, TripSignUp } from "@/models/models"
 import { formatDateString } from "@/utils/utils"
 import ProfileBar from "./ProfileBar";
@@ -126,7 +126,7 @@ export default function Profile() {
   // const [showPhone, setShowPhone] = useState(false);
   // const [phone, setPhone] = useState("");
 
-  const { backendGet, backendPost } = makeRequesters();
+  const { backendGet, backendPost } = useRequesters();
   const { data: session, status } = useSession();
 
   const updateLogin = async () => {
@@ -170,7 +170,12 @@ export default function Profile() {
       const tripsWithDetails = await Promise.all(tripPromises);
       setTripDetails(tripsWithDetails);
       setLoading(false);
-    } catch (error) {
+    } catch (error: any) {
+      //There is no profile to show without a session, so send them to log in and come back
+      if (error?.status === 401) {
+        signIn("google", { callbackUrl: "/user" });
+        return;
+      }
       console.error(error);
       setUserProfile(null);
       setTripDetails([]);
@@ -191,10 +196,18 @@ export default function Profile() {
   if (loading) {
     return <div className="px-20 flex justify-center">Loading...</div>;
   }
+  //Without this, a failed fetch renders ProfileBar with a null profile and throws
+  if (!userProfile) {
+    return (
+      <div className="px-20 flex justify-center">
+        We couldn't load your profile. Try refreshing, and let an admin know if it keeps happening.
+      </div>
+    );
+  }
 
   return (
     <div className="h-full min-h-screen w-full px-40 py-10">
-      <ProfileBar userProfile={userProfile!} submitPhone={submitPhone}/>
+      <ProfileBar userProfile={userProfile} submitPhone={submitPhone}/>
       <br/>
       {/* Your trips table */}
       {hostedTrips && (

@@ -5,11 +5,14 @@ import { TripClass, TripWithSignup } from "@/models/models";
 import { Requesters } from "@/scripts/requests";
 import { ChangeEvent, useRef, useState, KeyboardEvent, useEffect, } from "react";
 import { EditIcon } from "./editable";
+import { formatCost } from "@/utils/utils";
 
-export default function EditableCost(props: { trip: TripWithSignup, reqs: Requesters, cost: number }) {
+export default function EditableCost(props: { trip: TripWithSignup, reqs: Requesters, cost: number | null }) {
   const [showInput, setShowInput] = useState(false);
   const [iptClassVal, setIptClassVal] = useState(props.trip.class ? props.trip.class : null);
-  const [iptPriceVal, setIptPriceVal] = useState(props.trip.priceOverride ? props.trip.priceOverride : null);
+  //Compare against null, not truthiness - a priceOverride of 0 is a real value, and
+  //treating it as "unset" makes a free-by-override trip impossible to set or edit
+  const [iptPriceVal, setIptPriceVal] = useState(props.trip.priceOverride ?? null);
   const inputClassRef = useRef<HTMLInputElement>(null);
   const inputPriceRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -17,18 +20,18 @@ export default function EditableCost(props: { trip: TripWithSignup, reqs: Reques
   const handleKeyDown = async (key: string) => {
     if (key === "Enter") {
       let body;
-      if (iptClassVal && !iptPriceVal) {
-        body = { 
+      if (iptClassVal && iptPriceVal == null) {
+        body = {
           priceOverride: null,
-          class: iptClassVal, 
+          class: iptClassVal,
         }
-      } else if (!iptClassVal && iptPriceVal) {
-        body = { 
-          class: null, 
+      } else if (!iptClassVal && iptPriceVal != null) {
+        body = {
+          class: null,
           priceOverride: iptPriceVal,
         }
       } else {
-        console.log("This should be impossible");
+        //Neither field filled in, or somehow both - nothing coherent to submit
         setShowInput(false);
         return;
       }
@@ -67,16 +70,16 @@ export default function EditableCost(props: { trip: TripWithSignup, reqs: Reques
   useEffect(()=>{
     if (showInput) {
       //One of the the input fields MUST be in focus at all times or else UI breaks, so set one in focus on reveal
-      if (!iptClassVal && iptPriceVal) {
+      if (!iptClassVal && iptPriceVal != null) {
         inputPriceRef.current?.focus()
       } else {
         inputClassRef.current?.focus()
       }
     }
     else {
-      //Reset values - sometimes residual values from previous usages of the feature mess things up 
+      //Reset values - sometimes residual values from previous usages of the feature mess things up
       setIptClassVal(props.trip.class ? props.trip.class : null)
-      setIptPriceVal(props.trip.priceOverride ? props.trip.priceOverride : null)
+      setIptPriceVal(props.trip.priceOverride ?? null)
     }
   }, [showInput])
 
@@ -96,7 +99,7 @@ export default function EditableCost(props: { trip: TripWithSignup, reqs: Reques
         maxLength={1}
         pattern="^[A-J, Z]{1}$"
         placeholder="Trip Class (A-J, Z)"
-        disabled={!!iptPriceVal}
+        disabled={iptPriceVal != null}
         ref={inputClassRef}
       />
       <input
@@ -105,8 +108,9 @@ export default function EditableCost(props: { trip: TripWithSignup, reqs: Reques
         step="5"
         min={0}
         max={1000}
-        value={iptPriceVal ? iptPriceVal : ""}
-        onChange={(e: ChangeEvent<HTMLInputElement>)=>{setIptPriceVal(Number(e.target.value))}}
+        value={iptPriceVal ?? ""}
+        //An empty field means "no override", not a price of zero
+        onChange={(e: ChangeEvent<HTMLInputElement>)=>{setIptPriceVal(e.target.value === "" ? null : Number(e.target.value))}}
         className='border border-gray-300 rounded px-2 py-1 w-full'
         placeholder="Price Override"
         disabled={!!iptClassVal}
@@ -116,7 +120,7 @@ export default function EditableCost(props: { trip: TripWithSignup, reqs: Reques
     : <div onClick={() => setShowInput(true)} className="cursor-pointer mb-1">
       <p>
         <span className="font-bold mr-2">Cost:</span>
-        {props.cost === 0 ? "Free!" : "$" + String(props.cost)} &nbsp;
+        {formatCost(props.cost)} &nbsp;
         {EditIcon}
       </p>
     </div>

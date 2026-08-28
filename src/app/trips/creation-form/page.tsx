@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, ChangeEvent, FormEvent, useEffect } from 'react';
-import { makeRequesters }from "@/scripts/requests"
+import { useRequesters }from "@/scripts/requests"
 import { startAfter } from 'firebase/firestore';
 
 interface TripForm {
@@ -52,7 +52,7 @@ export default function CreateTripForm() {
   const [availableLeaders, setAvailableLeaders] = useState<string[]>([])
   const [userEmail, setUserEmail] = useState<string|null>(null)
 
-  const { backendGet, backendPost } = makeRequesters();
+  const { backendGet, backendPost } = useRequesters();
   
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -118,7 +118,9 @@ export default function CreateTripForm() {
       setForm({ ...emptyForm });
     }).catch((err)=>{
       let msg;
-      if (err.code == "ERR_BAD_REQUEST") {
+      if (err.status === 401 && !err.response) { //Rejected before it left the browser
+        msg = 'Action unauthorized. Make sure you are logged into a leader account.'
+      } else if (err.code == "ERR_BAD_REQUEST") {
         switch (err.response.status) {
           case 401:
             msg = 'Action unauthorized. Make sure you are logged into a leader account.'
@@ -145,7 +147,11 @@ export default function CreateTripForm() {
         })
         .catch((err): void => {
           console.error(err)
-          alert(`You shouldn't be seeing this! Please alert a website admin to this error. ERROR: ${err}`)
+          if (err?.status === 401) { //Not signed in - a normal way to land here, not a fault
+            setError('Log in with a leader account to create a trip.')
+          } else {
+            alert(`You shouldn't be seeing this! Please alert a website admin to this error. ERROR: ${err}`)
+          }
         })
     }
   }, [])
