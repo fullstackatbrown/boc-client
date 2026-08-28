@@ -182,7 +182,7 @@ Conventions worth preserving if you extend it:
 - **Use `clickAndSettle` for anything that mutates.** Handlers here end in `window.location.reload()`, and navigating during that reload aborts it (`net::ERR_ABORTED`).
 - `Pre-Trip -> Post-Trip` has no UI trigger and no route — only the 5am cron does it — so the test shells out to `boc-server/test-helpers/run-trip.mjs`. That is the single place it reaches around the interface, and `runTrip`'s own guards still apply.
 
-To exercise leader/participant branches locally, seed with `node default_insts.mjs` in ../boc-server (users 1-4, trips 1-9 spanning Staging/Open/Pre-Trip/Post-Trip) and switch identity via the `TESTID` constant with `phonyAuth` enabled in server.mjs.
+To exercise leader/participant branches locally, seed with `node default_insts.mjs` in ../boc-server (users 1-12, trips 1-9 spanning Staging/Open/Pre-Trip/Post-Trip) and switch identity as described below.
 
 ### Test Logins
 Automated tests and manual multi-user testing both need to act as several different people in one session, which real Google auth can't do. Setting `NEXT_PUBLIC_E2E=1` registers an extra next-auth Credentials provider (id `e2e`) that signs in as any @brown.edu / @risd.edu address without contacting Google:
@@ -190,6 +190,8 @@ Automated tests and manual multi-user testing both need to act as several differ
 ```ts
 signIn("e2e", { email: "ada.lovelace@brown.edu" })
 ```
+
+For manual testing, `/dev-login` is a page over that provider: buttons for every seeded user plus a field for arbitrary addresses. It renders only when the flag is on, and the provider it calls is not registered otherwise. Start the dev server as `NEXT_PUBLIC_E2E=1 npm run dev` to get either.
 
 The session it mints carries an `e2e:<email>` access token in place of a Google one, which `boc-server` accepts while its own `DEVELOPING` flag is set. Both halves must be enabled for this to work, and both are separately gated off in production builds. See the Test Identity Bypass section of `../boc-server/CLAUDE.md` for the backend side and the security caveats.
 

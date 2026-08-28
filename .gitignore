@@ -36,6 +36,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# local-only working notes
+/claude_notes/
+
 # playwright
 /e2e/test-results/
 /playwright-report/
