@@ -15,6 +15,9 @@ const SERVER_DIR = "../boc-server";
 
 export default defineConfig({
   testDir: "./e2e",
+  // Keep failure artifacts (screenshots, traces) alongside the tests rather than
+  // dropping a test-results/ folder at the repo root.
+  outputDir: "./e2e/test-results",
   // The lifecycle walk is one long ordered story; running its steps in parallel or
   // retrying a step in isolation would be meaningless.
   fullyParallel: false,

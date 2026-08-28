@@ -202,3 +202,6 @@ Documented so you don't waste time on it. Leave it alone unless asked:
 - `our-team/page.tsx` cards `router.push` to `/team/${resource.id}`, but no `src/app/team/` route exists — clicking a leader card 404s.
 - Trip filters on `/trips` (name/date/size) are fully implemented but commented out of the render, deemed "kinda silly".
 - `src/app/user/page.tsx` reads `tripInfo.otherLeaders`, a field the backend never sends (`GET /trip/:id` returns `leaders`). That lookup always falls through to the empty-array branch, so the `leaders` column it builds is effectively dead.
+
+## General Notes
+- Please confirm changes with user before committing unless told otherwise
