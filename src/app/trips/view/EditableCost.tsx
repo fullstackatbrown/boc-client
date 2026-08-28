@@ -20,6 +20,13 @@ export default function EditableCost(props: { trip: TripWithSignup, reqs: Reques
   const handleKeyDown = async (key: string) => {
     if (key === "Enter") {
       let body;
+      //Free trips are class Z, and the backend rejects a 0 override outright - say so
+      //here rather than letting it through to surface as a raw SQL error
+      if (iptPriceVal === 0) {
+        inputPriceRef.current?.setCustomValidity('Use class Z for a free trip, not a $0 override.')
+        inputPriceRef.current?.reportValidity()
+        return;
+      }
       if (iptClassVal && iptPriceVal == null) {
         body = {
           priceOverride: null,
@@ -106,11 +113,14 @@ export default function EditableCost(props: { trip: TripWithSignup, reqs: Reques
         name="priceOverride"
         type="number"
         step="5"
-        min={0}
+        min={1}
         max={1000}
         value={iptPriceVal ?? ""}
         //An empty field means "no override", not a price of zero
-        onChange={(e: ChangeEvent<HTMLInputElement>)=>{setIptPriceVal(e.target.value === "" ? null : Number(e.target.value))}}
+        onChange={(e: ChangeEvent<HTMLInputElement>)=>{
+          e.target.setCustomValidity(''); //Clear any message from a previous attempt
+          setIptPriceVal(e.target.value === "" ? null : Number(e.target.value));
+        }}
         className='border border-gray-300 rounded px-2 py-1 w-full'
         placeholder="Price Override"
         disabled={!!iptClassVal}
