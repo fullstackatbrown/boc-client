@@ -28,10 +28,10 @@ export default function LandAcknowledgement() {
   }, []);
 
   return (
-    <div className="h-full w-full px-20 pt-10 pb-5">
+    <div className="h-full w-full px-6 sm:px-10 desktop:px-20 pt-10 pb-5">
       <Title text="Financial Aid" />
-      <div id="content" className="text-center flex py-5">
-        <p className="text-lg font-light text-left leading-9 text-grey-50" style={{ color: "#3b3b3b" }}>
+      <div id="content" className="text-center flex flex-col desktop:flex-row py-5">
+        <p className="text-lg font-light text-left leading-9 text-grey-50 break-words" style={{ color: "#3b3b3b" }}>
           Excited about a trip offering but hesitant to sign up because of the cost? 
           <br/><br/>
           We understand that many outdoors-related sports and activities have high costs, and we don't 
@@ -53,8 +53,11 @@ export default function LandAcknowledgement() {
           {treasurers} [<a href={`mailto:${email}`} className="underline">email us!</a>].
         </p>
         {/* <hr className="border-t-1.5 border-gray-300 w-24 mx-auto my-4" /> */}
-        <div className="pl-24 flex-shrink-0">
-          <img src={Rafting.src} className="rounded-xl w-96"></img>
+        {/* Stacked above the text on mobile so the photo isn't buried below the copy.
+            Width is capped here, not on the img — preflight's max-width:100% shrinks it to fit. */}
+        <div className="order-first w-full max-w-96 mb-6
+        desktop:order-none desktop:w-auto desktop:max-w-none desktop:mb-0 desktop:pl-24 desktop:flex-shrink-0">
+          <img src={Rafting.src} alt="BOC members rafting a river in autumn" className="rounded-xl w-96"></img>
         </div>
       </div>
       <Dropdown header="Promo Codes" content={
