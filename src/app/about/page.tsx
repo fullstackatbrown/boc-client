@@ -3,9 +3,11 @@ import BOCButton from "@/components/BOCButton";
 import Title from "@/components/Title";
 import Image1 from "@/assets/images/about/main.png";
 
+// Justify only on desktop - it opens rivers at phone widths. Sizes are arbitrary values so
+// none of them pull in a line-height; the inherited one is what the desktop layout expects.
 function Paragraph(props: { children: React.ReactNode }) {
   return (
-    <div className="text-justify pb-5 text-[24px]">
+    <div className="text-left desktop:text-justify pb-5 text-[18px] sm:text-[20px] desktop:text-[24px]">
       <p>{props.children}</p>
     </div>
   );
@@ -13,14 +15,14 @@ function Paragraph(props: { children: React.ReactNode }) {
 
 function Faces() {
   return (
-    <div className="bg-[#dedeae] rounded-2xl mt-10 p-8 shadow-md mx-auto">
+    <div className="bg-[#dedeae] rounded-2xl mt-10 p-5 sm:p-8 shadow-md mx-auto">
       <p className="text-lg font-semibold mb-6">
         We, the Board of the Brown Outing Club, will abide by the following
         values, and use them as guiding principles for the short and long-term
         goals of the club (F.A.C.E.S.):
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8 text-[#3f9135] font-semibold text-3xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8 text-[#3f9135] font-semibold text-2xl sm:text-3xl">
         <div>
           <h2>Fun</h2>
           <p className="text-black font-normal text-base mt-2">
@@ -55,7 +57,7 @@ function Faces() {
           </p>
         </div>
         <div className="md:col-span-2 flex justify-center">
-          <div className="w-[50%]">
+          <div className="w-full md:w-[50%]">
             <h2>Service</h2>
             <p className="text-black font-normal text-base mt-2">
               serve the Brown community by providing opportunities to get off
@@ -72,11 +74,12 @@ function Faces() {
 
 export default function About() {
   return (
-    <div className="h-full w-full px-20 py-10">
+    <div className="h-full w-full px-6 sm:px-10 desktop:px-20 py-10">
       {/* Site content */}
       <Title text="About" />
-      <div className="flex space-x-10">
-        <div className="text-center max-w-[70%]">
+      {/* col-reverse lifts the photo above the copy on mobile while keeping it right of it on desktop */}
+      <div className="flex flex-col-reverse desktop:flex-row gap-8 desktop:gap-10">
+        <div className="text-center desktop:max-w-[70%]">
           <Paragraph>
             The BOC organizes everything from local walks and bike rides to
             weekend backpacking, kayaking, skiing, and camping trips! Our
@@ -103,7 +106,13 @@ export default function About() {
 
         </div>
         <div>
-          <img src={Image1.src} className="rounded-xl h-auto" />
+          {/* Cropped to a banner on mobile; desktop keeps the intrinsic portrait shape */}
+          <img
+            src={Image1.src}
+            alt="BOC members hiking a wooded trail"
+            className="rounded-xl h-auto w-full max-h-[220px] object-cover
+            desktop:w-auto desktop:max-h-none"
+          />
         </div>
       </div>
       <Faces />
