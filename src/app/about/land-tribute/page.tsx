@@ -5,15 +5,17 @@ import Image1 from "@/assets/images/about/riverlandacknowledgement.png";
 
 export default function LandAcknowledgement() {
   return (
-    <div className="h-full w-full px-20 py-10">
+    <div className="h-full w-full px-6 sm:px-10 desktop:px-20 py-10">
       <Title text="Land Tribute" />
 
-      <div id="content" className="text-center flex py-5">
+      {/* Text and image sit side by side only at desktop; below that the image
+          would shrink to a postage stamp, so it stacks underneath instead */}
+      <div id="content" className="text-center flex flex-col desktop:flex-row py-5">
         <div>
           <div>
             <h2
               id="paragraph"
-              className="mb-8 text-lg font-light text-left leading-9 italic text-grey-50"
+              className="mb-8 text-base sm:text-lg font-light text-left leading-8 desktop:leading-9 italic text-grey-50"
               style={{ color: "#3b3b3b" }}
             >
               “Brown University is located in Providence, Rhode Island, on lands
@@ -32,7 +34,7 @@ export default function LandAcknowledgement() {
           <hr className="border-t-1.5 border-gray-300 w-24 mx-auto my-4" />
           <div
             id="paragraph"
-            className="mb-8 text-xl font-[100] text-left leading-10"
+            className="mb-8 text-lg desktop:text-xl font-[100] text-left leading-8 desktop:leading-10"
           >
             <p>
               {" "}
@@ -44,7 +46,7 @@ export default function LandAcknowledgement() {
 
           <div
             id="paragraph2"
-            className="mb-8 text-xl font-[100] text-left leading-10"
+            className="mb-8 text-lg desktop:text-xl font-[100] text-left leading-8 desktop:leading-10"
           >
             <p>
               {" "}
@@ -57,7 +59,7 @@ export default function LandAcknowledgement() {
 
           <div
             id="paragraph3"
-            className="mb-8 text-xl font-[100] text-left leading-10"
+            className="mb-8 text-lg desktop:text-xl font-[100] text-left leading-8 desktop:leading-10"
           >
             <p>
               {" "}
@@ -67,8 +69,14 @@ export default function LandAcknowledgement() {
           </div>
         </div>
 
-        <div className="pl-24">
-          <img src={Image1.src} className="rounded-xl"></img>
+        {/* Capped and centred on mobile; at desktop the cap lifts and flex-shrink
+            sizes it as before */}
+        <div className="pt-4 max-w-[20rem] mx-auto desktop:pt-0 desktop:pl-24 desktop:max-w-none desktop:mx-0">
+          <img
+            src={Image1.src}
+            alt="A person standing in a river at sunset, arms raised"
+            className="rounded-xl"
+          ></img>
         </div>
       </div>
     </div>
