@@ -8,9 +8,10 @@ import { usePathname } from "next/navigation";
 export default function Footer() {
   const pathname = usePathname();
 
+  //Height is fixed only once the columns sit in a row - stacked, h-52 would clip them
   return (
-    <footer className={`${pathname == "/" ? "hidden" : ""} relative text-[#fcecc5] px-6 py-10 h-52 overflow-hidden`}>
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-start items-start gap-20 h-full">
+    <footer className={`${pathname == "/" ? "hidden" : ""} relative text-[#fcecc5] px-6 py-10 md:h-52 overflow-hidden`}>
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-start items-start gap-8 md:gap-20 h-full">
         <div className="absolute inset-0 -z-20 -bottom-200 opacity-75">
           <Image
             src={BOCBackground.src}
@@ -24,17 +25,20 @@ export default function Footer() {
         {/* Logo and Copyright */}
         <div className="flex flex-col items-start z-10">
           <div className="relative h-28 w-40">
+            {/* Without an explicit sizes, `fill` defaults to 100vw - which both fetches a
+                needlessly large file for this 160px box and left the logo unloaded on mobile */}
             <Image
               src={BOCLogo.src}
               alt="Brown Outing Club Logo"
               fill
+              sizes="160px"
               style={{ objectFit: 'contain' }}
             />
           </div>
           <p className="text-sm text-boc_earthyorange">© 2025 Brown Outing Club</p>
         </div>
-        {/* Bar Spacer */}
-        <div className="h-full my-auto w-1 bg-boc_earthyorange"/>
+        {/* Bar Spacer - only meaningful as a divider between side-by-side columns */}
+        <div className="hidden md:block h-full my-auto w-1 bg-boc_earthyorange"/>
         {/* Key Links */}
         <div className="z-10 text-boc_earthyorange">
           <h3 className="font-bold text-lg mb-2">KEY LINKS</h3>
