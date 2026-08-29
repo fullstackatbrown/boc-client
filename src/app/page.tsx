@@ -9,21 +9,15 @@ export default function Home() {
   const router = useRouter();
   return (
     <div className="h-full w-full">
-      {/* Splash Graphic */}
-      <img
-        src={splash_graphic.src}
-        className="w-[45em] h-auto fixed bottom-0 right-0 -z-10"
-      />
-
       {/* Main Body */}
-      <div className="px-20 pt-10">
+      <div className="px-6 sm:px-10 desktop:px-20 pt-10">
         <div className="">
-          <h1 className="text-boc_logo_size text-boc_darkgreen 
-          font-funky font-bold mb-4 leading-tight">
+          <h1 className="text-[2.25rem] sm:text-5xl md:text-6xl desktop:text-boc_logo_size
+          text-boc_darkgreen font-funky font-bold mb-4 leading-tight">
             BROWN OUTING <br /> CLUB
           </h1>
         </div>
-        <div className="w-[45%]">
+        <div className="w-full md:w-[70%] desktop:w-[45%]">
           <section className="flex-auto justify-end mb-8">
             <p className="pb-8">
               The Brown Outing Club facilitates getting students together and
@@ -42,6 +36,16 @@ export default function Home() {
           <SocialMedia />
         </div>
       </div>
+
+      {/* Splash Graphic - a full-bleed block below the content on mobile, where its curved
+          top edge reads as a divider; pinned behind the text from `desktop` up */}
+      <img
+        src={splash_graphic.src}
+        alt="BOC members hiking a forest trail in New England"
+        className="w-full h-auto max-w-[36em] ml-auto mt-10
+        desktop:mt-0 desktop:max-w-none desktop:w-[45em]
+        desktop:fixed desktop:bottom-0 desktop:right-0 desktop:-z-10"
+      />
     </div>
   );
 }

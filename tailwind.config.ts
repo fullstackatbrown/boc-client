@@ -8,6 +8,11 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      screens: {
+        //The full desktop nav needs 1120px to lay out (logo + menu + padding), so this is
+        //where it has to give way to the mobile menu. sm/md/lg still mean what they always do.
+        desktop: '1150px',
+      },
       fontFamily: {
         standard: ['Gabarito', 'Helvetica Neue', 'Helvetica'],
         funky: ['Chelsea Market', 'sans-serif'],
