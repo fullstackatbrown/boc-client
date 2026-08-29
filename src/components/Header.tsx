@@ -109,7 +109,7 @@ function MobileMenu(props: { items: any[]; showLogin: boolean; onNavigate: () =>
   return (
     <div
       id="mobile-menu"
-      className="desktop:hidden border-t-2 border-boc_green bg-background"
+      className="desktop:hidden border-b-2 border-boc_green bg-background"
     >
       <ul className="divide-y-2 divide-boc_lightbrown">
         {items.map((item) => (

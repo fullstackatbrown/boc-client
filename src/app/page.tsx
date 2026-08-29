@@ -37,12 +37,13 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Splash Graphic - a full-bleed block below the content on mobile, where its curved
-          top edge reads as a divider; pinned behind the text from `desktop` up */}
+      {/* Splash Graphic - full-bleed on mobile, pulled up so its transparent upper left sits
+          alongside the button and socials; pinned behind the text from `desktop` up.
+          pointer-events-none so the overlapped controls stay clickable. */}
       <img
         src={splash_graphic.src}
         alt="BOC members hiking a forest trail in New England"
-        className="w-full h-auto max-w-[36em] ml-auto mt-10
+        className="pointer-events-none w-full h-auto max-w-[36em] ml-auto -mt-28
         desktop:mt-0 desktop:max-w-none desktop:w-[45em]
         desktop:fixed desktop:bottom-0 desktop:right-0 desktop:-z-10"
       />
