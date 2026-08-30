@@ -14,9 +14,14 @@ import Image1 from "@/assets/images/gear-room/main.jpg"
 //   )
 // }
 
+// Justify only on desktop - it opens rivers at phone widths. Sizes are arbitrary values so
+// none of them pull in a line-height of their own over the explicit leading.
+const proseClasses =
+  "text-[18px] sm:text-[20px] desktop:text-[20px] font-[100] text-left desktop:text-justify leading-8 sm:leading-9 desktop:leading-10";
+
 function Paragraph(props: { children: React.ReactNode }) {
   return (
-    <div className="text-xl font-[100] text-justify leading-10 mb-3">
+    <div className={`${proseClasses} mb-3`}>
       <p>{props.children}</p>
     </div>
   );
@@ -52,14 +57,16 @@ export default function GearRoom() {
   }, []);
 
   return (
-    <div className="h-full w-full px-20 py-10">
+    <div className="h-full w-full px-6 sm:px-10 desktop:px-20 py-10">
       <Title text="Gear Room" />
 
       {/* Site content */}
 
       <div>
-        <div className="flex space-x-10">
-		<div className="text-center max-w-[70%]">
+        {/* col-reverse lifts the photo above the copy on mobile while keeping it right of it
+            on desktop; desktop:gap-10 reproduces the old space-x-10 exactly. */}
+        <div className="flex flex-col-reverse desktop:flex-row gap-6 desktop:gap-10">
+		<div className="text-center desktop:max-w-[70%]">
 			<Paragraph>
 				  The BOC has a gear room in the ground floor of the Campus Center
 				  (directions below), where we have a large selection of outdoor gear.
@@ -72,8 +79,15 @@ export default function GearRoom() {
 				  visit our gear room during open hours!
 			</Paragraph>
 		</div>
-		<div className="max-w-[30%] h-auto">
-			<img src={Image1.src} className="rounded-xl h-auto" />
+		<div className="desktop:max-w-[30%] h-auto">
+			{/* Cropped to a banner on mobile; desktop keeps the intrinsic shape. Sizing stays
+			    off max-width so preflight's img{max-width:100%} still caps it to the wrapper. */}
+			<img
+				src={Image1.src}
+				alt="The BOC gear room, lined with shelves of camping equipment and hanging jackets"
+				className="rounded-xl h-auto w-full max-h-[220px] object-cover
+				desktop:w-auto desktop:max-h-none"
+			/>
 		</div>
 	</div>
         <BigDropdown header="Gear Room Hours" content={
@@ -111,7 +125,7 @@ export default function GearRoom() {
           </Paragraph>
         }/>
         <HorSeparator/>
-        <p className="text-xl font-[100] text-justify leading-10 mt-3">
+        <p className={`${proseClasses} mt-3`}>
           More questions regarding gear rental or our inventory?
           Please email us at outing@brown.edu or contact our gear room managers 
           {` ${managers} `} [<a href={`mailto:${email}`} target="_blank" className="underline">email us!</a>].

@@ -5,9 +5,11 @@ function Subheading(props: { children: React.ReactNode }) {
   return <h1 className="text-2xl font-bold mb-5 mt-10">{props.children}</h1>;
 }
 
+// Justify only on desktop - it opens rivers at phone widths. Sizes are arbitrary values so
+// none of them pull in a line-height of their own over the explicit leading.
 function Paragraph(props: { children: React.ReactNode }) {
   return (
-    <div className="text-xl font-[100] text-justify leading-10 mb-3">
+    <div className="text-[18px] sm:text-[20px] desktop:text-[20px] font-[100] text-left desktop:text-justify leading-8 sm:leading-9 desktop:leading-10 mb-3">
       <p>{props.children}</p>
     </div>
   );
@@ -15,7 +17,7 @@ function Paragraph(props: { children: React.ReactNode }) {
 
 export default function GearRoom() {
   return (
-    <div className="h-full w-full px-20 py-10">
+    <div className="h-full w-full px-6 sm:px-10 desktop:px-20 py-10">
       <Title text="Gear Room Policies" />
 
       {/* Site content */}
