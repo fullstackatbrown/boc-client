@@ -39,6 +39,9 @@ export default function Footer() {
         </div>
         {/* Bar Spacer - only meaningful as a divider between side-by-side columns */}
         <div className="hidden md:block h-full my-auto w-1 bg-boc_earthyorange"/>
+        {/* The two link groups share one horizontal band on mobile; md:contents dissolves
+            this wrapper so they become direct children of the row again on desktop */}
+        <div className="grid grid-cols-2 gap-8 w-full md:contents">
         {/* Key Links */}
         <div className="z-10 text-boc_earthyorange">
           <h3 className="font-bold text-lg mb-2">KEY LINKS</h3>
@@ -84,6 +87,7 @@ export default function Footer() {
               </a>
             </li>
           </ul>
+        </div>
         </div>
       </div>
     </footer>

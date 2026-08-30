@@ -27,8 +27,11 @@ export default function Team() {
     const isGeneral = resource.category === "general";
     const imagePath = resource.image || photoPlaceholder.src;
 
+    // mx-auto is phone-only: the one-per-row link is full width, so a card narrower
+    // than it (max-w-sm, binding above ~432px) would sit flush left. Reset at sm so
+    // the tablet and desktop rows keep their existing alignment.
     return (
-      <div className="flex flex-col items-center w-full max-w-sm cursor-pointer group outline-none">
+      <div className="flex flex-col items-center w-full max-w-sm mx-auto sm:mx-0 cursor-pointer group outline-none">
         <div className="w-full aspect-square overflow-hidden rounded-2xl shadow-lg mb-4 transition-transform duration-200 group-hover:scale-[1.02]">
           <img className="w-full h-full object-cover" src={imagePath} alt={resource.name} />
         </div>

@@ -53,11 +53,16 @@ export default function LandAcknowledgement() {
           {treasurers} [<a href={`mailto:${email}`} className="underline">email us!</a>].
         </p>
         {/* <hr className="border-t-1.5 border-gray-300 w-24 mx-auto my-4" /> */}
-        {/* Stacked above the text on mobile so the photo isn't buried below the copy.
-            Width is capped here, not on the img — preflight's max-width:100% shrinks it to fit. */}
-        <div className="order-first w-full max-w-96 mb-6
+        {/* Stacked above the text on mobile so the photo isn't buried below the copy,
+            and cropped full-bleed to a banner there (matching the About page) rather
+            than running the full portrait height. */}
+        <div className="order-first w-full mb-6
         desktop:order-none desktop:w-auto desktop:max-w-none desktop:mb-0 desktop:pl-24 desktop:flex-shrink-0">
-          <img src={Rafting.src} alt="BOC members rafting a river in autumn" className="rounded-xl w-96"></img>
+          <img
+            src={Rafting.src}
+            alt="BOC members rafting a river in autumn"
+            className="rounded-xl w-full max-h-[220px] object-cover desktop:w-96 desktop:max-h-none"
+          ></img>
         </div>
       </div>
       <Dropdown header="Promo Codes" content={

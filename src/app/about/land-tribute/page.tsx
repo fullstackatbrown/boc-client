@@ -69,9 +69,11 @@ export default function LandAcknowledgement() {
           </div>
         </div>
 
-        {/* Capped and centred on mobile; at desktop the cap lifts and flex-shrink
-            sizes it as before */}
-        <div className="pt-4 max-w-[20rem] mx-auto desktop:pt-0 desktop:pl-24 desktop:max-w-none desktop:mx-0">
+        {/* Capped and centred on mobile; at desktop it's a fixed 360px so the photo
+            doesn't rescale with the viewport. Margin, not padding, so the box-border
+            width is the image's. Sizing lives here — preflight's max-width:100% on the
+            img is what applies it. */}
+        <div className="pt-4 max-w-[20rem] mx-auto desktop:pt-0 desktop:ml-24 desktop:mr-0 desktop:w-[360px] desktop:max-w-none desktop:flex-shrink-0">
           <img
             src={Image1.src}
             alt="A person standing in a river at sunset, arms raised"
