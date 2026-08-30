@@ -162,15 +162,16 @@ export default function Trips() {
   );
 
   return (
-    <div className="relative w-full pb-10 px-20">
+    <div className="relative w-full pb-10 px-6 sm:px-10 desktop:px-20">
       {/* Title and Description */}
       <Title text="BOC Trips Calendar" />
       Find all of our upcoming trips on this page and click on them to learn
       more!
       <section className="pt-5">
         {/* <Dropdown header="Filters" content={filterEl} /> */} {/* Filters - Commented out because they're lowkey just kinda silly */}
-        <div className="mx-4 mb-4">
-          <h2 className="font-funky text-2xl text-boc_medbrown">
+        {/* mx tracks the cards' own gutter, which narrows on phones */}
+        <div className="mx-1 sm:mx-4 mb-4">
+          <h2 className="font-funky text-xl sm:text-2xl text-boc_medbrown">
             Upcoming Trips!
           </h2>
         </div>

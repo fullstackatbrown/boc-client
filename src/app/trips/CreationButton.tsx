@@ -31,12 +31,14 @@ export default function CreationButton({ footerRef }:{ footerRef: RefObject<HTML
           : 'fixed bottom-4 right-4'
       }`}
     >
+      {/* Touch devices have no hover, so below desktop the label stays out rather than
+          leaving mobile admins an unlabelled "+". */}
       <button
-        className="group flex items-center gap-2 bg-boc_darkbrown text-background text-lg font-semibold px-4 h-12 rounded-full transition-all duration-1000 overflow-hidden w-12 hover:w-36"
+        className="group flex items-center gap-2 bg-boc_darkbrown text-background text-lg font-semibold px-4 h-12 rounded-full transition-all duration-1000 overflow-hidden w-36 desktop:w-12 desktop:hover:w-36"
         onClick={() => router.push("/trips/creation-form")}
       >
         <span className="text-2xl">+</span>
-        <span className="opacity-0 group-hover:opacity-100 whitespace-nowrap transition-none">
+        <span className="whitespace-nowrap transition-none desktop:opacity-0 desktop:group-hover:opacity-100">
           Create Trip
         </span>
       </button>
