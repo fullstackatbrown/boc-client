@@ -32,11 +32,13 @@ export default function Team() {
         <div className="w-full aspect-square overflow-hidden rounded-2xl shadow-lg mb-4 transition-transform duration-200 group-hover:scale-[1.02]">
           <img className="w-full h-full object-cover" src={imagePath} alt={resource.name} />
         </div>
-        <h2 className="font-funky text-gray-800 text-2xl font-semibold text-center leading-tight">
+        {/* desktop:leading-tight is required: a responsive text-* utility also sets
+            line-height, and its media query would otherwise beat the base leading-tight. */}
+        <h2 className="font-funky text-gray-800 text-base sm:text-xl desktop:text-2xl font-semibold text-center leading-tight desktop:leading-tight">
           {resource.name}
         </h2>
         {!isGeneral && (
-          <p className="text-gray-600 text-lg text-center mt-1">{resource.position}</p>
+          <p className="text-gray-600 text-sm sm:text-base desktop:text-lg text-center mt-1">{resource.position}</p>
         )}
       </div>
     );
@@ -68,25 +70,27 @@ export default function Team() {
   if (loading) return <div className="p-20 text-center font-funky text-xl">Loading...</div>;
 
   return (
-    <div className="min-h-screen w-full px-10 md:px-20 py-10">
+    <div className="min-h-screen w-full px-6 sm:px-10 desktop:px-20 py-10">
 
       <Title text="Our Team" />
       
       <section className="flex flex-col items-center mt-8">
-        <h1 className="text-4xl font-bold py-5 mb-4 text-center">Core Leadership</h1>
-        <div className="flex flex-wrap justify-center gap-10">
+        <h1 className="text-3xl sm:text-4xl font-bold py-5 mb-4 text-center">Core Leadership</h1>
+        {/* One officer per row on phones so their photos stay large; two from sm up, then
+            the natural max-w-sm flow of the cards themselves once there's room. */}
+        <div className="flex flex-wrap justify-center gap-10 w-full">
           {coreLeadership.map((member) => (
-            <Link href={`/about/our-team/${member.id}`} key={member.id} className="transition-transform hover:scale-105">
+            <Link href={`/about/our-team/${member.id}`} key={member.id} className="w-full sm:w-[calc(50%-1.25rem)] desktop:w-auto transition-transform hover:scale-105">
               <Card resource={member} />
             </Link>
           ))}
         </div>
 
         {/* Spacer replaces the blue lines */}
-        <div className="h-20 w-full" />
+        <div className="h-10 sm:h-20 w-full" />
 
-        <h1 className="text-4xl font-bold py-5 mb-4 text-center">Trip Leaders</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12 w-full max-w-7xl px-4">
+        <h1 className="text-3xl sm:text-4xl font-bold py-5 mb-4 text-center">Trip Leaders</h1>
+        <div className="grid grid-cols-2 md:grid-cols-3 desktop:grid-cols-4 gap-x-4 sm:gap-x-8 gap-y-8 sm:gap-y-12 w-full max-w-7xl px-0 sm:px-4">
           {tripLeaders.map((member) => (
             <Link href={`/about/our-team/${member.id}`} key={member.id} className="transition-transform hover:scale-105">
               <Card resource={member} />
@@ -94,8 +98,8 @@ export default function Team() {
           ))}
         </div>
 
-        <div className="h-24 w-full" />
-        
+        <div className="h-12 sm:h-24 w-full" />
+
         {/* <h1 className="text-4xl font-bold py-5 mb-4 text-center">Team Picture</h1>
         <div className="w-full flex justify-center">
           <img className="w-full max-w-5xl object-cover rounded-3xl shadow-xl" src={teamLink} alt="Outing Club Group" />
@@ -103,9 +107,9 @@ export default function Team() {
       </section>
 
       <section>
-      <div className="w-full px-10 md:px-20 py-10">
+      <div className="w-full px-0 sm:px-10 desktop:px-20 py-10">
       <hr className="bg-boc_medbrown border-0 h-[2px] my-5" />
-      <h2 className="text-2xl font-bold text-center">Can't find who you're looking for?</h2>
+      <h2 className="text-xl sm:text-2xl font-bold text-center">Can't find who you're looking for?</h2>
 	<p className="text-center">Check out our <a href="https://docs.google.com/presentation/d/126AAnBdr9MDmfMszCapoj9YNie0rActtkxj0L3VLH9w/edit#slide=id.ge9c455096b_0_1941" 
 	className="underline text-blue-600">complete BOC roster</a> here!</p>
       </div>
