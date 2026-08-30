@@ -17,9 +17,10 @@ interface Trip { //Different from the Trip interface in models.tsx
   lotteryInfo: string;
 }
 
-function Td(props: { children: React.ReactNode }) {
+function Td(props: { children: React.ReactNode; className?: string }) {
   return (
-    <td className="border-boc_green rounded-lg p-[5px] text-left text-boc_darkbrown border-2">
+    <td className={`block sm:table-cell border-boc_green rounded-lg p-[5px] text-left
+    text-boc_darkbrown border-2 ${props.className ?? ""}`}>
       {props.children}
     </td>
   );
@@ -58,18 +59,20 @@ function TripRow(data: Trip & { onOpen: (tripId: number) => void }) {
     }
   };
   return (
+    //Below sm the row is a card: title/blurb across the top, date and status sharing the
+    //line beneath. It stays one <tr>, so the whole card remains a single click target.
     <tr
-    className="px-4 py-2"
+    className="flex flex-wrap gap-2 mb-4 sm:table-row sm:mb-0 px-4 py-2 cursor-pointer"
     onClick={() => data.onOpen(data.tripId)}
     >
-      <Td>
+      <Td className="w-full">
         <b className="text-blue-400">{data.tripName} </b>
         <br /> {data.sentenceDesc}
       </Td>
-      <Td>
+      <Td className="flex-1">
         <div className="text-center w-full">{data.date}</div>
       </Td>
-      <Td>
+      <Td className="flex-1">
         <span
           className={`flex justify-center items-center h-[50px] rounded ${getLotteryColor(
             data.lotteryInfo,
@@ -92,14 +95,15 @@ function tripTable(tripsType: String, trips: Trip[], onOpen: (tripId: number) =>
 
       <div className="flex justify-center pt-5">
         { trips.length > 0 ? 
-          <table className="table-fixed w-full border-separate border-spacing-2">
+          <table className="block sm:table table-fixed w-full border-separate border-spacing-2">
             <colgroup>
               <col style={{ width: "60%" }} />
               <col style={{ width: "20%" }} />
               <col style={{ width: "20%" }} />
             </colgroup>
-            <tbody>
-              <tr className="px-4 py-2 text-center font-bold">
+            <tbody className="block sm:table-row-group">
+              {/* The cards below sm label themselves, so the header only exists as a table */}
+              <tr className="hidden sm:table-row px-4 py-2 text-center font-bold">
                 <Th>Trip Title</Th>
                 <Th>Date</Th>
                 <Th>Lottery Info</Th>
@@ -109,7 +113,7 @@ function tripTable(tripsType: String, trips: Trip[], onOpen: (tripId: number) =>
               ))}
             </tbody>
           </table>
-          : <p className="w-full text-center border-2 border-dashed border-boc_green rounded-lg p-8 text-2xl text-gray-500">None Yet!</p>
+          : <p className="w-full text-center border-2 border-dashed border-boc_green rounded-lg p-6 sm:p-8 text-xl sm:text-2xl text-gray-500">None Yet!</p>
         }
       </div>
     </div>
@@ -197,26 +201,26 @@ export default function Profile() {
   }, [status, backendGet]);
 
   if (loading) {
-    return <div className="px-20 flex justify-center">Loading...</div>;
+    return <div className="px-6 sm:px-10 desktop:px-20 flex justify-center">Loading...</div>;
   }
   //Without this, a failed fetch renders ProfileBar with a null profile and throws
   if (!userProfile) {
     return (
-      <div className="px-20 flex justify-center">
+      <div className="px-6 sm:px-10 desktop:px-20 flex justify-center text-center">
         We couldn't load your profile. Try refreshing, and let an admin know if it keeps happening.
       </div>
     );
   }
 
   return (
-    <div className="h-full min-h-screen w-full px-40 py-10">
+    <div className="h-full min-h-screen w-full px-6 sm:px-10 desktop:px-40 py-10">
       <ProfileBar userProfile={userProfile} submitPhone={submitPhone}/>
       <br/>
       {/* Your trips table */}
       {hostedTrips && (
         <div id="hostedTrips" className="flex flex-col">
           <button 
-            className="ml-auto mr-10 bg-boc_darkbrown text-white font-bold py-2 px-4 rounded-full hover:bg-boc_darkgreen transition duration-300 ease-in-out"
+            className="ml-auto mr-0 desktop:mr-10 whitespace-nowrap bg-boc_darkbrown text-white font-bold py-2 px-4 rounded-full hover:bg-boc_darkgreen transition duration-300 ease-in-out"
             onClick={() => router.push("/trips/creation-form")}
           >
             + Create a New Trip

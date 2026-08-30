@@ -39,7 +39,8 @@ export default function EditablePhone({ currPhone, submitPhone }: {currPhone: st
       ) : (
         <div
           onClick={() => setShowInput(true)}
-          className="cursor-pointer flex items-center gap-2"
+          //centred to match the stacked, centred profile bar on mobile
+          className="cursor-pointer flex items-center justify-center desktop:justify-start gap-2"
         >
           <u>{phone !== "" ? formatPhone(phone) : "Set phone"}</u>
           <PencilSquareIcon className="w-auto h-6" />
