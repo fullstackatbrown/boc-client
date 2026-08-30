@@ -24,16 +24,11 @@ export default function RootLayout({
         className={`${chelseaMarket.className} ${gabarito.className}`}
       >
         <body className="bg-background font-standard text-[18px] min-h-screen flex flex-col">
-          {/* Mobile View Blocker */}
-          {/* <div className="[@media(min-width:1150px)]:hidden fixed inset-0 bg-boc_slate text-boc_lightbrown flex flex-col items-center justify-center z-[1000] p-6">
-            <h1 className="text-3xl font-bold mb-4 text-center">Site Not Available on Smaller Screens Yet :(</h1>
-            <p className="text-center text-lg">
-              We're still working on views for smaller screens! If you'd like to help us make those
-              happen, <a href="mailto:william_l_stone@brown.edu;samuel_bradley@brown.edu;alan_wang2@brown.edu" className="underline">shoot us an email</a>; we'd love the help! Regardless, please visit from a laptop or desktop for now.
-            </p>
-          </div> */}
-          {/* Page Contents - When mobile blocker is removed, just remove this main tag completely */}
-          <main className="flex flex-col min-h-screen"> {/*hidden [@media(min-width:1150px)]: */}
+          {/* The mobile-view blocker that used to live here is gone - every page has a
+              mobile view now. Its old note said to drop this <main> along with it, but
+              min-h-screen here and below is what pads a short page down to the footer,
+              so removing it would reflow every page. */}
+          <main className="flex flex-col min-h-screen">
             <div className="min-h-screen">
               <Header />
               {children}

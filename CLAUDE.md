@@ -69,19 +69,19 @@ Firebase config is **hardcoded** in `src/scripts/firebase.ts`, not env-driven. T
 ```
 
 ## Backend Request Pattern
-**Never call `api` (raw axios) directly from a page or component.** Use `makeRequesters()` from `src/scripts/requests.ts`:
+**Never call `api` (raw axios) directly from a page or component.** Use `useRequesters()` from `src/scripts/requests.ts`:
 
 ```ts
-const reqs = makeRequesters();
+const reqs = useRequesters();
 const { backendGet, backendPost, sessionStatus } = reqs;
 ```
 
-`makeRequesters` is a hook (it calls `useSession`) — it must be called at the top level of a client component, never conditionally or in a callback. It exists to solve one specific problem: next-auth's session starts in a `"loading"` state, and a naive request fires before the Google access token is available. So:
+`useRequesters` is a hook (it calls `useSession`) — it must be called at the top level of a client component, never conditionally or in a callback. The functions it returns, and the object holding them, are memoised, so they are safe to put in a `useEffect` dependency array; before that they changed identity every render and looped any effect that depended on them. It exists to solve one specific problem: next-auth's session starts in a `"loading"` state, and a naive request fires before the Google access token is available. So:
 - `backendGet(path, noAuth?)` / `backendPost(path, body)` **await the session becoming ready** before attaching `Authorization: Bearer <googleAccessToken>`. Pass `noAuth: true` to `backendGet` for genuinely public data (e.g. `/trips`) so it doesn't block on auth.
 - `sessionStatus()` resolves once the session is no longer loading, returning `AuthStat.Auth` or `AuthStat.Unauth`. Use it when the *shape* of the request depends on whether the user is logged in (see `trips/view/page.tsx`, which decides whether to send `noAuth`).
-- Known sharp edge: if the user is unauthenticated, pending authenticated requests **hang forever** rather than rejecting — they just log to the console. Gate on `sessionStatus()` first rather than relying on a `.catch`.
+- If the user is unauthenticated, an authenticated request now **rejects with `NotAuthenticatedError`** (`status === 401`) instead of hanging forever as it used to. You can `.catch` it; a 401 there is the ordinary signed-out case, not a fault.
 
-`src/components/Header.tsx` is the one place that still calls `api.get` directly with a manually-attached token. That's legacy; don't copy it.
+Every caller now goes through this. `Header.tsx` used to attach a token by hand to a raw `api.get`; it doesn't any more.
 
 The token sent to the backend is the raw **Google** access token, not a next-auth session token. `boc-server` validates it by calling Google's userinfo endpoint on every request. That means backend auth failures usually trace back to token refresh, not to anything in this repo.
 
@@ -130,8 +130,12 @@ page.tsx               fetches GET /trip/:id (auth-aware), handles 401/404, rend
 - **`useSearchParams` requires a Suspense boundary** in this Next version. Any component reading it must be wrapped — see `trips/view/page.tsx`, `SignupButton.tsx`, `get-involved/page.tsx`, `api/auth/error/page.tsx` for the established pattern (inner `*Content` component + exported wrapper).
 - **Post-login actions.** Signing up for a trip or joining the listserv while logged out redirects to Google with a `post_login_action` query param, then an effect on return performs the action. Preserve that param plumbing if you touch those flows.
 - **Styling.** Use the palette tokens in `tailwind.config.ts` (`boc_green`, `boc_darkbrown`, `boc_lightgreen`, `boc_yellow`, `boc_medbrown`, `boc_slate`, ...) rather than raw hex or stock Tailwind colors. `font-funky` (Chelsea Market) is for headings; `font-standard` (Gabarito) is body; `font-montserrat` is nav.
-- **Navigation** is done with `window.location.href` and plain `<a>` tags throughout, not `next/link`. Consistent, if not idiomatic.
-- **Desktop-only, for now.** Layouts assume a viewport of at least 1150px; nothing below that has been designed. `layout.tsx` still contains the mobile-view blocker that used to hide the site below that width, but it is currently commented out, so small screens get the desktop layout rather than the explanatory message. Bringing in real mobile views is a goal that hasn't been started — assume desktop when writing new UI, and don't assume any existing component is responsive.
+- **Navigation** uses `next/link` (or `router.push`) for ordinary links — the header, trip cards, profile rows and leader cards. Mutations are the exception: they still end in `window.location.reload()` / `window.location.href`, which is the reload-after-mutate convention described above.
+- **Responsive.** Every page now has a mobile view. `tailwind.config.ts` defines a custom screen **`desktop` = 1150px** — the measured width at which the full nav stops fitting — and that is where layouts switch between mobile and desktop mode. `sm`/`md`/`lg` keep their normal Tailwind meanings and are for tuning in between. Conventions: page padding is `px-6 sm:px-10 desktop:px-20`; multi-column rows stack below `desktop`; tables become stacked cards below `sm` by toggling `display: block`/`table` rather than duplicating markup (see `user/page.tsx`, `about/our-team/[id]/page.tsx`, `trips/view/ParticipantList.tsx`).
+  Three traps that each cost real time, all of which silently change **desktop** while looking mobile-only:
+  1. A responsive `text-*` utility also sets `line-height`, so `sm:text-xl` overrides an unprefixed `leading-tight`, and mixing named steps with an arbitrary `text-[24px]` leaks the named step's line-height upward. Restate `leading-*` at `desktop:`.
+  2. Preflight's `img{max-width:100%}` is sometimes the only thing sizing an unsized `<img>` in a flex row — adding `desktop:max-w-none` removes that cap and blows the layout up. Put sizing on a wrapper `<div>`.
+  3. `flex-wrap` and `shrink-0` are not automatically desktop no-ops. Gate them (`desktop:flex-nowrap`, `desktop:shrink`) and verify 1440 is unchanged.
 - `@types/react` is pinned at 18.x while `react` is 19.x. Typecheck passes anyway; don't "fix" this without checking it doesn't cascade.
 
 ## Firebase / Firestore Content Model
