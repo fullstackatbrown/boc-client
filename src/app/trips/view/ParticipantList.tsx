@@ -1,7 +1,7 @@
 import HoverButton from "@/components/HoverButton";
 import { TripParticipant, SignupStatus, TripStatus, TripWithSignup } from "@/models/models";
 import { Requesters } from "@/scripts/requests";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { FaceFrownIcon } from "@heroicons/react/24/outline";
 
 //NOTE: reqs is used here to flag whether or not participant removal should be enabled, which is perhaps not the best practice, 
@@ -11,14 +11,16 @@ export default function ParticipantList({ trip, participants, reqs }:{ trip: Tri
   const extraData = !([TripStatus.Staging, TripStatus.Open].includes(trip.status));
   return (
     <div className="flex justify-center">
-      <table className="table-fixed w-full border-separate border-spacing-2">
+      {/* Below sm the table becomes stacked cards via display toggles, so each row stays one click target */}
+      <table className="block sm:table table-fixed w-full border-separate border-spacing-2">
         {/* <colgroup>
           <col style={{ width: "33.3%" }} />
           <col style={{ width: "33.3%" }} />
           <col style={{ width: "33.4%" }} />
         </colgroup> */}
-        <tbody>
-          <tr className="px-4 py-2 text-center font-bold">
+        <tbody className="block sm:table-row-group">
+          {/* The cards below sm carry their own labels, so the header only exists as a table */}
+          <tr className="hidden sm:table-row px-4 py-2 text-center font-bold">
             <Th>NAME</Th>
             <Th>EMAIL</Th>
             { extraData 
@@ -54,6 +56,16 @@ function ParticipantRow({ part, extraData, trip, reqs }: { part: TripParticipant
     setMenuPosition({ x: e.clientX, y: e.clientY });
   };
 
+  // Below desktop the menu is wide relative to the screen, so a raw click near an edge puts it
+  // off-viewport. Nudge it back using its measured size. Desktop keeps the raw coordinates.
+  useLayoutEffect(() => {
+    if (!menuPosition || !menuRef.current || window.innerWidth >= 1150) return;
+    const { width, height } = menuRef.current.getBoundingClientRect();
+    const x = Math.max(8, Math.min(menuPosition.x, window.innerWidth - width - 8));
+    const y = Math.max(8, Math.min(menuPosition.y, window.innerHeight - height - 8));
+    if (x !== menuPosition.x || y !== menuPosition.y) setMenuPosition({ x, y });
+  }, [menuPosition]);
+
   useEffect(() => {
     // Logic to close the menu if clicking anywhere else
     const handleClickOutside = (event: MouseEvent) => {
@@ -72,11 +84,11 @@ function ParticipantRow({ part, extraData, trip, reqs }: { part: TripParticipant
   }, [menuPosition]);
 
   return (
-    <tr 
-      className={`px-4 py-2 text-center ${reqs ? 'cursor-pointer hover:bg-boc_lightbrown' : ''}`} 
+    <tr
+      className={`flex flex-wrap gap-2 mb-4 sm:table-row sm:mb-0 px-4 py-2 text-center ${reqs ? 'cursor-pointer hover:bg-boc_lightbrown' : ''}`}
       onClick={handleRowClick}
     >
-      <Td>
+      <Td className="w-full sm:w-auto">
         {part.firstName} {part.lastName}
         {/* The Popup Menu 
            Placed inside the first TD to maintain valid HTML table structure,
@@ -104,11 +116,18 @@ function ParticipantRow({ part, extraData, trip, reqs }: { part: TripParticipant
           </div>
         )}
       </Td>
-      <Td>{part.email}</Td>
-      { extraData 
+      <Td className="w-full sm:w-auto">{part.email}</Td>
+      { extraData
       ? <>
-        <Td>{part.confirmed ? "Yup!" : "Not Yet..."}</Td>
-        <Td>{part.status == SignupStatus.NoShow ? <span className="text-red-500">No Show</span> : part.paid ? "Yup!" : "Not Yet..."}</Td>
+        {/* Below sm the two status cells collapse into one sentence, since the header that
+            labelled them is hidden there. No Show still displaces the paid value, in red. */}
+        <Td className="w-full sm:hidden">
+          {part.confirmed ? "Confirmed" : "Not confirmed"}
+          &nbsp;·&nbsp;
+          {part.status == SignupStatus.NoShow ? <span className="text-red-500">No Show</span> : part.paid ? "Paid" : "Not paid"}
+        </Td>
+        <Td className="hidden sm:table-cell">{part.confirmed ? "Yup!" : "Not Yet..."}</Td>
+        <Td className="hidden sm:table-cell">{part.status == SignupStatus.NoShow ? <span className="text-red-500">No Show</span> : part.paid ? "Yup!" : "Not Yet..."}</Td>
       </>
       : <></>
       }
@@ -132,9 +151,11 @@ function ParticipantRow({ part, extraData, trip, reqs }: { part: TripParticipant
   // );
 // }
 
-function Td(props: { children: React.ReactNode }) {
+function Td(props: { children: React.ReactNode, className?: string }) {
+  //Below sm long emails wrap inside the card; at sm+ the cell scrolls, as it always has
   return (
-    <td className="border-boc_green rounded-lg p-[5px] text-center text-boc_darkbrown border-2 overflow-x-scroll">
+    <td className={`block sm:table-cell border-boc_green rounded-lg p-[5px] text-center text-boc_darkbrown border-2
+    break-words sm:break-normal overflow-x-visible sm:overflow-x-scroll ${props.className ?? ""}`}>
       {props.children}
     </td>
   );

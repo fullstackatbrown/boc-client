@@ -5,7 +5,7 @@ import imgPlaceholder from "@/assets/images/trips/img-placeholder.png"
 import Logo from "@/assets/images/header/logo.svg"
 import SignupButton from "./SignupButton";
 import { Requesters } from "@/scripts/requests";
-import { useRef, useState, useEffect, ReactElement } from "react";
+import { useRef, useState, useEffect, ReactElement, CSSProperties } from "react";
 import { EditIcon, EditableComponent, EditableString } from "./editable";
 import { UserPlusIcon } from "@heroicons/react/24/outline";
 import EditableCost from "./EditableCost";
@@ -141,12 +141,20 @@ export default function TripInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs:
     }
   }
 
+  //The measured height only applies at desktop, where the image sits beside the info panel.
+  //It has to travel as a custom property: an inline height would win at every width.
+  const imgSizeVar = { '--info-h': `${height}px` } as CSSProperties;
+  //3:2 full width, but capped so a wide phone/tablet doesn't get a 700px-tall image.
+  //max-h has to be reset at desktop, where the height is the info panel's and may exceed it.
+  const imgSizeClasses = "w-full aspect-[3/2] max-h-80 desktop:max-h-none desktop:w-80 desktop:aspect-auto desktop:h-[var(--info-h)] desktop:shrink-0 relative";
+
   function TripImage() {
     const src = (trip.image ? trip.image : imgPlaceholder.src)
     const baseImg = (
-      <div ref={imageRef} style={{ height }} className="w-80 flex-shrink-0 relative">
+      <div ref={imageRef} style={imgSizeVar} className={imgSizeClasses}>
         <img
           src={src}
+          alt={`Photo for ${trip.tripName}`}
           className="w-full h-full object-cover rounded-2xl"
           style={{ objectPosition: 'center' }}
         />
@@ -184,18 +192,20 @@ export default function TripInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs:
   const cost = (trip.class ? classToCost(trip.class) ?? null : trip.priceOverride)
   return (
     <div className="w-full pt-4">
-      <div className="flex flex-row gap-x-4">
+      <div className="flex flex-col gap-4 desktop:flex-row desktop:gap-x-4 desktop:gap-y-0">
         {/* Image wrapper with dynamic height */}
-        <div style={{ height }} className="w-80 flex-shrink-0 relative">
+        <div style={imgSizeVar} className={imgSizeClasses}>
           { TripImage() }
         </div>
 
         {/* Info panel with dynamic height reference */}
         <div ref={infoRef} className="flex flex-col gap-4 flex-grow">
-          <div className="w-full bg-boc_lightgreen rounded-2xl pt-4 pb-8 px-10">
+          <div className="w-full bg-boc_lightgreen rounded-2xl pt-4 pb-8 px-5 sm:px-8 desktop:px-10">
             <h2 className="w-full text-center text-boc_green font-funky text-3xl mb-3">Trip Info</h2>
             <div className="flex justify-around flex-col">
-	      <div className="flex items-baseline gap-2 mb-0">
+	      {/*Wrapping keeps "(who?)" from squeezing the leader list on narrow screens;
+	         desktop keeps its original single line*/}
+	      <div className="flex flex-wrap desktop:flex-nowrap items-baseline gap-2 mb-0">
                 <TripInfo lead="Leaders" text={trip.leaders.map((leader: SimpleUser) => `${leader.firstName} ${leader.lastName}`).join(", ") || "No leaders assigned"} editable={
                   trip.userData?.tripRole == TripRole.Leader ? editSpecs?.leaders : undefined
                 }/>

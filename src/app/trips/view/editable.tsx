@@ -35,7 +35,8 @@ export function EditableString(props: {currVal: string, editEl: ReactElement, on
           onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setIptVal(e.target.value),
           onKeyDown: (e: KeyboardEvent) => handleKeyDown(e.key),
           onBlur: () => setShowInput(false),
-          className: "border border-gray-300 rounded px-2 py-1 w-full",
+          //Merge, don't replace - callers use this to size the input responsively
+          className: `border border-gray-300 rounded px-2 py-1 w-full ${props.editEl.props.className ?? ""}`,
           autoFocus: true,
         })
       ) : (

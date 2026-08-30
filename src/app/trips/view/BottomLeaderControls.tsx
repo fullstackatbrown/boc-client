@@ -120,7 +120,8 @@ function StatusButton({ state, text, onClick }:{ state: StatusState, text: Statu
       break;
   }
   return (
-    <div className={`flex flex-col ${state == StatusState.Next ? "w-2/6" : "w-1/6"}`}>
+    //Below desktop the stages wrap two-up, with the one actionable stage on its own full-width row
+    <div className={`flex flex-col ${state == StatusState.Next ? "w-full desktop:w-2/6" : "w-[calc(50%-0.25rem)] desktop:w-1/6"}`}>
       { headerEl }
       <div className={`py-3 px-3 rounded-xl border-4 text-center ${extraStyle}`} onClick={state == StatusState.Next ? onClick : ()=>{}}>
         { currText }
@@ -133,7 +134,8 @@ function TripStatusBar({ trip, reqs, setPopup, showAttendanceForm, setShowAttend
   return (
     trip.status == TripStatus.Complete 
       ? <div className="py-4 text-xl rounded-xl text-center bg-boc_medbrown text-white font-funky">Trip Complete!</div>
-      : <div className="flex gap-2">
+      //flex-nowrap at desktop: the five stages total exactly 6/6, so the gaps would otherwise wrap one off
+      : <div className="flex flex-wrap desktop:flex-nowrap gap-2">
         { 
           statusButtonInfos(trip, reqs, setPopup, showAttendanceForm, setShowAttendanceForm).map((buttonInf: StatusButtonInfo)=>{
             const state = stageState(buttonInf.stat, trip.status);
@@ -181,12 +183,12 @@ export default function BottomLeaderControls({ trip, reqs }:{ trip: TripWithSign
   return (
     <div className="flex flex-col gap-4 mb-4">
       <div className="w-full border-b-2 border-dashed border-boc_medbrown"></div>
-      <div className="flex gap-4">
-        <div className="w-1/2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
+        <div className="w-full sm:w-1/2">
           <p className="font-bold">Sentence Description:</p>
           { sentenceDesc }
         </div>
-        <div className="w-1/2">
+        <div className="w-full sm:w-1/2">
           <p className="font-bold">Trip Size:</p>
           { maxSize }
         </div>

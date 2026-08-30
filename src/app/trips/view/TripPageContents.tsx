@@ -15,14 +15,18 @@ export default function TripPageContents({ trip, reqs }:{ trip: TripWithSignup, 
         currVal={trip.tripName}
         withIcon={
           <div className="pb-0 w-full"> {/*Copied from Title*/}
-            <h1 className="text-5xl text-boc_green font-funky">
+            <h1 className="text-3xl sm:text-4xl desktop:text-5xl text-boc_green font-funky">
               {trip.tripName} &nbsp;
-              <PencilSquareIcon className="w-auto mb-1 h-10 inline text-boc_medbrown"/>
+              <PencilSquareIcon className="w-auto mb-1 h-6 sm:h-8 desktop:h-10 inline text-boc_medbrown"/>
             </h1>
             <hr className="bg-boc_medbrown border-0 h-[2px] my-5" />
           </div>
         }
-        editEl={<input style={{ fontSize: "3rem" }} type="text"></input>}
+        editEl={<input className={
+          //Arbitrary sizes, not the named steps: those also set line-height, which would
+          //change the input's height from what the old inline 3rem gave
+          "text-[1.875rem] sm:text-[2.25rem] desktop:text-[3rem]"
+        } type="text"></input>}
         createBody={(newVal: string)=>{ return { tripName: newVal }}}
         trip={trip} reqs={reqs}
         />
@@ -53,9 +57,10 @@ export default function TripPageContents({ trip, reqs }:{ trip: TripWithSignup, 
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="w-full px-14 flex flex-col gap-y-4">
+      <div className="w-full px-6 sm:px-10 desktop:px-14 flex flex-col gap-y-4">
         <EditableTitle editable={trip.userData?.tripRole == TripRole.Leader}/>
-        <main className="px-[min(13rem,20%)]">
+        {/*The inner inset is desktop-only - below that the page needs its full width*/}
+        <main className="px-0 desktop:px-[min(13rem,20%)]">
           <TripInfoBar trip={trip} reqs={reqs}/>
           <TripBlurb editable={trip.userData?.tripRole == TripRole.Leader}/>
           { trip.userData?.tripRole == TripRole.Leader 

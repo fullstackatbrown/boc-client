@@ -57,7 +57,7 @@ function TripPage() {
   }, [id, sessionStatus, backendGet, router]);
 
   if (!trip) {
-    return <div className="px-20 flex justify-center">Loading...</div>;
+    return <div className="px-6 sm:px-10 desktop:px-20 flex justify-center">Loading...</div>;
   } else {
     return <TripPageContents trip={trip} reqs={reqs} />;
   }
@@ -66,7 +66,7 @@ function TripPage() {
 export default function TripsWrapper() {
   return (
     <Suspense
-      fallback={<div className="px-20 flex justify-center">Loading...</div>}
+      fallback={<div className="px-6 sm:px-10 desktop:px-20 flex justify-center">Loading...</div>}
     >
       <TripPage />
     </Suspense>

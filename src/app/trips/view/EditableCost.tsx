@@ -92,7 +92,7 @@ export default function EditableCost(props: { trip: TripWithSignup, reqs: Reques
 
   return (showInput ?
     <div 
-      className="grid grid-cols-2 gap-4 w-full" 
+      className="grid grid-cols-1 desktop:grid-cols-2 gap-2 desktop:gap-4 w-full"
       onKeyDown={(e: KeyboardEvent) => handleKeyDown(e.key)} 
       onBlur={handleBlur}
       ref={containerRef}

@@ -112,7 +112,7 @@ function NonSelectedEmailButtons({ signups }:{ signups: TripParticipant[] }) {
   const [currWaitlistCopyIcon, setCurrWaitlistCopyIcon] = useState<ReactNode>(copyIcon);
   const [currNotSelectedCopyIcon, setCurrNotSelectedCopyIcon] = useState<ReactNode>(copyIcon);
   return (
-    <div className="w-full flex justify-start">
+    <div className="w-full flex flex-wrap justify-start">
       <HoverButton 
         header="Copy Waitlist Emails" 
         icon={copyIcon}
@@ -175,7 +175,7 @@ export default function KeyInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs: 
       if (signups && selectedSignups) {
         const confirmedNum = selectedSignups.reduce((accum: number, tp: TripParticipant) => (tp.confirmed ? accum + 1 : accum), 0);
         const paidNum = selectedSignups.reduce((accum: number, tp: TripParticipant) => (tp.paid ? accum + 1 : accum), 0);
-        const bar = Bar(<div className="flex gap-3">
+        const bar = Bar(<div className="flex flex-wrap gap-3">
             <p><span className="font-bold">Confirmed:</span>&nbsp;{confirmedNum} / {selectedSignups.length}</p>
             <p><span className="font-bold">Paid:</span>&nbsp;{paidNum} / {selectedSignups.length}</p>
           </div>);
@@ -189,7 +189,7 @@ export default function KeyInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs: 
     case TripStatus.PostTrip:
       if (selectedSignups) {
         const paidNum = selectedSignups.reduce((accum: number, tp: TripParticipant) => (tp.paid ? accum + 1 : accum), 0);
-        const bar = Bar(<div className="flex gap-3">
+        const bar = Bar(<div className="flex flex-wrap gap-3">
             <p><span className="font-bold">Paid:</span>&nbsp;{paidNum} / <span className="text-red-500">?</span>&nbsp;<span className="italic">Take attendance to know how many payments are needed</span></p>
           </div>);
         content = <div className="flex flex-col gap-1">
@@ -203,7 +203,7 @@ export default function KeyInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs: 
         const attendedSignups = signups.filter((tp: TripParticipant) => tp.status == SignupStatus.Attended);
         const paidNum = attendedSignups.reduce((accum: number, tp: TripParticipant) => (tp.paid ? accum + 1 : accum), 0);
         const paymentsNeeded = attendedSignups.length;
-        const bar = Bar(<div className="flex gap-3">
+        const bar = Bar(<div className="flex flex-wrap gap-3">
             <p>
               <span className="font-bold">Paid:</span>&nbsp;{paidNum} / {paymentsNeeded}&nbsp;
               { paidNum < paymentsNeeded ? <>❌</> : <>✅</> }

@@ -12,7 +12,8 @@ import { usePathname, useSearchParams } from "next/navigation";
 function Message({ text, bgColor, textColor}: { text: string, bgColor: string, textColor: string }) {
   return (
     <div className={`p-4 rounded-lg ${bgColor}`}>
-      <p className={`line-clamp-2 overflow-scroll ${textColor}`}>{text}</p>
+      {/*Clamped only where two lines are enough - narrower than that it would hide most of the message*/}
+      <p className={`desktop:line-clamp-2 overflow-scroll ${textColor}`}>{text}</p>
     </div>
   )
 }
@@ -23,7 +24,7 @@ function GoodNews({ text }: { text: string }) { return <Message text={text} bgCo
 
 export default function SignupButton({ trip, reqs }:{ trip: TripWithSignup, reqs: Requesters }) { //Any component that uses useSearchParams MUST be wrapped in a Suspense component as of the latest Next version
   return (
-    <Suspense fallback={<div className="px-20 text-center">Loading...</div>}>
+    <Suspense fallback={<div className="px-6 sm:px-10 desktop:px-20 text-center">Loading...</div>}>
       <SignupButtonContent trip={trip} reqs={reqs}/>
     </Suspense>
   )
@@ -69,8 +70,8 @@ function SignupButtonContent({ trip, reqs }:{ trip: TripWithSignup, reqs: Reques
   const [showPopup, setShowPopup] = useState(false);
   //Helper Components
   const payBar = ( 
-    <div className="flex flex-col gap-1 flex-shrink-0">
-      <BOCButton text="Pay" onClick={async () => { 
+    <div className="flex flex-col gap-1 w-full desktop:w-auto desktop:shrink-0">
+      <BOCButton text="Pay" onClick={async () => {
         await backendPost(`/trip/${trip.id}/participate/pay`, {});
         window.open("https://payment.brown.edu/C20460_ustores/web/store_cat.jsp?STOREID=2&CATID=396", "_blank");
         window.location.reload();
@@ -92,18 +93,19 @@ function SignupButtonContent({ trip, reqs }:{ trip: TripWithSignup, reqs: Reques
   const SignupsClosed = <Informational text="Signups have closed"/>
   const SignedUp = <Informational text="You are signed up! We'll let you know once the lottery has run if you were selected." />
   const NotSelected = <BadNews text="Unfortunately, you were not selected for this trip. Your odds of getting on a future trip are now increased!"/>
-  const Selected = ( 
-    <div className="flex gap-2">
-      <div className="flex flex-col gap-1 w-1/4 flex-shrink-0">
+  const Selected = (
+    <div className="flex flex-col desktop:flex-row gap-2">
+      {/*Stacked, the message reads first and the buttons go full-width beneath it*/}
+      <div className="flex flex-col gap-1 w-full order-last desktop:order-none desktop:w-1/4 desktop:shrink-0">
         <BOCButton text="Confirm" onClick={() => simpleUpdate(`/trip/${trip.id}/participate/confirm`)}></BOCButton>
         <BOCButton text="Cancel" onClick={() => setShowPopup(true)} negative></BOCButton>
       </div>
       <GoodNews text="Congrats, you were selected! Now, confirm your spot so we know you're still interested." />
     </div>
   )
-  const Waitlisted = ( 
-    <div className="flex gap-2">
-      <div className="flex flex-col gap-1 w-1/4 flex-shrink-0">
+  const Waitlisted = (
+    <div className="flex flex-col desktop:flex-row gap-2">
+      <div className="flex flex-col gap-1 w-full order-last desktop:order-none desktop:w-1/4 desktop:shrink-0">
         <BOCButton text="Confirm" onClick={() => simpleUpdate(`/trip/${trip.id}/participate/confirm`)}></BOCButton>
         <BOCButton text="Cancel" onClick={() => setShowPopup(true)} negative></BOCButton>
       </div>
@@ -113,7 +115,7 @@ function SignupButtonContent({ trip, reqs }:{ trip: TripWithSignup, reqs: Reques
   const WaitlistedConfrimed = <Informational text="Thanks for confirming your interest! Your status will update to Selected if you are chosen off the waitlist." />
   const ConfirmedFree = <GoodNews text="Thanks for confirming your spot!"/>
   const Confirmed = (
-    <div className="flex gap-2">
+    <div className="flex flex-col desktop:flex-row gap-2">
       <GoodNews text="Thanks for confirming your spot! Remember to pay when you can!"/>
       { payBar }
     </div>
@@ -121,7 +123,7 @@ function SignupButtonContent({ trip, reqs }:{ trip: TripWithSignup, reqs: Reques
   const ConfirmedAndPaid = <GoodNews text="Thanks for confirming and paying - you're all set for the trip!"/>
   const Attended = <GoodNews text="Thanks for exploring with us! Please join us again soon!"/>
   const AttendedNeedPay = (
-    <div className="flex gap-2">
+    <div className="flex flex-col desktop:flex-row gap-2">
       <GoodNews text="Thanks for exploring with us! Remember to pay when you can (or we'll pester you)!"/>
       { payBar }
     </div>

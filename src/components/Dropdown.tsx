@@ -14,7 +14,8 @@ const Dropdown: React.FC<DropdownProps> = ({ header, content, sideActions }) => 
 
   return (
     <div className={`w-full`}>
-      <div className="w-full flex justify-start">
+      {/* wraps on narrow screens; no-op at desktop, where the actions always fit one row */}
+      <div className="w-full flex flex-wrap justify-start">
         <button
           className="flex justify-start items-center px-4 py-3 text-lef hover:bg-boc_lightbrown transition rounded-2xl"
           onClick={() => setIsOpen(!isOpen)}

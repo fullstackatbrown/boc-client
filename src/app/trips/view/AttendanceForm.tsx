@@ -136,16 +136,17 @@ const AttendanceForm: React.FC<AttendanceFormProps> = ({ trip, reqs }) => {
       {/* Signed Up Participants */}
       <div>
         <h3 className="text-lg font-semibold mb-2">Signed Up Participants</h3>
+        {/* Below sm the select drops onto its own full-width line under the name */}
         <ul className="space-y-2">
           {participants.map(p => (
-            <li key={p.email} className="flex items-center justify-between gap-2 border-b pb-1">
-              <span className="text-sm">
+            <li key={p.email} className="flex flex-col items-stretch gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-2 border-b pb-1">
+              <span className="text-sm break-words sm:break-normal">
                 {p.firstName} {p.lastName} <span className="text-gray-500">({p.email})</span>:
               </span>
               <select
                 value={participantStatuses[p.email] || AttendanceStatus.NoShow}
                 onChange={(e) => handleStatusChange(p.email, e.target.value as AttendanceStatus)}
-                className="border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full sm:w-auto border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {Object.values(AttendanceStatus).map(status => (
                   <option key={status} value={status}>
@@ -201,7 +202,7 @@ const AttendanceForm: React.FC<AttendanceFormProps> = ({ trip, reqs }) => {
           );
         })}
 
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button
             type="button"
             onClick={handleAddEmailInput}
