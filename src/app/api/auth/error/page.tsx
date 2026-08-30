@@ -10,7 +10,8 @@ function ErrorContent() {
   const error = searchParams.get("error");
 
   return (
-    <div className="flex flex-col items-center justify-center">
+    // Gutters keep the copy off the edges on a phone; desktop had none, so it stays at none
+    <div className="flex flex-col items-center justify-center px-6 sm:px-10 desktop:px-0 pt-8 desktop:pt-0">
       <h1 className="text-2xl font-bold text-red-600">Login Failed</h1>
       
       {error === "AccessDenied" && (

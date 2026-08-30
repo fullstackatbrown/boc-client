@@ -37,7 +37,7 @@ export default function DevLogin() {
 
   if (!E2E_AUTH_ENABLED) {
     return (
-      <div className="px-20 py-10">
+      <div className="px-6 sm:px-10 desktop:px-20 py-10">
         Test logins are disabled. Restart the dev server with{" "}
         <code className="bg-gray-200 px-1 rounded">NEXT_PUBLIC_E2E=1 npm run dev</code>.
       </div>
@@ -48,7 +48,7 @@ export default function DevLogin() {
   const become = (email: string) => signIn("e2e", { email, callbackUrl: "/dev-login" });
 
   return (
-    <div className="px-20 py-10 flex flex-col gap-6">
+    <div className="px-6 sm:px-10 desktop:px-20 py-10 flex flex-col gap-6">
       <div>
         <h1 className="text-3xl font-bold">Test Login</h1>
         <p className="text-gray-600">
@@ -71,11 +71,11 @@ export default function DevLogin() {
 
       <div className="flex flex-col gap-2">
         {SEEDED.map((user) => (
-          <div key={user.email} className="flex items-center gap-4">
-            <div className="w-56">
+          <div key={user.email} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
+            <div className="w-full sm:w-56">
               <BOCButton text={user.label} onClick={() => become(user.email)} grow />
             </div>
-            <span className="text-gray-600">
+            <span className="text-gray-600 break-all sm:break-normal">
               {user.role} - {user.email}
             </span>
           </div>
@@ -83,14 +83,14 @@ export default function DevLogin() {
       </div>
 
       <form
-        className="flex items-center gap-4"
+        className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4"
         onSubmit={(e) => {
           e.preventDefault();
           if (custom.trim()) become(custom.trim());
         }}
       >
         <input
-          className="border rounded-lg px-4 h-12 w-96"
+          className="border rounded-lg px-4 h-12 w-full sm:w-96"
           placeholder="anyone@brown.edu"
           value={custom}
           onChange={(e) => setCustom(e.target.value)}

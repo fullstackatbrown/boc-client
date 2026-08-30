@@ -8,7 +8,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 
 export default function MailingList() { //Any component that uses useSearchParams MUST be wrapped in a Suspense component as of the latest Next version
   return (
-    <Suspense fallback={<div className="px-20 text-center">Loading...</div>}>
+    <Suspense fallback={<div className="px-6 sm:px-10 desktop:px-20 text-center">Loading...</div>}>
       <MailingListContent/>
     </Suspense>
   )
@@ -69,10 +69,11 @@ function MailingListContent() {
       <div style={{ minHeight: `5px` }}></div>
 
       {/* Centered content with margin */}
-      <div className="flex flex-col items-center mt-12 px-4">
+      <div className="flex flex-col items-center mt-12 px-6 desktop:px-4">
+        {/* leading restated at sm: the responsive text-* step carries its own line-height */}
         <p
           id="paragraph"
-          className="text-xl font-light leading-8 mb-12 text-center max-w-2xl"
+          className="text-lg sm:text-xl font-light leading-7 sm:leading-8 mb-12 text-center max-w-2xl"
         >
           You will receive one weekly newsletter email informing you of the
           trips going out soon. We don't spam—we promise! :-)

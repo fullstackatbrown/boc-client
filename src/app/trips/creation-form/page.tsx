@@ -172,7 +172,7 @@ export default function CreateTripForm() {
 
   return (
     <div className="max-w-3xl mx-auto py-12 px-6 bg-boc_yellow text-[#2c3e1d] rounded-t-[5rem] font-body border-4 border-b-0 border-boc_medbrown">
-      <h1 className="text-4xl font-funky mb-6 text-boc_darkgreen text-center">Create a New Trip!</h1>
+      <h1 className="text-3xl sm:text-4xl font-funky mb-6 text-boc_darkgreen text-center">Create a New Trip!</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Leader Emails */}
@@ -236,8 +236,8 @@ export default function CreateTripForm() {
             className={iptStyle}
           />
         </div>
-        {/* Date */}
-        <div className="grid grid-cols-2 gap-4 w-full">
+        {/* Date - the pair only fits side by side once the labels stop wrapping */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
           <div>
             <label className={labelStyle}>Start Date</label>
             <input
@@ -276,7 +276,7 @@ export default function CreateTripForm() {
           />
         </div>
         {/* Class or Price Override */}
-        <div className="grid grid-cols-2 gap-4 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
           <div>
             <label className={labelStyle}>Trip Class (A-J or Z for free)</label>
             <input

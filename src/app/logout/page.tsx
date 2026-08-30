@@ -13,7 +13,7 @@ export default function Logout() {
   }, []);
 
   return (
-    <div className="px-20 py-10">
+    <div className="px-6 sm:px-10 desktop:px-20 py-10">
       Signing out in 2 seconds. {" "}
       <u>
         <a
