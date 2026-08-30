@@ -106,9 +106,6 @@ export default function LeaderProfile({ params }: { params: Promise<{ id: string
         {/* Trips Badge */}
         <div className="flex justify-center desktop:justify-end">
           <div className="w-36 desktop:w-48 text-center shrink-0">
-            <p className="text-base desktop:text-xl font-bold text-boc_darkbrown uppercase tracking-widest leading-none desktop:leading-none mb-1">
-              Summit Seeker
-            </p>
             <div className="relative w-full aspect-square flex items-center justify-center">
               <img src={tripsBadge.src} alt="badge" className="absolute inset-0 w-full h-full object-contain" />
               <span className="relative z-10 text-white font-bold text-4xl desktop:text-5xl pt-1">

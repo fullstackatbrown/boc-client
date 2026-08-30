@@ -6,18 +6,20 @@ import { PencilSquareIcon } from '@heroicons/react/24/solid';
 import { AxiosResponse } from "axios";
 import EditablePhone from "./EditablePhone";
 
-const Badge = ({title, count, label} : {title: string, count: number, label: string} ) => (
-	<>
-            <div className="w-36 desktop:w-1/5 text-center rounded-lg float-right">
-            <p className="text-lg desktop:text-2xl font-bold text-boc_darkbrown">{title}</p>
-
-            <div className="relative w-full">
+//The count is sized in cqw off the badge's own width, so it stays inside the hexagon
+//(46% of the artwork) however hard the desktop row squeezes the badge. `combined` is the
+//"led | total" form, several times wider than a lone number, so it takes a smaller face.
+const Badge = ({count, label, combined} : {count: string, label: string, combined: boolean} ) => (
+            <div className="w-52 desktop:w-1/4 text-center rounded-lg float-right">
+            <div className="relative w-full [container-type:inline-size]">
                 <img
                 src={tripsBadge.src}
                 alt="trips badge"
                 className="w-full h-auto p-2"
                 ></img>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white font-bold text-3xl desktop:text-5xl px-4 py-2 rounded-lg">
+                <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+                whitespace-nowrap text-white font-bold leading-none
+                ${combined ? "text-[11cqw]" : "text-[22cqw]"}`}>
 		{count}
                 </div>
             </div>
@@ -25,32 +27,25 @@ const Badge = ({title, count, label} : {title: string, count: number, label: str
                 <p className="text-lg desktop:text-2xl font-bold text-boc_darkbrown">{label}</p>
             </div>
             </div>
-	    </>
 );
 
 function Badges({ role, tripsParticipated, tripsLead } : {role: Role, tripsParticipated: number, tripsLead: number}) {
 		//Admins lead trips too - checking for Leader alone hides this from most of the
 		//people who have actually led anything
 		const leads = role === Role.Leader || role === Role.Admin;
+		const total = tripsParticipated + tripsLead;
 		return (
-			//Below `desktop` the badges sit side by side in their own row; `desktop:contents`
-			//dissolves this wrapper again so they stay direct flex children of the bar.
+			//Below `desktop` the badge sits in its own centred row; `desktop:contents`
+			//dissolves this wrapper again so it stays a direct flex child of the bar.
 			<div className="flex justify-center gap-6 desktop:contents">
-			{/* Pushes the badges to the right edge, however many of them there are */}
+			{/* Pushes the badge to the right edge */}
 			<div className="hidden desktop:block flex-grow"></div>
+			{/* Leaders get led | total in one badge; everyone else just their total */}
 			<Badge
-				title="SUMMIT SEEKER"
-				count={tripsParticipated + tripsLead}
-				label="TOTAL TRIPS"
+				count={leads ? `${tripsLead} | ${total}` : `${total}`}
+				label={leads ? "TRIPS" : "TOTAL TRIPS"}
+				combined={leads}
 			/>
-
-			{leads && (
-				<Badge
-					title="LEADER STATS"
-					count={tripsLead}
-					label="TRIPS LED"
-				/>
-			)}
 			</div>
 		);
 }

@@ -120,8 +120,8 @@ function StatusButton({ state, text, onClick }:{ state: StatusState, text: Statu
       break;
   }
   return (
-    //Below desktop the stages wrap two-up, with the one actionable stage on its own full-width row
-    <div className={`flex flex-col ${state == StatusState.Next ? "w-full desktop:w-2/6" : "w-[calc(50%-0.25rem)] desktop:w-1/6"}`}>
+    //Below desktop every stage takes its own full-width row
+    <div className={`flex flex-col ${state == StatusState.Next ? "w-full desktop:w-2/6" : "w-full desktop:w-1/6"}`}>
       { headerEl }
       <div className={`py-3 px-3 rounded-xl border-4 text-center ${extraStyle}`} onClick={state == StatusState.Next ? onClick : ()=>{}}>
         { currText }

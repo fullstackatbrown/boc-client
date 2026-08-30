@@ -69,7 +69,9 @@ function TripRow(data: Trip & { onOpen: (tripId: number) => void }) {
         <b className="text-blue-400">{data.tripName} </b>
         <br /> {data.sentenceDesc}
       </Td>
-      <Td className="flex-1">
+      {/* Below sm the cell is a block box stretched to the row's height, so the date needs
+          centring by hand; from sm it is a table-cell again and inherits align middle. */}
+      <Td className="flex-1 flex items-center sm:table-cell">
         <div className="text-center w-full">{data.date}</div>
       </Td>
       <Td className="flex-1">

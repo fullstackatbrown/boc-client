@@ -107,9 +107,10 @@ function MobileMenu(props: { items: any[]; showLogin: boolean; onNavigate: () =>
   const [expanded, setExpanded] = useState<string | null>(null);
 
   return (
+    //mb-6 keeps the closing green rule off the page title underneath
     <div
       id="mobile-menu"
-      className="desktop:hidden border-b-2 border-boc_green bg-background"
+      className="desktop:hidden border-b-2 border-boc_green bg-background mb-6"
     >
       <ul className="divide-y-2 divide-boc_lightbrown">
         {items.map((item) => (
