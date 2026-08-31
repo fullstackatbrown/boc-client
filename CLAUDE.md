@@ -52,7 +52,9 @@ Firebase config is **hardcoded** in `src/scripts/firebase.ts`, not env-driven. T
 | | | - user/ - profile page: user info, editable phone, tables of hosted/upcoming/past trips
 | | | - api/auth/[...nextauth]/route.ts - next-auth config: Google provider, token refresh, @brown.edu/@risd.edu allowlist
 | | | - api/auth/error/page.tsx - shown when the email-domain check rejects a login
-| | | - layout.tsx - SessionProvider, Header/Footer, fonts, mobile-view blocker
+| | | - dev-login/ - test-login page over the `e2e` provider; renders only when NEXT_PUBLIC_E2E=1
+| | | - layout.tsx - SessionProvider, Header/Footer, fonts. The min-h-screen wrappers here are
+| | |                what pad a short page down to the footer - don't remove them
 | | | - page.tsx - splash/home page
 | | - assets/ - static images, icons
 | | - components/ - React components shared across the site
@@ -155,6 +157,17 @@ The current bar for a change is:
 2. `npx tsc --noEmit` passes clean (it currently does — a new error means you introduced it)
 3. `npm run build` succeeds for anything touching routing, Suspense boundaries, or server/client component boundaries
 4. Manual browser check with `boc-server` running locally. State which pages and which roles you exercised. Because so much UI branches on trip status and viewer role, say explicitly which branch you verified — e.g. "checked as leader on an Open trip" — and which you did not.
+5. **For any layout change, check 390 / 768 / 1100 / 1440** and prove 1440 is unchanged. See below.
+
+### Checking layout changes
+Every page is responsive now, so a CSS change can silently break a width you weren't looking at. What worked, repeatedly:
+
+- **Drive Playwright directly from a standalone node script**, not the test runner — `npm run test:e2e`'s globalSetup destructively reseeds the database. Import it by absolute path (`node_modules/@playwright/test/index.mjs`); a script outside the repo can't resolve it by name.
+- **Never `waitUntil: "networkidle"`** — Firestore holds a connection open, so it never fires and you get a 30s timeout. Use `domcontentloaded` and then *poll for the content you need*. A fixed timeout silently captures a half-loaded page; that produced one false "desktop regression" that took a while to disprove.
+- **Attribute overflow to an element**, don't just compare `scrollWidth` to the viewport — walk the DOM for boxes past the right edge and name them. A bare number tells you nothing about whose fault it is.
+- **Prove desktop is unchanged by comparing pixels or geometry, not by eye.** Three separate desktop regressions in this codebase were invisible to a human and obvious to a diff.
+- **Signing in via `/dev-login` is timing-sensitive.** The form is inert until React hydrates, and polling `/api/auth/session` straight through the post-signIn redirect destroys the execution context and returns `null` forever — which looks exactly like a broken session. Fill the free-text input, press Enter, wait for the redirect to settle, *then* poll. Note the per-user buttons are labelled with display names, not emails.
+- **`alert()` blocks everything.** This app alerts on every backend rejection, and an open dialog freezes the page to automation. Register a dialog handler before navigating.
 
 ### Tests
 ```
@@ -205,7 +218,6 @@ This is what makes the trip lifecycle testable at all — reaching Pre-Trip or a
 Documented so you don't waste time on it. Leave it alone unless asked:
 - `src/app/trips/trips-form/` — a legacy form posting to a Google Apps Script endpoint, superseded by `creation-form/`. Still routable at `/trips/trips-form`, unlinked from anywhere.
 - `src/app/about/photo-album/page.disabled.tsx` — intentionally disabled by filename; its nav entry in `Header.tsx` is commented out.
-- `our-team/page.tsx` cards `router.push` to `/team/${resource.id}`, but no `src/app/team/` route exists — clicking a leader card 404s.
 - Trip filters on `/trips` (name/date/size) are fully implemented but commented out of the render, deemed "kinda silly".
 - `src/app/user/page.tsx` reads `tripInfo.otherLeaders`, a field the backend never sends (`GET /trip/:id` returns `leaders`). That lookup always falls through to the empty-array branch, so the `leaders` column it builds is effectively dead.
 
