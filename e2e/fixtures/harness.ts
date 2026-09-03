@@ -28,6 +28,10 @@ export const WALK_ON = "margaret.hamilton@risd.edu";
  * in sequence, which one real Google account cannot do.
  */
 export async function loginAs(page: Page, email: string): Promise<void> {
+  //Park on a blank page first. A trip page left open keeps next-auth's SessionProvider
+  //alive, and it races clearCookies() by re-establishing the outgoing user's session -
+  //which showed up as this sign-in intermittently resolving to the previous participant
+  await page.goto("about:blank");
   await page.context().clearCookies();
 
   const csrfRes = await page.request.get("/api/auth/csrf");

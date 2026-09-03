@@ -185,7 +185,13 @@ test("a trip runs from creation through attendance", async ({ page, request }) =
   await test.step("leader pulls a replacement off the waitlist", async () => {
     await openTripPage(page, tripId);
     await page.getByRole("button", { name: /Participant List/ }).click();
-    await clickAndSettle(page, page.getByText("Add Participant from Waitlist"));
+    //The button only reveals the count input; the reload comes after Enter submits it
+    await page.getByText("Add from Waitlist").click();
+    const countInput = page.getByRole("spinbutton");
+    await countInput.fill("1");
+    const reloaded = page.waitForEvent("load", { timeout: 20_000 }).catch(() => {});
+    await countInput.press("Enter");
+    await reloaded;
 
     await expect
       .poll(async () => {
