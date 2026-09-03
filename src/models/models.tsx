@@ -8,6 +8,7 @@ export interface Trip {
   plannedDate: string,
   plannedEndDate: string | null,
   maxSize: number,
+  waitlistSize: number | null, //null means an unlimited waitlist
   class: TripClass | null,
   priceOverride: number | null, 
   sentenceDesc: string | null, 

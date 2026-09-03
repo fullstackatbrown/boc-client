@@ -10,6 +10,7 @@ interface TripForm {
   plannedDate: string;
   plannedEndDate: string;
   maxSize: string;
+  waitlistSize: string;
   class: string;
   priceOverride: string;
   sentenceDesc: string;
@@ -30,6 +31,7 @@ const emptyForm = {
   plannedDate: '',
   plannedEndDate: '',
   maxSize: '',
+  waitlistSize: '',
   class: '',
   priceOverride: '',
   sentenceDesc: '',
@@ -100,6 +102,7 @@ export default function CreateTripForm() {
       plannedDate: form.plannedDate,//startDate,
       plannedEndDate: endDate,
       maxSize: parseInt(form.maxSize, 10),
+      waitlistSize: form.waitlistSize === '' ? null : parseInt(form.waitlistSize, 10), //Blank means unlimited
       class: form.class || null,
       priceOverride: form.priceOverride ? parseFloat(form.priceOverride) : null,
       sentenceDesc: form.sentenceDesc || null,
@@ -271,6 +274,21 @@ export default function CreateTripForm() {
             min={1}
             max={1000}
             required
+            onChange={handleChange}
+            className={iptStyle}
+          />
+        </div>
+        {/* Waitlist Size */}
+        <div>
+          <label className={labelStyle}>Waitlist Size (leave blank for unlimited)</label>
+          <input
+            name="waitlistSize"
+            type="number"
+            value={form.waitlistSize}
+            min={0}
+            max={1000}
+            step={1}
+            placeholder="Unlimited"
             onChange={handleChange}
             className={iptStyle}
           />

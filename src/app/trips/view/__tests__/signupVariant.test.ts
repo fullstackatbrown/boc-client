@@ -31,6 +31,7 @@ function makeTrip(over: Partial<TripWithSignup> = {}): TripWithSignup {
     plannedDate: "2026-10-15",
     plannedEndDate: null,
     maxSize: 10,
+    waitlistSize: null,
     class: TripClass.A,
     priceOverride: null,
     sentenceDesc: "A trip.",
