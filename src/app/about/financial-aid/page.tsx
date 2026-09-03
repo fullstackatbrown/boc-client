@@ -6,6 +6,7 @@ import Rafting from "@/assets/images/about/rafting.jpg";
 import { useEffect, useState } from "react";
 import db from "@/scripts/firebase";
 import { getDoc, doc, collection, getDocs } from "firebase/firestore";
+import { loadCoreSlots } from "../our-team/coreLeadership";
 
 export default function LandAcknowledgement() {
   const [treasurers, setTreasurers] = useState<string>("loading...");
@@ -13,8 +14,18 @@ export default function LandAcknowledgement() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const treasurer1 = (await getDoc(doc(db, "team", "treasurer1"))).data();
-        const treasurer2 = (await getDoc(doc(db, "team", "treasurer2"))).data();
+        //Whoever currently holds the two treasurer slots, rather than two team docs named
+        //after the slots - so handing the role over is a change to `core`, not to this page.
+        //TEMPORARY: falling back to the slot name as a team doc id covers the pre-migration
+        //data, where the treasurers really were team/treasurer1 and team/treasurer2.
+        const slots = await loadCoreSlots();
+        const ids = ["treasurer1", "treasurer2"].map(
+          (slot) => slots.find((s) => s.id === slot)?.leader ?? slot
+        );
+        const [treasurer1, treasurer2] = (
+          await Promise.all(ids.map((id) => getDoc(doc(db, "team", id))))
+        ).map((snap) => snap.data());
+
         if (!(treasurer1 && treasurer2)) throw new Error("Unable to find the treasurer data");
         else {
           setTreasurers(` ${treasurer1.name} and ${treasurer2.name} `);

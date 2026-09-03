@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatDateString } from "@/utils/utils";
 import { signInAsLeader, handleEditError } from "../leaderAuth";
+import { loadCoreSlots, positionFor } from "../coreLeadership";
 
 // Assets imported from your original structure
 import tripsBadge from "@/assets/images/profile/badge.png";
@@ -81,6 +82,7 @@ export default function LeaderProfile({ params }: { params: Promise<{ id: string
   const router = useRouter();
   const openTrip = (tripId: number) => router.push(`/trips/view?id=${tripId}`);
   const [leader, setLeader] = useState<any>(null);
+  const [position, setPosition] = useState("");
   const [notFound, setNotFound] = useState(false);
   const [tripCount, setTripCount] = useState(0);
   const [currentTrips, setCurrentTrips] = useState<any[]>([]);
@@ -103,6 +105,10 @@ export default function LeaderProfile({ params }: { params: Promise<{ id: string
       }
       const data = leaderSnap.data();
       setLeader(data);
+
+      //The position is a property of the core slot this leader holds, not of the leader, so
+      //it disappears by itself when a slot is reassigned. Nothing shows if no slot points here.
+      setPosition(positionFor(id, await loadCoreSlots(), data.position));
 
       const nameParts = data.name.split(" ");
       const first = nameParts[0];
@@ -249,7 +255,9 @@ export default function LeaderProfile({ params }: { params: Promise<{ id: string
           <h1 className="text-4xl sm:text-5xl desktop:text-6xl font-funky text-boc_darkbrown leading-[1.1] desktop:leading-[1.1]">
             <b>{leader.name}</b>
           </h1>
-          <p className="text-xl desktop:text-2xl text-boc_darkbrown italic mt-1 opacity-80">{leader.position}</p>
+          {position && (
+            <p className="text-xl desktop:text-2xl text-boc_darkbrown italic mt-1 opacity-80">{position}</p>
+          )}
         </div>
 
         {/* Trips Badge */}

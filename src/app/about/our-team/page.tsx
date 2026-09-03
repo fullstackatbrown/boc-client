@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import photoPlaceholder from "@/assets/images/profile/bear.png";
 import { signInAsLeader, handleEditError } from "./leaderAuth";
+import { CoreSlot, loadCoreSlots, partitionTeam } from "./coreLeadership";
 
 type ResourceData = {
   id: string;
@@ -17,9 +18,11 @@ type ResourceData = {
   image: string;
   index: number;
   display: boolean;
-  position: string;
-  category: string;
   email?: string;
+  //Legacy, pre-migration only: position now lives on the core slot, and core membership
+  //is being a slot's `leader` rather than carrying category === "core".
+  position?: string;
+  category?: string;
   bio?: string;
 };
 
@@ -30,6 +33,7 @@ const NEW_LEADER_BIO = "I'm a new leader, and I haven't created my blurb yet!";
 
 export default function Team() {
   const [info, setData] = useState<ResourceData[]>([]);
+  const [coreSlots, setCoreSlots] = useState<CoreSlot[]>([]);
   const [teamLink, setTeamLink] = useState("");
   const [loading, setLoading] = useState(true);
   const [viewer, setViewer] = useState<Viewer | null>(null);
@@ -40,8 +44,7 @@ export default function Team() {
   const router = useRouter();
 
   // 1. Simplify the Card (Remove the router.push)
-  function Card({ resource }: { resource: ResourceData }) {
-    const isGeneral = resource.category === "general";
+  function Card({ resource, position }: { resource: ResourceData, position?: string }) {
     const imagePath = resource.image || photoPlaceholder.src;
 
     // mx-auto is phone-only: the one-per-row link is full width, so a card narrower
@@ -57,8 +60,8 @@ export default function Team() {
         <h2 className="font-funky text-gray-800 text-base sm:text-xl desktop:text-2xl font-semibold text-center leading-tight desktop:leading-tight">
           {resource.name}
         </h2>
-        {!isGeneral && (
-          <p className="text-gray-600 text-sm sm:text-base desktop:text-lg text-center mt-1">{resource.position}</p>
+        {position && (
+          <p className="text-gray-600 text-sm sm:text-base desktop:text-lg text-center mt-1">{position}</p>
         )}
       </div>
     );
@@ -69,6 +72,7 @@ export default function Team() {
       try {
         const querySnapshot = await getDocs(collection(db, "team"));
         const queryAssets = await getDoc(doc(db, "assets", "team-picture"));
+        setCoreSlots(await loadCoreSlots());
         const documents = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
@@ -112,7 +116,7 @@ export default function Team() {
 
     try {
       await signInAsLeader(reqs); //The write below is gated on the Firebase identity
-      const slug = `trip_${viewer.firstName}-${viewer.lastName}`.toLowerCase().replace(/\s+/g, "-");
+      const slug = `${viewer.firstName}-${viewer.lastName}`.toLowerCase().replace(/\s+/g, "-");
       let id = slug;
       for (let n = 2; info.some((m) => m.id === id); n++) id = `${slug}-${n}`;
 
@@ -122,8 +126,8 @@ export default function Team() {
         email: viewer.email,
         image: "", //Falsy, so both team pages fall back to the bear placeholder
         bio: NEW_LEADER_BIO,
-        position: "Trip Leader",
-        category: "general",
+        //No category or position: a new leader holds no core slot, and `index` orders only
+        //the trip leader grid they land in.
         index: Math.max(0, ...info.map((m) => m.index)) + 1,
         display: true,
       });
@@ -133,8 +137,7 @@ export default function Team() {
     }
   };
 
-  const coreLeadership = info.filter(m => m.category === "core" && m.display !== false).sort((a, b) => a.index - b.index);
-  const tripLeaders = info.filter(m => m.category === "general" && m.display !== false).sort((a, b) => a.index - b.index);
+  const { core: coreLeadership, general: tripLeaders } = partitionTeam(info, coreSlots);
 
   if (loading) return <div className="p-20 text-center font-funky text-xl">Loading...</div>;
 
@@ -148,9 +151,9 @@ export default function Team() {
         {/* One officer per row on phones so their photos stay large; two from sm up, then
             the natural max-w-sm flow of the cards themselves once there's room. */}
         <div className="flex flex-wrap justify-center gap-10 w-full">
-          {coreLeadership.map((member) => (
+          {coreLeadership.map(({ member, position }) => (
             <Link href={`/about/our-team/${member.id}`} key={member.id} className="w-full sm:w-[calc(50%-1.25rem)] desktop:w-auto transition-transform hover:scale-105">
-              <Card resource={member} />
+              <Card resource={member} position={position} />
             </Link>
           ))}
         </div>
