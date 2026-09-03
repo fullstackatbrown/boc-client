@@ -108,7 +108,7 @@ export default function LeaderProfile({ params }: { params: Promise<{ id: string
 
       //The position is a property of the core slot this leader holds, not of the leader, so
       //it disappears by itself when a slot is reassigned. Nothing shows if no slot points here.
-      setPosition(positionFor(id, await loadCoreSlots(), data.position));
+      setPosition(positionFor(id, await loadCoreSlots()));
 
       const nameParts = data.name.split(" ");
       const first = nameParts[0];

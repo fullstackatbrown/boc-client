@@ -1,14 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { CoreSlot, TeamMember, partitionTeam, positionFor } from "../coreLeadership";
 
-//Leadership positions are moving from fields on each team doc to their own `core`
-//collection. Both shapes have to work: the migration happens after this code deploys,
-//so the site runs on the legacy shape for a while with exactly today's behaviour.
+//Leadership positions live in their own `core` collection: each slot names the team doc
+//that holds it, so reassigning a position never touches either person's record.
 
 const member = (id: string, index: number, extra: Partial<TeamMember> = {}): TeamMember =>
   ({ id, index, ...extra });
 
-// --- new shape: positions live in `core`, team docs carry neither field ---
 const NEW_TEAM: TeamMember[] = [
   member("ella-creane", 0),
   member("alex-tully", 1),
@@ -24,14 +22,6 @@ const SLOTS: CoreSlot[] = [
   { id: "co-president2", leader: "alex-tully", position: "Co-President", order: 1 },
 ];
 
-// --- legacy shape: category/position/index on the team docs ---
-const OLD_TEAM: TeamMember[] = [
-  member("co-president1", 0, { category: "core", position: "Co-President" }),
-  member("co-president2", 1, { category: "core", position: "Co-President" }),
-  member("treasurer1", 3, { category: "core", position: "Treasurer" }),
-  member("trip_alice-xie", 20, { category: "general", position: "Trip Leader" }),
-  member("trip_adnan-aldabbagh", 13, { category: "general", position: "Trip Leader" }),
-];
 
 describe("partitionTeam, new shape", () => {
   const { core, general } = partitionTeam(NEW_TEAM, SLOTS);
@@ -80,35 +70,14 @@ describe("partitionTeam, new shape", () => {
   });
 });
 
-describe("partitionTeam, legacy shape (no core collection yet)", () => {
-  const { core, general } = partitionTeam(OLD_TEAM, []);
-
-  it("falls back to category and index, matching today's live behaviour", () => {
-    expect(core.map((e) => e.member.id)).toEqual(["co-president1", "co-president2", "treasurer1"]);
-    expect(general.map((m) => m.id)).toEqual(["trip_adnan-aldabbagh", "trip_alice-xie"]);
-  });
-
-  it("still labels core members from the position field on their team doc", () => {
-    expect(core.map((e) => e.position)).toEqual(["Co-President", "Co-President", "Treasurer"]);
-  });
-
-  it("keeps honouring display false", () => {
-    const team = OLD_TEAM.map((m) => m.id === "treasurer1" ? { ...m, display: false } : m);
-    expect(partitionTeam(team, []).core.map((e) => e.member.id)).not.toContain("treasurer1");
-  });
-});
 
 describe("positionFor", () => {
   it("returns the label of whichever slot points at this leader", () => {
-    expect(positionFor("vanessa-tao", SLOTS, undefined)).toBe("Treasurer");
+    expect(positionFor("vanessa-tao", SLOTS)).toBe("Treasurer");
   });
 
   it("returns nothing for a leader no slot points at", () => {
-    expect(positionFor("alice-xie", SLOTS, "Trip Leader")).toBe("");
+    expect(positionFor("alice-xie", SLOTS)).toBe("");
   });
 
-  it("falls back to the team doc's own position before the migration", () => {
-    expect(positionFor("co-president1", [], "Co-President")).toBe("Co-President");
-    expect(positionFor("trip_alice-xie", [], undefined)).toBe("");
-  });
 });

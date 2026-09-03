@@ -16,11 +16,9 @@ export default function LandAcknowledgement() {
       try {
         //Whoever currently holds the two treasurer slots, rather than two team docs named
         //after the slots - so handing the role over is a change to `core`, not to this page.
-        //TEMPORARY: falling back to the slot name as a team doc id covers the pre-migration
-        //data, where the treasurers really were team/treasurer1 and team/treasurer2.
         const slots = await loadCoreSlots();
-        const ids = ["treasurer1", "treasurer2"].map(
-          (slot) => slots.find((s) => s.id === slot)?.leader ?? slot
+        const ids = ["treasurer1", "treasurer2"].flatMap(
+          (slot) => slots.find((s) => s.id === slot)?.leader ?? []
         );
         const [treasurer1, treasurer2] = (
           await Promise.all(ids.map((id) => getDoc(doc(db, "team", id))))

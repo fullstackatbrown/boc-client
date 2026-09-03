@@ -17,17 +17,10 @@ export interface TeamMember {
   id: string;
   index: number;
   display?: boolean;
-  //Legacy, pre-migration only - see the note on loadCoreSlots.
-  position?: string;
-  category?: string;
 }
 
 //The `core` collection is the source of truth for who holds which position, so a position
 //can be reassigned without touching anyone's team doc.
-//
-//An empty result means the data has not been migrated yet, and the helpers below fall back
-//to the legacy `category`/`position`/`index` fields on the team docs themselves.
-//TEMPORARY: those fallbacks come out once the migration is confirmed in production.
 export async function loadCoreSlots(): Promise<CoreSlot[]> {
   const snap = await getDocs(collection(db, "core"));
   return snap.docs.map((d) => ({ id: d.id, ...d.data() } as CoreSlot));
@@ -41,25 +34,19 @@ export async function loadCoreSlots(): Promise<CoreSlot[]> {
  * no slot points at is a trip leader.
  */
 export function partitionTeam<T extends TeamMember>(team: T[], slots: CoreSlot[]) {
-  const migrated = slots.length > 0;
   const shown = (m: T) => m.display !== false;
 
-  const core: { member: T, position?: string }[] = migrated
-    ? [...slots]
-        .sort((a, b) => a.order - b.order)
-        .map((slot) => ({ member: team.find((m) => m.id === slot.leader), position: slot.position }))
-        //A slot pointing at a missing or hidden doc simply drops out of the row
-        .filter((e): e is { member: T, position: string } => !!e.member && shown(e.member))
-    //TEMPORARY pre-migration path: membership, label and order all off the team doc.
-    : team.filter((m) => m.category === "core" && shown(m))
-        .sort((a, b) => a.index - b.index)
-        .map((m) => ({ member: m, position: m.position }));
+  const core = [...slots]
+    .sort((a, b) => a.order - b.order)
+    .map((slot) => ({ member: team.find((m) => m.id === slot.leader), position: slot.position }))
+    //A slot pointing at a missing or hidden doc simply drops out of the row
+    .filter((e): e is { member: T, position: string } => !!e.member && shown(e.member));
 
   //Excluded by slot reference rather than by the filtered core list above: a core member
   //hidden with display:false must stay hidden, not fall through into the trip leader grid.
   const slotLeaderIds = new Set(slots.map((s) => s.leader));
   const general = team
-    .filter((m) => (migrated ? !slotLeaderIds.has(m.id) : m.category === "general"))
+    .filter((m) => !slotLeaderIds.has(m.id))
     .filter(shown)
     .sort((a, b) => a.index - b.index);
 
@@ -67,8 +54,6 @@ export function partitionTeam<T extends TeamMember>(team: T[], slots: CoreSlot[]
 }
 
 //The label to show on one leader's own profile page: whatever slot points at them, if any.
-export function positionFor(leaderId: string, slots: CoreSlot[], legacyPosition?: string) {
-  //TEMPORARY pre-migration path: position still lives on the team doc.
-  if (slots.length === 0) return legacyPosition ?? "";
+export function positionFor(leaderId: string, slots: CoreSlot[]) {
   return slots.find((s) => s.leader === leaderId)?.position ?? "";
 }
