@@ -1,11 +1,14 @@
 "use client";
-import React, { use, useEffect, useState } from "react";
+import React, { use, useEffect, useRef, useState } from "react";
 import { useRequesters } from "@/scripts/requests";
-import db from "@/scripts/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import db, { storage } from "@/scripts/firebase";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatDateString } from "@/utils/utils";
+import { signInAsLeader, handleEditError } from "../leaderAuth";
 
 // Assets imported from your original structure
 import tripsBadge from "@/assets/images/profile/badge.png";
@@ -16,12 +19,18 @@ export default function LeaderProfile({ params }: { params: Promise<{ id: string
   const resolvedParams = use(params);
   const id = resolvedParams.id;
 
-  const { backendGet } = useRequesters();
+  const reqs = useRequesters();
+  const { backendGet } = reqs;
   const router = useRouter();
   const [leader, setLeader] = useState<any>(null);
   const [notFound, setNotFound] = useState(false);
   const [tripCount, setTripCount] = useState(0);
   const [pastTrips, setPastTrips] = useState<any[]>([]);
+  const [viewer, setViewer] = useState<any>(null);
+  const [editingBio, setEditingBio] = useState(false);
+  const [bioVal, setBioVal] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   //NOTE: backendGet must NOT be a dependency here. It changes identity whenever the
   //session does, and this effect sets state on every run - together that loops forever.
@@ -59,6 +68,56 @@ export default function LeaderProfile({ params }: { params: Promise<{ id: string
     fetchPageData();
   }, [id]);
 
+  useEffect(() => {
+    //A 401 is just the ordinary signed-out visitor, who gets the read-only page
+    backendGet("/user")
+      .then((res): void => setViewer(res.data))
+      .catch((e): void => { if (e.status !== 401) console.error(`Fetching user data failed: ${e}`); });
+  }, [backendGet]);
+
+  //Own page only. The Firestore rules let a leader update just their own doc, so offering
+  //an admin controls on anyone else's would only ever produce a denied write.
+  const canEdit = !!viewer && !!leader?.email &&
+    viewer.email?.toLowerCase() === leader.email.toLowerCase();
+
+  const saveBio = async () => {
+    try {
+      await signInAsLeader(reqs);
+      await updateDoc(doc(db, "team", id), { bio: bioVal });
+      window.location.reload();
+    } catch (err) {
+      handleEditError(err);
+    }
+  };
+
+  const uploadPhoto = async (file: File) => {
+    //The Storage rule caps type and size too, but failing here gives a usable message
+    if (!file.type.startsWith("image/")) return alert("That doesn't look like an image file.");
+    if (file.size > 5 * 1024 * 1024) return alert("That image is too large - please pick one under 5MB.");
+
+    setUploading(true);
+    try {
+      const fbUser = await signInAsLeader(reqs);
+      const ext = file.name.split(".").pop() || "jpg";
+      //The uid segment is what makes the Storage rule expressible: a leader may only write
+      //under their own folder.
+      const dest = ref(storage, `LeaderPhotos/${fbUser.uid}/${Date.now()}.${ext}`);
+      await uploadBytes(dest, file);
+      await updateDoc(doc(db, "team", id), { image: await getDownloadURL(dest) });
+
+      //Clean up the replaced file, but only ever one of our own uploads - the curated
+      //CoreLeaders/GeneralLeaders originals are shared and must survive a photo swap.
+      //Runs after the doc update so a failed delete can never orphan the profile.
+      if (typeof leader.image === "string" && leader.image.includes("/o/LeaderPhotos%2F")) {
+        await deleteObject(ref(storage, leader.image)).catch((e) => console.log(e));
+      }
+      window.location.reload();
+    } catch (err) {
+      setUploading(false);
+      handleEditError(err);
+    }
+  };
+
   if (notFound) return (
     <div className="p-10 text-center font-funky text-boc_darkbrown text-2xl">
       We couldn't find that leader.{" "}
@@ -88,8 +147,36 @@ export default function LeaderProfile({ params }: { params: Promise<{ id: string
 
         {/* Profile Photo: Single Frame */}
         <div className="flex justify-center desktop:justify-start">
-          <div className="border-[6px] border-[#d2b48c] shadow-md overflow-hidden bg-white w-56 h-56 shrink-0">
-            <img src={leader.image || photoPlaceholder.src} alt={leader.name} className="w-full h-full object-cover" />
+          {/* The frame clips its own contents, so the edit badge hangs off this wrapper */}
+          <div className="relative shrink-0">
+            <div className="border-[6px] border-[#d2b48c] shadow-md overflow-hidden bg-white w-56 h-56">
+              <img src={leader.image || photoPlaceholder.src} alt={leader.name} className="w-full h-full object-cover" />
+            </div>
+            {canEdit && (
+              <>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadPhoto(f); }}
+                />
+                {/* A permanent badge rather than a hover overlay - touch devices have no hover */}
+                <button
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploading}
+                  aria-label="Change profile photo"
+                  className="absolute -bottom-2 -right-2 flex items-center justify-center w-11 h-11 rounded-full bg-boc_darkbrown text-background shadow-md hover:bg-boc_darkgreen transition-colors disabled:opacity-60"
+                >
+                  <PencilSquareIcon className="w-6 h-6" />
+                </button>
+              </>
+            )}
+            {uploading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white font-bold">
+                Uploading...
+              </div>
+            )}
           </div>
         </div>
 
@@ -121,12 +208,45 @@ export default function LeaderProfile({ params }: { params: Promise<{ id: string
 
       {/* About Section: Full width text */}
       <div className="mt-8 w-full">
-        <h2 className="text-2xl sm:text-3xl font-bold text-boc_darkbrown mb-3 font-funky">
+        {/* flex, not an inline icon: an inline-block pencil overhangs the line box and grows
+            the heading by 2px, nudging everything below it down for editors only. */}
+        <h2 className="flex items-center gap-3 text-2xl sm:text-3xl font-bold text-boc_darkbrown mb-3 font-funky">
           About
+          {canEdit && !editingBio && (
+            <button
+              onClick={() => { setBioVal(leader.bio || ""); setEditingBio(true); }}
+              aria-label="Edit blurb"
+              className="text-boc_medbrown hover:text-boc_darkbrown transition-colors"
+            >
+              <PencilSquareIcon className="w-6 h-6 block" />
+            </button>
+          )}
         </h2>
-        <p className="text-lg sm:text-xl leading-relaxed sm:leading-relaxed text-gray-800">
-          {leader.bio || "This leader hasn't added a bio yet."}
-        </p>
+        {/* A textarea with explicit Save, not the trip pages' Enter-to-submit EditableString -
+            a blurb is a paragraph, and Enter has to mean newline. */}
+        {editingBio ? (
+          <div>
+            <textarea
+              value={bioVal}
+              onChange={(e) => setBioVal(e.target.value)}
+              rows={6}
+              autoFocus
+              className="w-full border border-gray-300 rounded px-2 py-1 text-lg sm:text-xl leading-relaxed sm:leading-relaxed"
+            />
+            <div className="flex gap-3 mt-2">
+              <button onClick={saveBio} className="bg-boc_darkbrown text-background font-bold py-2 px-4 rounded-full hover:bg-boc_darkgreen transition duration-300 ease-in-out">
+                Save
+              </button>
+              <button onClick={() => setEditingBio(false)} className="border-2 border-boc_darkbrown text-boc_darkbrown font-bold py-2 px-4 rounded-full hover:bg-boc_lightbrown transition duration-300 ease-in-out">
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p className="text-lg sm:text-xl leading-relaxed sm:leading-relaxed text-gray-800">
+            {leader.bio || "This leader hasn't added a bio yet."}
+          </p>
+        )}
       </div>
 
       {/* Past Trips Table: Card-row style */}

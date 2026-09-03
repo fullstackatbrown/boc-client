@@ -1,10 +1,15 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { collection, getDocs, doc, getDoc} from "firebase/firestore";
+import React, { useEffect, useRef, useState } from "react";
+import { collection, getDocs, doc, getDoc, setDoc } from "firebase/firestore";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import Title from "@/components/Title";
 import db from "@/scripts/firebase";
+import { useRequesters } from "@/scripts/requests";
+import { Role } from "@/models/models";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import photoPlaceholder from "@/assets/images/profile/bear.png";
+import { signInAsLeader, handleEditError } from "./leaderAuth";
 
 type ResourceData = {
   id: string;
@@ -15,12 +20,24 @@ type ResourceData = {
   position: string;
   category: string;
   email?: string;
+  bio?: string;
 };
+
+//What GET /user sends back - narrower than models' User, which also carries trip counts
+type Viewer = { firstName: string; lastName: string; email: string; role: Role };
+
+const NEW_LEADER_BIO = "I'm a new leader, and I haven't created my blurb yet!";
 
 export default function Team() {
   const [info, setData] = useState<ResourceData[]>([]);
   const [teamLink, setTeamLink] = useState("");
   const [loading, setLoading] = useState(true);
+  const [viewer, setViewer] = useState<Viewer | null>(null);
+  const [isAboveFooter, setIsAboveFooter] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const reqs = useRequesters();
+  const { backendGet } = reqs;
+  const router = useRouter();
 
   // 1. Simplify the Card (Remove the router.push)
   function Card({ resource }: { resource: ResourceData }) {
@@ -67,13 +84,62 @@ export default function Team() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    //A 401 here is just the ordinary signed-out case - no button, no error
+    backendGet("/user")
+      .then((res): void => setViewer(res.data))
+      .catch((e): void => { if (e.status !== 401) console.error(`Fetching user data failed: ${e}`); });
+  }, [backendGet]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { setIsAboveFooter(entry.isIntersecting); },
+      { root: null, threshold: 0 }
+    );
+    if (sentinelRef.current) observer.observe(sentinelRef.current);
+    return () => { if (sentinelRef.current) observer.unobserve(sentinelRef.current); };
+  }, [loading]); //The sentinel only exists once the loading placeholder is replaced
+
+  //Send a leader to their own profile, creating one the first time they ask for it. The
+  //docs are already loaded for the grid, so finding it costs no extra Firestore reads.
+  const goToMyProfile = async () => {
+    if (!viewer) return;
+    const mine = info.find((m) => m.email?.toLowerCase() === viewer.email.toLowerCase());
+    if (mine) {
+      router.push(`/about/our-team/${mine.id}`);
+      return;
+    }
+
+    try {
+      await signInAsLeader(reqs); //The write below is gated on the Firebase identity
+      const slug = `trip_${viewer.firstName}-${viewer.lastName}`.toLowerCase().replace(/\s+/g, "-");
+      let id = slug;
+      for (let n = 2; info.some((m) => m.id === id); n++) id = `${slug}-${n}`;
+
+      await setDoc(doc(db, "team", id), {
+        //Must be exactly "First Last": /public/leader-stats splits this to look up trip counts
+        name: `${viewer.firstName} ${viewer.lastName}`,
+        email: viewer.email,
+        image: "", //Falsy, so both team pages fall back to the bear placeholder
+        bio: NEW_LEADER_BIO,
+        position: "Trip Leader",
+        category: "general",
+        index: Math.max(0, ...info.map((m) => m.index)) + 1,
+        display: true,
+      });
+      router.push(`/about/our-team/${id}`);
+    } catch (err) {
+      handleEditError(err);
+    }
+  };
+
   const coreLeadership = info.filter(m => m.category === "core" && m.display !== false).sort((a, b) => a.index - b.index);
   const tripLeaders = info.filter(m => m.category === "general" && m.display !== false).sort((a, b) => a.index - b.index);
 
   if (loading) return <div className="p-20 text-center font-funky text-xl">Loading...</div>;
 
   return (
-    <div className="min-h-screen w-full px-6 sm:px-10 desktop:px-20 py-10">
+    <div className="relative min-h-screen w-full px-6 sm:px-10 desktop:px-20 py-10">
 
       <Title text="Our Team" />
       
@@ -117,6 +183,29 @@ export default function Team() {
 	className="underline text-blue-600">complete BOC roster</a> here!</p>
       </div>
       </section>
+
+      {viewer && [Role.Leader, Role.Admin].includes(viewer.role) && (
+        <>
+          {/* Mirrors the trips page's creation button, down to the collapse: touch devices
+              have no hover, so below desktop the label stays out rather than leaving mobile
+              leaders an unlabelled icon. */}
+          <div className={`transition-all duration-200 ${isAboveFooter ? "absolute bottom-4 right-4" : "fixed bottom-4 right-4"}`}>
+            {/* px-3 rather than the trips button's px-4 so the 24px icon exactly fills the
+                collapsed 48px circle instead of being clipped by overflow-hidden */}
+            <button
+              className="group flex items-center gap-2 bg-boc_darkbrown text-background text-lg font-semibold px-3 h-12 rounded-full transition-all duration-1000 overflow-hidden w-40 desktop:w-12 desktop:hover:w-40"
+              onClick={goToMyProfile}
+            >
+              <PencilSquareIcon className="h-6 w-6 shrink-0" />
+              <span className="whitespace-nowrap transition-none desktop:opacity-0 desktop:group-hover:opacity-100">
+                My Profile
+              </span>
+            </button>
+          </div>
+          {/* Sentinel for positioning the edit button */}
+          <div ref={sentinelRef} className="w-full absolute bottom-0"></div>
+        </>
+      )}
     </div>
   );
 }
