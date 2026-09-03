@@ -1,4 +1,4 @@
-import { Dispatch, ReactNode, SetStateAction, useState } from 'react';
+import { Dispatch, Fragment, ReactNode, SetStateAction, isValidElement, useState } from 'react';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import HoverButton from '@/components/HoverButton';
 import { HoverButtonProps } from '@/components/HoverButton';
@@ -6,7 +6,8 @@ import { HoverButtonProps } from '@/components/HoverButton';
 interface DropdownProps {
   header: string;
   content: ReactNode;
-  sideActions?: HoverButtonProps[];
+  //A raw node lets a caller supply a side action that isn't a plain button
+  sideActions?: (HoverButtonProps | ReactNode)[];
 }
 
 const Dropdown: React.FC<DropdownProps> = ({ header, content, sideActions }) => {
@@ -28,8 +29,10 @@ const Dropdown: React.FC<DropdownProps> = ({ header, content, sideActions }) => 
           />
         </button>
         { sideActions
-          ? sideActions.map((sideAc) => {
-            return <HoverButton key={sideAc.header} header={sideAc.header} icon={sideAc.icon} repIcon={sideAc.repIcon} onClick={sideAc.onClick}/>
+          ? sideActions.map((sideAc, i) => {
+            if (isValidElement(sideAc)) return <Fragment key={i}>{sideAc}</Fragment>;
+            const btn = sideAc as HoverButtonProps;
+            return <HoverButton key={btn.header} header={btn.header} icon={btn.icon} repIcon={btn.repIcon} onClick={btn.onClick}/>
             // (
             //   <button
             //     key={sideAc.header}
