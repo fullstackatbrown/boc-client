@@ -7,6 +7,7 @@ import { Dispatch, ReactNode, SetStateAction, useState } from "react";
 import KeyInfoBar from "./KeyInfoBar";
 import Popup from "@/components/Popup";
 import AttendanceForm from "./AttendanceForm";
+import CancelTripButton from "./CancelTripButton";
 import { StatusState, stageState } from "./statusBarState";
 
 
@@ -180,17 +181,35 @@ export default function BottomLeaderControls({ trip, reqs }:{ trip: TripWithSign
     trip={trip}
     reqs={reqs}
   />
+  //null waitlistSize means unlimited; clearing the input restores that
+  const waitlistSize = <EditableComponent
+    currVal={ trip.waitlistSize === null ? "" : trip.waitlistSize.toString() }
+    withIcon={
+      <p>
+        { trip.waitlistSize === null ? "Unlimited" : trip.waitlistSize.toString() }
+        &nbsp; { EditIcon }
+      </p>
+    }
+    editEl={<input type="number" min={0} max={1000} step={1} placeholder="Unlimited"/>}
+    createBody={(newVal: string) => {return { waitlistSize: newVal === "" ? null : newVal }}}
+    trip={trip}
+    reqs={reqs}
+  />
   return (
     <div className="flex flex-col gap-4 mb-4">
       <div className="w-full border-b-2 border-dashed border-boc_medbrown"></div>
       <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
-        <div className="w-full sm:w-1/2">
+        <div className="w-full sm:w-1/3">
           <p className="font-bold">Sentence Description:</p>
           { sentenceDesc }
         </div>
-        <div className="w-full sm:w-1/2">
+        <div className="w-full sm:w-1/3">
           <p className="font-bold">Trip Size:</p>
           { maxSize }
+        </div>
+        <div className="w-full sm:w-1/3">
+          <p className="font-bold">Waitlist Size:</p>
+          { waitlistSize }
         </div>
       </div>
       <KeyInfoBar trip={trip} reqs={reqs}/>
@@ -202,6 +221,7 @@ export default function BottomLeaderControls({ trip, reqs }:{ trip: TripWithSign
           </Popup>
         : <></>
       }
+      <CancelTripButton trip={trip} reqs={reqs}/>
     </div>
   )
 }
