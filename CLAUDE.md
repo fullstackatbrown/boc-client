@@ -65,7 +65,7 @@ Firebase config is **hardcoded** in `src/scripts/firebase.ts`, not env-driven. T
 | | | - requests.ts - THE way to talk to the backend; see Backend Request Pattern
 | | - styles/ - Google font imports (Chelsea Market, Gabarito) + Tailwind entrypoint
 | | - types/next-auth.d.ts - module augmentation putting accessToken/refreshToken on Session and JWT
-| | - utils/utils.ts - shared utilities (currently just formatDateString)
+| | - utils/utils.ts - shared utilities: formatDateString, formatCost, tripCost (the class-letter price table, mirrored from boc-server)
 | - helpers/add_leadership.py - one-off admin script for seeding Firestore leadership history; not part of the app
 | - tailwind.config.ts - the BOC color palette and font families
 ```
