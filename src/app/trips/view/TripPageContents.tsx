@@ -3,6 +3,7 @@ import { Requesters } from "@/scripts/requests";
 
 import Title from "@/components/Title";
 import TripInfoBar from "./TripInfoBar";
+import SignedOutNotice from "./SignedOutNotice";
 import { EditIcon, EditableComponent } from "./editable";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import BottomLeaderControls from "./BottomLeaderControls";
@@ -61,6 +62,7 @@ export default function TripPageContents({ trip, reqs }:{ trip: TripWithSignup, 
         <EditableTitle editable={trip.userData?.tripRole == TripRole.Leader}/>
         {/*The inner inset is desktop-only - below that the page needs its full width*/}
         <main className="px-0 desktop:px-[min(13rem,20%)]">
+          <SignedOutNotice reqs={reqs}/>
           <TripInfoBar trip={trip} reqs={reqs}/>
           <TripBlurb editable={trip.userData?.tripRole == TripRole.Leader}/>
           { trip.userData?.tripRole == TripRole.Leader 

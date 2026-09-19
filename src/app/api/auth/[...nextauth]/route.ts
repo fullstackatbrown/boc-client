@@ -101,6 +101,7 @@ const { handlers, signIn, signOut, auth } = NextAuth({
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
         token.accessTokenExpires = (account.expires_at ?? 0) * 1000; // milliseconds
+        delete token.error; //A fresh login clears a failed refresh
       }
 
       if (token.accessTokenExpires && Date.now() < token.accessTokenExpires) {
@@ -113,6 +114,9 @@ const { handlers, signIn, signOut, auth } = NextAuth({
       // attach Google tokens to session
       session.accessToken = token.accessToken;
       session.refreshToken = token.refreshToken;
+      //Set by refreshAccessToken on failure. The access token is then dead, every backend
+      //request 401s, and the site must treat the session as signed out (see requests.ts)
+      session.error = token.error;
       return session;
     },
   },

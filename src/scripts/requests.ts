@@ -30,7 +30,11 @@ export class NotAuthenticatedError extends Error {
  * re-run the effect forever.
  */
 export function useRequesters(): Requesters {
-  const { data: session, status } = useSession();
+  const { data: session, status: sessionState } = useSession();
+  //A session whose Google token could not be refreshed is signed out for every practical
+  //purpose: the backend rejects the dead token on every request. Treating it as
+  //authenticated is how a "logged in" student came to see "Signups have closed".
+  const status = session?.error === "RefreshAccessTokenError" ? "unauthenticated" : sessionState;
   const waiters = useRef<{ resolve: (token: string) => void, reject: (err: Error) => void }[]>([]);
   const loadWaiters = useRef<((stat: AuthStat) => void)[]>([]);
 
