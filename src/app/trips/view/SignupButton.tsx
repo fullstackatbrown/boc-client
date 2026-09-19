@@ -8,6 +8,7 @@ import { AuthStat, Requesters } from "@/scripts/requests";
 import Popup from "@/components/Popup";
 import { signIn } from "next-auth/react";
 import { usePathname, useSearchParams } from "next/navigation";
+import { CLASS_COST, classCombination, formatCost, tripCost } from "@/utils/utils";
 
 function Message({ text, bgColor, textColor}: { text: string, bgColor: string, textColor: string }) {
   return (
@@ -21,6 +22,8 @@ function Message({ text, bgColor, textColor}: { text: string, bgColor: string, t
 function Informational({ text }:{ text: string }) { return <Message text={text} bgColor="bg-gray-200" textColor="text-gray-600"/> }
 function BadNews({ text }: { text: string }) { return <Message text={text} bgColor="bg-red-200" textColor="text-red-600"/> }
 function GoodNews({ text }: { text: string }) { return <Message text={text} bgColor="bg-boc_lightgreen" textColor="text-boc_darkgreen"/> }
+
+const STORE_URL = "https://payment.brown.edu/C20460_ustores/web/store_cat.jsp?STOREID=2&CATID=396";
 
 export default function SignupButton({ trip, reqs }:{ trip: TripWithSignup, reqs: Requesters }) { //Any component that uses useSearchParams MUST be wrapped in a Suspense component as of the latest Next version
   return (
@@ -68,16 +71,44 @@ function SignupButtonContent({ trip, reqs }:{ trip: TripWithSignup, reqs: Reques
     window.location.href = `${pathname}?${params.toString()}`;
   }
   const [showPopup, setShowPopup] = useState(false);
+  const [showPayPopup, setShowPayPopup] = useState(false);
   //Helper Components
+  //Payment happens on the Marketplace; the backend records it from the store's emailed
+  //receipt, matching on the buyer's email and the item's price - hence the instructions
   const payBar = ( 
     <div className="flex flex-col gap-1 w-full desktop:w-auto desktop:shrink-0">
-      <BOCButton text="Pay" onClick={async () => {
-        await backendPost(`/trip/${trip.id}/participate/pay`, {});
-        window.open("https://payment.brown.edu/C20460_ustores/web/store_cat.jsp?STOREID=2&CATID=396", "_blank");
-        window.location.reload();
-      }} grow/>
+      <BOCButton text="Pay" onClick={() => setShowPayPopup(true)} grow/>
       <a href="/about/financial-aid" className="text-sm underline nowrap">Financial Aid Policy</a> 
     </div>
+  )
+  const price = tripCost(trip);
+  const cost = formatCost(price);
+  //Override trips have no store item of their own: buy a special one if the club made
+  //it, else the classes that add up to the price - in one cart, so the receipt total matches
+  const combination = price && price % 5 === 0
+    ? classCombination(price).map((c) => `Class ${c} (${formatCost(CLASS_COST[c])})`).join(" + ")
+    : null;
+  const storeItem = trip.class
+    ? <>Buy the <b>Outing Club-Class {trip.class} Trip</b> item ({cost}).</>
+    : combination
+    ? <>First look for a special Marketplace item priced exactly <b>{cost}</b> for this trip. If there isn&apos;t one, buy the Class items that add up to it - <b>{combination}</b> - <b>in the same cart, in one checkout</b>; bought separately they won&apos;t be recorded.</>
+    : <>Buy the special Marketplace item priced <b>{cost}</b> for this trip.</>;
+  const payPopup = (
+    <Popup onClose={() => setShowPayPopup(false)}>
+      <div className="flex flex-col gap-3 max-w-md">
+        <h1 className="text-boc_green font-funky text-center">How to pay</h1>
+        <p>Payment is through Brown Marketplace, a separate site. Two things matter there:</p>
+        <ol className="list-decimal pl-5 flex flex-col gap-2">
+          <li>Check out with your <b>Brown or RISD email address</b> - the one you use to sign in here. That is how we match your payment to you; payments from other addresses can&apos;t be matched.</li>
+          <li>{storeItem}</li>
+        </ol>
+        <p>Financial aid promo codes are applied at checkout and don&apos;t affect matching. This page will show you as paid within a couple of minutes.</p>
+        <BOCButton text="Go to Brown Marketplace" onClick={() => {
+          window.open(STORE_URL, "_blank");
+          setShowPayPopup(false);
+        }}/>
+      </div>
+    </Popup>
   )
   //Possible components
   const Staging = <Informational text="This trip is not yet public" />
@@ -153,6 +184,7 @@ function SignupButtonContent({ trip, reqs }:{ trip: TripWithSignup, reqs: Reques
     <>
       {content}
       <AutoSignupIfParam/>
+      { showPayPopup && payPopup }
       { showPopup && (<Popup onClose={() => setShowPopup(false)}>
         <div className="flex flex-col justify-center gap-2">
           <h1 className="text-boc_green font-funky text-center">Are you sure?</h1>

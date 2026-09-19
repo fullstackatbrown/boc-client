@@ -9,25 +9,9 @@ import { useRef, useState, useEffect, ReactElement, CSSProperties } from "react"
 import { EditIcon, EditableComponent, EditableString } from "./editable";
 import { UserPlusIcon } from "@heroicons/react/24/outline";
 import EditableCost from "./EditableCost";
-import { formatCost, formatDateString } from "@/utils/utils";
+import { formatCost, formatDateString, tripCost } from "@/utils/utils";
 import Link from "next/link";
 
-function classToCost(cls: string): number | undefined {
-  const mapping: Record<string, number> = { //Thanks Chat
-    A: 5,
-    B: 10,
-    C: 15,
-    D: 20,
-    E: 25,
-    F: 30,
-    G: 35,
-    H: 40,
-    I: 45,
-    J: 50,
-    Z: 0
-  };
-  return mapping[cls];
-}
 
 async function findLeaderEmails(trip: TripWithSignup, reqs: Requesters): Promise<string[]> {
   if (trip.userData?.tripRole == TripRole.Leader) {
@@ -189,7 +173,7 @@ export default function TripInfoBar({ trip, reqs }:{ trip: TripWithSignup, reqs:
   }, [trip, infoRef]);
 
   
-  const cost = (trip.class ? classToCost(trip.class) ?? null : trip.priceOverride)
+  const cost = tripCost(trip)
   return (
     <div className="w-full pt-4">
       <div className="flex flex-col gap-4 desktop:flex-row desktop:gap-x-4 desktop:gap-y-0">

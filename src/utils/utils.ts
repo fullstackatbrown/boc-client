@@ -11,3 +11,19 @@ export function formatCost(cost: number | null): string {
   if (cost === null) return "Not set";
   return cost === 0 ? "Free!" : `$${cost}`;
 }
+
+//Mirrors boc-server's trip_classes table; a change to either must be made to both, since
+//payment matching compares a receipt's price against the server's copy
+export const CLASS_COST: Record<string, number> = { A: 5, B: 10, C: 15, D: 20, E: 25, F: 30, G: 35, H: 40, I: 45, J: 50, Z: 0 };
+
+export function tripCost(trip: { class: string | null, priceOverride: number | null }): number | null {
+  return trip.class ? CLASS_COST[trip.class] ?? null : trip.priceOverride;
+}
+
+//Class letters that sum to a cost with no matching store item (a multiple of 5, > 0):
+//the class for the remainder under $50, then as many J ($50) as fit. Ascending order.
+export function classCombination(cost: number): string[] {
+  const remainder = cost % 50;
+  const js = Array<string>(Math.floor(cost / 50)).fill("J");
+  return remainder ? [String.fromCharCode(64 + remainder / 5), ...js] : js;
+}

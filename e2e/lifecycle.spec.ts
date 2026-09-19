@@ -131,7 +131,7 @@ test("a trip runs from creation through attendance", async ({ page, request }) =
     expect(emailsWithStatus(participants, "Not Selected")).toEqual([]);
   });
 
-  await test.step("a selected participant confirms and pays", async () => {
+  await test.step("a selected participant confirms and is told how to pay", async () => {
     const payer = selected[0];
     await loginAs(page, payer);
     await openTripPage(page, tripId);
@@ -140,15 +140,24 @@ test("a trip runs from creation through attendance", async ({ page, request }) =
     await page.getByRole("button", { name: "Confirm" }).click();
     await expect(page.getByText(/Remember to pay when you can!/)).toBeVisible();
 
-    // The Pay button opens Brown's payment site in a new tab; swallow the popup.
-    page.context().on("page", (popup) => popup.close().catch(() => {}));
+    // Paying happens on Brown's site and is recorded from the store's emailed receipt
+    // (boc-server/payments/), so the button only explains and then opens the store.
     await page.getByRole("button", { name: "Pay" }).click();
-    await expect(page.getByText(/you're all set for the trip!/)).toBeVisible();
+    await expect(page.getByText(/Brown or RISD email address/)).toBeVisible();
+    await expect(page.getByText(/Outing Club-Class A Trip/)).toBeVisible();
+    await expect(page.getByText(/\(\$5\)/)).toBeVisible();
+    const [store] = await Promise.all([
+      page.context().waitForEvent("page"),
+      page.getByRole("button", { name: "Go to Brown Marketplace" }).click(),
+    ]);
+    expect(store.url()).toContain("payment.brown.edu");
+    await store.close();
+    await expect(page.getByText(/Remember to pay when you can!/)).toBeVisible();
 
     const me = await backendGet(request, payer, "/user/profile");
     const signup = me.TripSignUps.find((s: any) => s.tripId === tripId);
     expect(signup.confirmed).toBe(true);
-    expect(signup.paid).toBe(true);
+    expect(signup.paid).toBe(false); //Only a receipt can flip this
   });
 
   await test.step("a waitlisted participant confirms interest", async () => {
