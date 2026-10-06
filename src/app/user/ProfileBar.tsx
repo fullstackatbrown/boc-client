@@ -19,7 +19,7 @@ const Badge = ({count, label, combined} : {count: string, label: string, combine
                 ></img>
                 <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
                 whitespace-nowrap text-white font-bold leading-none
-                ${combined ? "text-[11cqw]" : "text-[22cqw]"}`}>
+                ${combined ? "text-[14cqw]" : "text-[22cqw]"}`}>
 		{count}
                 </div>
             </div>
@@ -43,7 +43,7 @@ function Badges({ role, tripsParticipated, tripsLead } : {role: Role, tripsParti
 			{/* Leaders get led | total in one badge; everyone else just their total */}
 			<Badge
 				count={leads ? `${tripsLead} | ${total}` : `${total}`}
-				label={leads ? "TRIPS" : "TOTAL TRIPS"}
+				label={leads ? "TRIPS LED | TOTAL" : "TOTAL TRIPS"}
 				combined={leads}
 			/>
 			</div>

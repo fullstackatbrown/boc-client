@@ -122,6 +122,8 @@ export default function GearRoom() {
             and into a small hallway in its back right corner. The gear room is through the first 
             door on your right (the one with the ominous "Fire Door Keep Shut At All Times" sign).
             Don't let the sign scare you; c'mon in!
+            <br/>
+            Still unsure? This <a href="https://drive.google.com/file/d/1kX-unpFPRS8JWPw-Q1h3Lx3Xgqx1D7_h/view?usp=sharing" target="_blank" className="underline text-blue-600" >video walkthrough</a> may be of help.
           </Paragraph>
         }/>
         <HorSeparator/>
