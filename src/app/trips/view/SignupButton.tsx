@@ -143,7 +143,7 @@ function SignupButtonContent({ trip, reqs }:{ trip: TripWithSignup, reqs: Reques
       <Informational text="You are currently on the waitlist. Confirm your interest now to jump to the top of the waitlist!"/>
     </div>
   )
-  const WaitlistedConfrimed = <Informational text="Thanks for confirming your interest! Your status will update to Selected if you are chosen off the waitlist." />
+  const WaitlistedConfrimed = <Informational text="Thanks for confirming your interest! We'll email you if you're selected off the waitlist." />
   const ConfirmedFree = <GoodNews text="Thanks for confirming your spot!"/>
   const Confirmed = (
     <div className="flex flex-col desktop:flex-row gap-2">
